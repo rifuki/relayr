@@ -156,25 +156,19 @@ export default function ReceiveClientPage() {
   }
 
   function handleCloseConnection() {
-    console.log(
-      "Before close:",
-      getConnectionStatus(getWebSocket()?.readyState as number),
-    );
-
     sendJsonMessage({
       type: "cancelRecipientReady",
       senderId: senderId,
     });
     getWebSocket()?.close(1000, "Recipient closed the connection");
     const interval = setInterval(() => {
-      clearInterval(interval);
-      console.log(
-        "After close:",
-        getConnectionStatus(getWebSocket()?.readyState as number),
-      );
-      setIsConnectedToServer(false);
-      setRecipientId(null);
-      setSocketUrl(null);
+      if (getWebSocket()?.readyState === WebSocket.CLOSED) {
+        clearInterval(interval);
+        setRecipientId(null);
+
+        setIsConnectedToServer(false);
+        setSocketUrl(null);
+      }
     }, 100);
   }
 

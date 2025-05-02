@@ -64,11 +64,14 @@ impl RelayState {
             mime_type: mime_type.to_owned(),
         };
         file_metas.insert(sender_id.to_owned(), file_meta);
+        tracing::info!(sender_id, name, size, mime_type, "Stored file metadata");
     }
 
     pub async fn clear_file_meta(&self, sender_id: &str) {
         let mut file_metas = self.file_meta.lock().await;
-        file_metas.remove(sender_id);
+        if file_metas.remove(sender_id).is_some() {
+            tracing::info!(sender_id, "Cleared file metadata");
+        }
     }
 
     pub async fn get_file_meta(&self, sender_id: &str) -> Option<FileMeta> {
@@ -117,12 +120,15 @@ impl RelayState {
         };
 
         let mut connections = self.connections.lock().await;
-        connections.remove(base_conn_id);
-        tracing::info!(base_conn_id, "remove base connection");
+
+        if connections.remove(base_conn_id).is_some() {
+            tracing::info!(base_conn_id, "remove base connection");
+        }
 
         let mut active_connections = self.active_connections.lock().await;
-        active_connections.remove(base_conn_id);
-        tracing::info!(base_conn_id, "remove active connection");
+        if active_connections.remove(base_conn_id).is_some() {
+            tracing::info!(base_conn_id, "remove active connection");
+        }
 
         for custom_id in custom_ids {
             connections.remove(&custom_id);

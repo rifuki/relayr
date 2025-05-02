@@ -28,7 +28,7 @@ import {
   FileIcon,
   Loader2Icon,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { toast } from "sonner";
 
@@ -225,24 +225,11 @@ export default function SendPage() {
     setFile(null);
   }
 
-  function handleStopSharing() {
-    sendJsonMessage({
-      type: "cancelSender",
-      recipientId,
-    });
-    console.log(
-      "Before close:",
-      getConnectionStatus(getWebSocket()?.readyState as number),
-    );
+  function handleCloseConnection() {
     getWebSocket()?.close(1000, "Sender closed the connection");
-
     const interval = setInterval(() => {
       if (getWebSocket()?.readyState === WebSocket.CLOSED) {
         clearInterval(interval);
-        console.log(
-          "After close:",
-          getConnectionStatus(getWebSocket()?.readyState as number),
-        );
         setSenderId(null);
 
         setSocketUrl(null);
@@ -258,6 +245,23 @@ export default function SendPage() {
     });
     setRecipientId(null);
   }
+
+  useEffect(() => {
+    function handleBeforeUnload() {
+      if (readyState === WebSocket.OPEN && recipientId) {
+        sendJsonMessage({
+          type: "cancelSenderReady",
+          recipientId,
+        });
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [readyState, recipientId, sendJsonMessage]);
 
   return (
     <Card className="w-full max-w-sm sm:max-w-md">
@@ -450,7 +454,7 @@ export default function SendPage() {
               <Loader2Icon className="animate-spin" />
             </Button>
             <Button
-              onClick={handleStopSharing}
+              onClick={handleCloseConnection}
               variant="destructive"
               className="w-full"
             >
