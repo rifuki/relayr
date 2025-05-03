@@ -118,3 +118,121 @@ impl CancelSenderReadyResponseDto {
     }
 }
 impl_response_dto!(CancelSenderReadyResponseDto);
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileChunk {
+    pub success: bool,
+    #[serde(rename = "type")]
+    pub msg_type: String,
+    pub sender_id: String,
+    pub file_name: String,
+    pub total_chunks: u16,
+    pub chunk_index: u32,
+    pub chunk_data_size: u32,
+    pub uploaded_size: u64,
+    pub transfer_progress: u8,
+}
+
+impl FileChunk {
+    pub fn new(
+        sender_id: &str,
+        file_name: &str,
+        total_chunks: u16,
+        chunk_index: u32,
+        chunk_data_size: u32,
+        uploaded_size: u64,
+        transfer_progress: u8,
+    ) -> Self {
+        Self {
+            success: true,
+            msg_type: "fileChunk".to_owned(),
+            sender_id: sender_id.to_owned(),
+            file_name: file_name.to_owned(),
+            total_chunks,
+            chunk_index,
+            chunk_data_size,
+            uploaded_size,
+            transfer_progress,
+        }
+    }
+}
+impl_response_dto!(FileChunk);
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Ack {
+    pub success: bool,
+    #[serde(rename = "type")]
+    pub msg_type: String,
+    pub recipient_id: String,
+    pub status: String,
+    pub file_name: String,
+    pub total_chunks: u16,
+    pub chunk_index: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub chunk_data_size: Option<u32>,
+    pub uploaded_size: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transfer_progress: Option<u8>,
+}
+
+impl Ack {
+    pub fn new(
+        recipient_id: &str,
+        status: &str,
+        file_name: &str,
+        total_chunks: u16,
+        chunk_index: u32,
+        uploaded_size: u64,
+    ) -> Self {
+        Self {
+            success: true,
+            msg_type: "ack".to_owned(),
+            recipient_id: recipient_id.to_owned(),
+            status: status.to_owned(),
+            file_name: file_name.to_owned(),
+            total_chunks,
+            chunk_index,
+            chunk_data_size: None,
+            uploaded_size,
+            transfer_progress: None,
+        }
+    }
+
+    pub fn chunk_data_size(mut self, chunk_data_size: Option<u32>) -> Self {
+        self.chunk_data_size = chunk_data_size;
+        self
+    }
+
+    pub fn transfer_progress(mut self, transfer_progress: Option<u8>) -> Self {
+        self.transfer_progress = transfer_progress;
+        self
+    }
+}
+impl_response_dto!(Ack);
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileEnd {
+    pub success: bool,
+    #[serde(rename = "type")]
+    pub msg_type: String,
+    pub file_name: String,
+    pub total_chunks: u16,
+    pub chunk_index: u32,
+    pub uploaded_size: u64,
+}
+impl FileEnd {
+    pub fn new(file_name: &str, total_chunks: u16, chunk_index: u32, uploaded_size: u64) -> Self {
+        Self {
+            success: true,
+            msg_type: "fileEnd".to_owned(),
+            file_name: file_name.to_owned(),
+            total_chunks,
+            chunk_index,
+            uploaded_size,
+        }
+    }
+}
+impl_response_dto!(FileEnd);

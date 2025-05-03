@@ -40,7 +40,7 @@ export default function FileCard({ file, className }: FileCardProps) {
             </h3>
             <div className="flex items-center text-xs text-muted-foreground space-x-1">
               <div className="w-1.5 h-1.5 rounded-full bg-primary/70 mr-2"></div>
-              {fileSize} • {getFileTypeLabel(file.type)}
+              {getFileTypeLabel(file.type)} • {fileSize}
             </div>
           </div>
         </div>
