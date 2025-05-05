@@ -60,7 +60,6 @@ pub struct CancelRecipientReadyPayload {
 #[serde(rename_all = "camelCase")]
 pub struct CancelSenderReadyPayload {
     pub sender_id: Option<String>,
-    pub recipient_id: String,
 }
 
 #[derive(Deserialize)]
@@ -69,6 +68,7 @@ pub struct FileChunkPayload {
     pub sender_id: Option<String>,
     pub file_name: String,
     pub total_chunks: u16,
+    pub total_size: u64,
     pub chunk_index: u32,
     pub chunk_data_size: u32,
     pub uploaded_size: u64,
@@ -84,17 +84,18 @@ pub struct AckPayload {
     pub file_name: String,
     pub total_chunks: u16,
     pub chunk_index: u32,
-    pub chunk_data_size: Option<u32>,
     pub uploaded_size: u64,
+    pub chunk_data_size: Option<u32>,
     pub transfer_progress: Option<u8>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FileEndPayload {
     pub sender_id: Option<String>,
     pub file_name: String,
     pub total_chunks: u16,
+    pub total_size: u64,
     pub chunk_index: u32,
     pub uploaded_size: u64,
 }

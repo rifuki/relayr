@@ -61,6 +61,12 @@ pub fn spawn_receiver_task(
                         state.get_connected_recipient(&base_conn_id).await
                     {
                         if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
+                            tracing::info!(
+                                sender_id = base_conn_id,
+                                recipient_id = current_recipient,
+                                chunk_size = bin_data.len(),
+                                "Sending chunk of file to recipient"
+                            );
                             send_or_break!(recipient_tx, Message::binary(bin_data), stop_flag);
                         } else {
                             let err_msg = ErrorMessage::new(&format!(
@@ -71,11 +77,16 @@ pub fn spawn_receiver_task(
                             send_or_break!(tx, err_msg, stop_flag);
                         }
                     } else {
+                        tracing::warn!(
+                            "Sender `{}` attempted to send a file, but no recipient is connected",
+                            base_conn_id
+                        );
                         let err_msg = ErrorMessage::new(&format!(
                             "Active connection for sender_id: `{}` not found",
                             &base_conn_id
                         ))
                         .to_ws_msg();
+
                         send_or_break!(tx, err_msg, stop_flag);
                     }
                 }

@@ -10,13 +10,13 @@ import {
 } from "lucide-react";
 
 interface FileCardProps {
-  file: FileMetadata;
+  fileMetadata: FileMetadata;
   className?: string;
 }
 
-export default function FileCard({ file, className }: FileCardProps) {
-  const fileType = file.type.split("/")[0];
-  const fileSize = formatFileSize(file.size);
+export default function FileCard({ fileMetadata, className }: FileCardProps) {
+  const fileType = fileMetadata.type.split("/")[0];
+  const fileSize = formatFileSize(fileMetadata.size);
 
   return (
     <div
@@ -36,11 +36,11 @@ export default function FileCard({ file, className }: FileCardProps) {
         <div className="flex-grow min-h-0 overflow-hidden">
           <div className="flex flex-col">
             <h3 className="text-sm font-medium text-card-foreground truncate max-w-sm">
-              {file.name}
+              {fileMetadata.name}
             </h3>
             <div className="flex items-center text-xs text-muted-foreground space-x-1">
               <div className="w-1.5 h-1.5 rounded-full bg-primary/70 mr-2"></div>
-              {getFileTypeLabel(file.type)} • {fileSize}
+              {getFileTypeLabel(fileMetadata.type)} • {fileSize}
             </div>
           </div>
         </div>

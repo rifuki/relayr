@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "react";
 import { getConnectionStatus } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { WS_RELAY_API_URL, RELAY_API_URL } from "@/lib/api";
-import { RegisterResponse } from "@/types/responses";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertCircleIcon,
@@ -28,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import SenderId404Page from "./SenderId404Page";
 import { toast } from "sonner";
+import { RegisterResponse } from "@/types/webSocketMessages";
 
 export default function ReceiveClientPage() {
   const searchParams = useSearchParams();
@@ -243,7 +243,7 @@ export default function ReceiveClientPage() {
   function completeFileTransfer() {
     try {
       const blob = new Blob(receivedChunksRef.current, {
-        type: "application/octet-stream",
+        type: fileMetadata?.type || "application/octet-stream",
       });
 
       if (blob.size === 0) {
@@ -350,7 +350,7 @@ export default function ReceiveClientPage() {
                     Sender ID: {senderId}
                   </Badge>
 
-                  <FileCard file={fileMetadata} />
+                  <FileCard fileMetadata={fileMetadata} />
                 </div>
               </div>
             )}
@@ -374,7 +374,7 @@ export default function ReceiveClientPage() {
                       Sender ID: {senderId}
                     </Badge>
 
-                    <FileCard file={fileMetadata} />
+                    <FileCard fileMetadata={fileMetadata} />
 
                     <div className="w-full space-y-2">
                       <div className="flex justify-between text-sm">
@@ -407,7 +407,7 @@ export default function ReceiveClientPage() {
                       Sender ID: {senderId}
                     </Badge>
 
-                    <FileCard file={fileMetadata} />
+                    <FileCard fileMetadata={fileMetadata} />
 
                     <div className="w-full space-y-2">
                       <div className="flex justify-between text-sm">
@@ -437,7 +437,7 @@ export default function ReceiveClientPage() {
                     Sender ID: {senderId}
                   </Badge>
 
-                  <FileCard file={fileMetadata} />
+                  <FileCard fileMetadata={fileMetadata} />
 
                   <div className="w-full space-y-2">
                     <div className="flex justify-between text-sm">

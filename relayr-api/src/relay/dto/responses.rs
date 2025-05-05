@@ -128,9 +128,10 @@ pub struct FileChunk {
     pub sender_id: String,
     pub file_name: String,
     pub total_chunks: u16,
+    pub total_size: u64,
     pub chunk_index: u32,
-    pub chunk_data_size: u32,
     pub uploaded_size: u64,
+    pub chunk_data_size: u32,
     pub transfer_progress: u8,
 }
 
@@ -139,9 +140,10 @@ impl FileChunk {
         sender_id: &str,
         file_name: &str,
         total_chunks: u16,
+        total_size: u64,
         chunk_index: u32,
-        chunk_data_size: u32,
         uploaded_size: u64,
+        chunk_data_size: u32,
         transfer_progress: u8,
     ) -> Self {
         Self {
@@ -151,8 +153,9 @@ impl FileChunk {
             file_name: file_name.to_owned(),
             total_chunks,
             chunk_index,
-            chunk_data_size,
+            total_size,
             uploaded_size,
+            chunk_data_size,
             transfer_progress,
         }
     }
@@ -220,16 +223,24 @@ pub struct FileEnd {
     pub msg_type: String,
     pub file_name: String,
     pub total_chunks: u16,
+    pub total_size: u64,
     pub chunk_index: u32,
     pub uploaded_size: u64,
 }
 impl FileEnd {
-    pub fn new(file_name: &str, total_chunks: u16, chunk_index: u32, uploaded_size: u64) -> Self {
+    pub fn new(
+        file_name: &str,
+        total_chunks: u16,
+        total_size: u64,
+        chunk_index: u32,
+        uploaded_size: u64,
+    ) -> Self {
         Self {
             success: true,
             msg_type: "fileEnd".to_owned(),
             file_name: file_name.to_owned(),
             total_chunks,
+            total_size,
             chunk_index,
             uploaded_size,
         }

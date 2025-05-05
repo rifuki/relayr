@@ -174,9 +174,10 @@ pub async fn handle_incoming_payload(
                         &sender_id,
                         &payload.file_name,
                         payload.total_chunks,
+                        payload.total_size,
                         payload.chunk_index,
-                        payload.chunk_data_size,
                         payload.uploaded_size,
+                        payload.chunk_data_size,
                         payload.transfer_progress,
                     )
                     .to_ws_msg();
@@ -223,7 +224,6 @@ pub async fn handle_incoming_payload(
             }
         }
         RelayIncomingPayload::FileEnd(payload) => {
-            dbg!(&payload);
             let sender_id = payload.sender_id.unwrap_or(base_conn_id.to_owned());
             let connected_recipient = state.get_connected_recipient(&sender_id).await;
 
@@ -232,6 +232,7 @@ pub async fn handle_incoming_payload(
                     let success_msg = FileEnd::new(
                         &payload.file_name,
                         payload.total_chunks,
+                        payload.total_size,
                         payload.chunk_index,
                         payload.uploaded_size,
                     )
