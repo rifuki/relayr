@@ -59,17 +59,23 @@ export async function readFileAsArrayBuffer(
   file: File,
   offset: number = 0,
   chunkSize: number = file.size,
-): Promise<{ chunkData: Uint8Array; chunkDataSize: number }> {
+): Promise<{ chunkData: ArrayBuffer; chunkDataSize: number }> {
+  if (offset >= file.size) {
+    return {
+      chunkData: new ArrayBuffer(0),
+      chunkDataSize: 0,
+    };
+  }
+
   try {
     const slice = file.slice(offset, offset + chunkSize);
-    const result = await slice.arrayBuffer();
+    const chunkData = await slice.arrayBuffer();
 
-    const chunkData = new Uint8Array(result);
     const chunkDataSize = chunkData.byteLength;
 
     return { chunkData, chunkDataSize };
   } catch (error: unknown) {
-    console.log("Error reading file:", error);
+    console.error("Error reading file:", error);
     throw new Error("Failed to read file chunk");
   }
 }

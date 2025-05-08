@@ -1,18 +1,14 @@
-import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
-import { FileIcon } from "lucide-react";
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
-import { Button } from "../ui/button";
-import { TextShimmer } from "../../../components/motion-primitives/text-shimmer";
+import { FileIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
+import TransferHeader from "@/components/TransferHeader";
+import { useFileSenderActions } from "@/stores/useFileSenderStore";
+import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
 
-interface FileSelectorProps {
-  setFile: (file: File) => void;
-  setErrorMessage: (error: string | null) => void;
-}
+export default function FileSelector() {
+  const actions = useFileSenderActions();
 
-export default function FileSelector({
-  setFile,
-  setErrorMessage,
-}: FileSelectorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFileLoading, setIsFileLoading] = useState(false);
   const [dummyDownloadProgress, setDummyDownloadProgress] = useState(0);
@@ -20,8 +16,8 @@ export default function FileSelector({
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files?.length === 0) return;
 
-    setErrorMessage(null);
-    setFile(e.target.files[0]);
+    actions.setErrorMessage(null);
+    actions.setFile(e.target.files[0]);
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -36,33 +32,35 @@ export default function FileSelector({
     };
     const entry = itemWithEntry.webkitGetAsEntry?.();
     if (entry && entry.isDirectory) {
-      setErrorMessage("Cannot upload folders. Please select a single file.");
+      actions.setErrorMessage(
+        "Cannot upload folders. Please select a single file.",
+      );
       return;
     }
 
     const droppedFile = e.dataTransfer.files[0];
     if (!isFolderLike(droppedFile)) {
-      setErrorMessage("Cannot upload folders. Please select a single file.");
+      actions.setErrorMessage(
+        "Cannot upload folders. Please select a single file.",
+      );
       return;
     }
 
-    setErrorMessage(null);
-    setFile(droppedFile);
+    actions.setErrorMessage(null);
+    actions.setFile(droppedFile);
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => e.preventDefault();
 
   return (
     <div className="flex flex-col items-center space-y-5">
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">Send a File</h1>
-        <p className="text-sm text-muted-foreground">
-          Select a file to share it securely via WebSocket
-        </p>
-      </div>
+      <TransferHeader
+        title="Send a File"
+        description="Select a file to share it securely via WebSocket"
+      />
 
       <div
-        className="w-full p-20 border-4 border-dashed border-border/80 cursor-pointer hover:bg-secondary/50 flex flex-col justify-center items-center space-y-5"
+        className={`w-full p-20 border-4 border-dashed border-border/80 hover:bg-secondary/50 flex flex-col justify-center items-center space-y-5 ${!isFileLoading && "cursor-pointer"}`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
         onDrag={handleDragOver}
@@ -70,6 +68,7 @@ export default function FileSelector({
         <input
           type="file"
           onChange={handleFileSelect}
+          disabled={isFileLoading}
           ref={fileInputRef}
           className="hidden"
         />
@@ -86,7 +85,7 @@ export default function FileSelector({
         onClick={() =>
           handlePrepareDummyFile(
             setIsFileLoading,
-            setFile,
+            actions.setFile,
             setDummyDownloadProgress,
           )
         }

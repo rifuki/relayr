@@ -15,12 +15,14 @@ pub enum RelayIncomingPayload {
     CancelSenderReady(CancelSenderReadyPayload),
     #[serde(rename = "fileChunk")]
     FileChunk(FileChunkPayload),
-    #[serde(rename = "ack")]
-    Ack(AckPayload),
+    #[serde(rename = "fileTransferAck")]
+    FileTransferAck(FileTransferAckPayload),
     #[serde(rename = "fileEnd")]
     FileEnd(FileEndPayload),
-    CancelSenderInProgress,
-    CancelRecipientInProgress,
+    #[serde(rename = "cancelSenderTransfer")]
+    CancelSenderTransfer(CancelSenderTransferPayload),
+    #[serde(rename = "cancelRecipientTransfer")]
+    CancelRecipientTransfer(CancelRecipientTransferPayload),
     #[serde(rename = "terminate")]
     Terminate,
     #[serde(other)]
@@ -44,8 +46,8 @@ pub struct RecipientReadyPayload {
 #[serde(rename_all = "camelCase")]
 pub struct FileMetaPayload {
     pub sender_id: Option<String>,
-    pub file_name: String,
-    pub file_size: u64,
+    pub name: String,
+    pub size: u64,
     pub mime_type: String,
 }
 
@@ -77,7 +79,7 @@ pub struct FileChunkPayload {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AckPayload {
+pub struct FileTransferAckPayload {
     pub recipient_id: Option<String>,
     pub sender_id: String,
     pub status: String,
@@ -96,6 +98,19 @@ pub struct FileEndPayload {
     pub file_name: String,
     pub total_chunks: u16,
     pub total_size: u64,
-    pub chunk_index: u32,
+    pub last_chunk_index: u32,
     pub uploaded_size: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelSenderTransferPayload {
+    pub sender_id: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelRecipientTransferPayload {
+    pub sender_id: String,
+    pub recipient_id: Option<String>,
 }

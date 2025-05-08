@@ -1,8 +1,8 @@
 export interface FileMetaRequest {
   type: "fileMeta";
   senderId?: string;
-  fileName: string;
-  fileSize: number;
+  name: string;
+  size: number;
   mimeType: string;
 }
 
@@ -29,8 +29,13 @@ export interface FileEndRequest {
   fileName: string;
   totalChunks: number;
   totalSize: number;
-  chunkIndex: number;
+  lastChunkIndex: number;
   uploadedSize: number;
+}
+
+export interface cancelSenderTransferRequest {
+  type: "cancelSenderTransfer";
+  senderId?: string;
 }
 
 //export type WebSocketMessageRequest = FileMetaRequest | FileChunkRequest;
@@ -62,9 +67,9 @@ export interface CancelRecipientReadyResponse {
   timestamp: number;
 }
 
-export interface AckResponse {
+export interface FileTransferAckResponse {
   success: true;
-  type: "ack";
+  type: "fileTransferAck";
   status: "acknowledged" | "completed";
   fileName: string;
   totalChunks: number;
@@ -79,4 +84,4 @@ export type WebSocketMessageResponse =
   | RegisterResponse
   | RecipientReadyResponse
   | CancelRecipientReadyResponse
-  | AckResponse;
+  | FileTransferAckResponse;

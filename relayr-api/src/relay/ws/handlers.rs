@@ -11,8 +11,10 @@ use crate::{
         dto::{
             requests::RelayIncomingPayload,
             responses::{
-                Ack, CancelRecipientReadyResponseDto, CancelSenderReadyResponseDto, FileChunk,
-                FileEnd, RecipientReadyResponseDto, RegisterResponseDto, WsResponse,
+                CancelRecipientReadyResponseDto, CancelSenderReadyResponseDto,
+                CancelSenderTransferResponseDto, FileChunkResponseDto, FileEndResponseDto,
+                FileTransferAckResponseDto, RecipientReadyResponseDto, RegisterResponseDto,
+                WsResponse,
             },
         },
         error::ErrorMessage,
@@ -41,12 +43,7 @@ pub async fn handle_incoming_payload(
             let sender_id = payload.sender_id.unwrap_or(base_conn_id.to_owned());
 
             state
-                .store_file_meta(
-                    &sender_id,
-                    &payload.file_name,
-                    payload.file_size,
-                    &payload.mime_type,
-                )
+                .store_file_meta(&sender_id, &payload.name, payload.size, &payload.mime_type)
                 .await;
             //let connected_recipient = state.get_connected_recipient(&sender_id).await;
             //if let Some(recipient_id) = connected_recipient {
@@ -170,7 +167,7 @@ pub async fn handle_incoming_payload(
 
             if let Some(current_recipient) = connected_recipient {
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                    let success_msg = FileChunk::new(
+                    let success_msg = FileChunkResponseDto::new(
                         &sender_id,
                         &payload.file_name,
                         payload.total_chunks,
@@ -199,10 +196,10 @@ pub async fn handle_incoming_payload(
                 send_or_break!(tx, err_msg, stop_flag);
             }
         }
-        RelayIncomingPayload::Ack(payload) => {
+        RelayIncomingPayload::FileTransferAck(payload) => {
             let recipient_id = payload.recipient_id.unwrap_or(base_conn_id.to_owned());
             if let Some(sender_tx) = state.get_user_tx(&payload.sender_id).await {
-                let success_msg = Ack::new(
+                let success_msg = FileTransferAckResponseDto::new(
                     &recipient_id,
                     &payload.status,
                     &payload.file_name,
@@ -229,14 +226,39 @@ pub async fn handle_incoming_payload(
 
             if let Some(current_recipient) = connected_recipient {
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                    let success_msg = FileEnd::new(
+                    let success_msg = FileEndResponseDto::new(
                         &payload.file_name,
                         payload.total_chunks,
                         payload.total_size,
-                        payload.chunk_index,
+                        payload.last_chunk_index,
                         payload.uploaded_size,
                     )
                     .to_ws_msg();
+                    send_or_break!(recipient_tx, success_msg, stop_flag);
+                } else {
+                    let err_msg = ErrorMessage::new(&format!(
+                        "Recipient `{}` is no longer connected",
+                        current_recipient
+                    ))
+                    .to_ws_msg();
+                    send_or_break!(tx, err_msg, stop_flag);
+                }
+            } else {
+                let err_msg = ErrorMessage::new(&format!(
+                    "Active connection for sender_id: `{}` not found",
+                    sender_id
+                ))
+                .to_ws_msg();
+                send_or_break!(tx, err_msg, stop_flag);
+            }
+        }
+        RelayIncomingPayload::CancelSenderTransfer(payload) => {
+            let sender_id = payload.sender_id.unwrap_or(base_conn_id.to_owned());
+            let connected_recipient = state.get_connected_recipient(&sender_id).await;
+
+            if let Some(current_recipient) = connected_recipient {
+                if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
+                    let success_msg = CancelSenderTransferResponseDto::new(&sender_id).to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(&format!(

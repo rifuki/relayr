@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-import { FileMetadata } from "@/types/file";
 import {
   ArchiveIcon,
   FileAudioIcon,
@@ -8,6 +6,8 @@ import {
   FileVideoIcon,
   ImageIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { FileMetadata } from "@/types/file";
 
 interface FileCardProps {
   fileMetadata: FileMetadata;

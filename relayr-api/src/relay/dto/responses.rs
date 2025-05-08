@@ -121,7 +121,7 @@ impl_response_dto!(CancelSenderReadyResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FileChunk {
+pub struct FileChunkResponseDto {
     pub success: bool,
     #[serde(rename = "type")]
     pub msg_type: String,
@@ -135,7 +135,8 @@ pub struct FileChunk {
     pub transfer_progress: u8,
 }
 
-impl FileChunk {
+impl FileChunkResponseDto {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         sender_id: &str,
         file_name: &str,
@@ -152,19 +153,19 @@ impl FileChunk {
             sender_id: sender_id.to_owned(),
             file_name: file_name.to_owned(),
             total_chunks,
-            chunk_index,
             total_size,
+            chunk_index,
             uploaded_size,
             chunk_data_size,
             transfer_progress,
         }
     }
 }
-impl_response_dto!(FileChunk);
+impl_response_dto!(FileChunkResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Ack {
+pub struct FileTransferAckResponseDto {
     pub success: bool,
     #[serde(rename = "type")]
     pub msg_type: String,
@@ -180,7 +181,7 @@ pub struct Ack {
     pub transfer_progress: Option<u8>,
 }
 
-impl Ack {
+impl FileTransferAckResponseDto {
     pub fn new(
         recipient_id: &str,
         status: &str,
@@ -191,7 +192,7 @@ impl Ack {
     ) -> Self {
         Self {
             success: true,
-            msg_type: "ack".to_owned(),
+            msg_type: "fileTransferAck".to_owned(),
             recipient_id: recipient_id.to_owned(),
             status: status.to_owned(),
             file_name: file_name.to_owned(),
@@ -213,26 +214,26 @@ impl Ack {
         self
     }
 }
-impl_response_dto!(Ack);
+impl_response_dto!(FileTransferAckResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FileEnd {
+pub struct FileEndResponseDto {
     pub success: bool,
     #[serde(rename = "type")]
     pub msg_type: String,
     pub file_name: String,
     pub total_chunks: u16,
     pub total_size: u64,
-    pub chunk_index: u32,
+    pub last_chunk_index: u32,
     pub uploaded_size: u64,
 }
-impl FileEnd {
+impl FileEndResponseDto {
     pub fn new(
         file_name: &str,
         total_chunks: u16,
         total_size: u64,
-        chunk_index: u32,
+        last_chunk_index: u32,
         uploaded_size: u64,
     ) -> Self {
         Self {
@@ -241,9 +242,28 @@ impl FileEnd {
             file_name: file_name.to_owned(),
             total_chunks,
             total_size,
-            chunk_index,
+            last_chunk_index,
             uploaded_size,
         }
     }
 }
-impl_response_dto!(FileEnd);
+impl_response_dto!(FileEndResponseDto);
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelSenderTransferResponseDto {
+    pub success: bool,
+    #[serde(rename = "type")]
+    pub msg_type: String,
+    pub sender_id: String,
+}
+impl CancelSenderTransferResponseDto {
+    pub fn new(sender_id: &str) -> Self {
+        Self {
+            success: true,
+            msg_type: "cancelSenderRecipient".to_owned(),
+            sender_id: sender_id.to_owned(),
+        }
+    }
+}
+impl_response_dto!(CancelSenderTransferResponseDto);

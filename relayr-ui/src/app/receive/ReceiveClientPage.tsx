@@ -96,7 +96,7 @@ export default function ReceiveClientPage() {
         });
       },
       onClose: (error) => {
-        console.error("❌ Disconnected", error.code);
+        console.info("❌ Disconnected", error.code);
         setIsConnecting(false);
         setIsConnectedToServer(false);
         setRecipientId(null);
@@ -149,7 +149,7 @@ export default function ReceiveClientPage() {
               setSenderTransferringProgress(parsedMessage.transferProgress);
             } else if (parsedMessage.type === "fileEnd") {
               const message = {
-                type: "ack",
+                type: "fileTransferAck",
                 status: "completed",
                 fileName: fileMetadata?.name,
                 totalChunks: totalChunksRef.current,
@@ -178,7 +178,7 @@ export default function ReceiveClientPage() {
             handleReceiveChunk(result as ArrayBuffer);
 
             const message = {
-              type: "ack",
+              type: "fileTransferAck",
               status: "acknowledged",
               fileName: fileMetadata?.name,
               totalChunks: totalChunksRef.current,
