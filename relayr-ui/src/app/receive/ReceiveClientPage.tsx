@@ -66,6 +66,7 @@ export default function ReceiveClientPage() {
       const res = await axios.get<FileMetadata>(
         `${RELAY_API_URL}/file-meta/${senderId}`,
       );
+      console.log(`${RELAY_API_URL}/file-meta/${senderId}`);
       return res.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {

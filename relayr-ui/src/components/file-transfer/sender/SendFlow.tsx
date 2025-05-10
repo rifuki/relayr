@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+
+import useMeasure from "react-use-measure";
+
+import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
 import FileSelector from "./FileSelector";
 import SelectedFile from "./SelectedFile";
 import WaitingForRecipient from "./WaitingForRecipient";
@@ -16,83 +21,131 @@ export default function SendFlow() {
   const { isRecipientComplete } = useFileSenderStore(
     (state) => state.transferStatus,
   );
-  console.log({
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [ref, bounds] = useMeasure();
+
+  useEffect(() => {
+    function determineStep() {
+      // File selection state
+      if (
+        !file &&
+        !senderId &&
+        !transferShareLink &&
+        !recipientId &&
+        !isRecipientComplete
+      )
+        return 0;
+
+      // File selected state
+      if (
+        file &&
+        !senderId &&
+        !transferShareLink &&
+        !recipientId &&
+        !isRecipientComplete
+      )
+        return 1;
+
+      // Waiting for recipient state
+      if (
+        file &&
+        senderId &&
+        transferShareLink &&
+        !recipientId &&
+        !isRecipientComplete
+      )
+        return 2;
+
+      // Ready to transfer state
+      if (
+        file &&
+        senderId &&
+        transferShareLink &&
+        recipientId &&
+        !isRecipientComplete
+      )
+        return 3;
+
+      // Transfer completed state
+      if (
+        file &&
+        senderId &&
+        transferShareLink &&
+        recipientId &&
+        isRecipientComplete
+      )
+        return 4;
+
+      return 0;
+    }
+
+    const newStep = determineStep();
+    if (newStep !== currentStep) {
+      setDirection(newStep > currentStep ? 1 : -1);
+      setCurrentStep(newStep);
+    }
+  }, [
     file,
     senderId,
-    recipientId,
     transferShareLink,
+    recipientId,
     isRecipientComplete,
-  });
+    currentStep,
+  ]);
 
-  {
-    /* File selection state */
-  }
-  if (
-    !file &&
-    !senderId &&
-    !transferShareLink &&
-    !recipientId &&
-    !isRecipientComplete
-  ) {
-    return <FileSelector />;
-  }
-
-  {
-    /* File selected state */
-  }
-  if (
-    file &&
-    !senderId &&
-    !transferShareLink &&
-    !recipientId &&
-    !isRecipientComplete
-  ) {
-    return <SelectedFile />;
-  }
-
-  {
-    /* Waiting for recipient state */
-  }
-  if (
-    file &&
-    senderId &&
-    transferShareLink &&
-    !recipientId &&
-    !isRecipientComplete
-  ) {
-    return <WaitingForRecipient />;
-  }
-
-  {
-    /* Ready to transfer state */
-  }
-  if (
-    file &&
-    senderId &&
-    transferShareLink &&
-    recipientId &&
-    !isRecipientComplete
-  ) {
-    return <ReadyToTransfer />;
-  }
-
-  {
-    /* Transfer completed state */
-  }
-  if (
-    file &&
-    senderId &&
-    transferShareLink &&
-    recipientId &&
-    isRecipientComplete
-  ) {
-    return <TransferCompleted />;
-  }
+  const FLOW_COMPONENTS = [
+    <FileSelector key="fileSelector" />,
+    <SelectedFile key="selectedFile" />,
+    <WaitingForRecipient key="waitingForRecipient" />,
+    <ReadyToTransfer key="readyToTransfer" />,
+    <TransferCompleted key="transferCompleted" />,
+  ];
 
   // Fallback (should never happen ideally)
   return (
-    <p className="text-center text-sm text-muted-foreground">
-      Invalid transfer state
-    </p>
+    <TransitionPanel
+      activeIndex={currentStep}
+      variants={{
+        enter: (direction) => ({
+          x: direction > 0 ? 400 : -400,
+          opacity: 0,
+          height: bounds.height > 0 ? bounds.height : "auto",
+          position: "initial",
+        }),
+        center: {
+          zIndex: 1,
+          x: 0,
+          opacity: 1,
+          height: bounds.height > 0 ? bounds.height : "auto",
+        },
+        exit: (direction) => ({
+          zIndex: 0,
+          x: direction < 0 ? 400 : -400,
+          opacity: 0,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+        }),
+      }}
+      transition={{
+        x: { type: "spring", stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+        height: { type: "spring", stiffness: 500, damping: 50 },
+      }}
+      custom={direction}
+    >
+      {FLOW_COMPONENTS.map((component, index) => (
+        <div
+          key={index}
+          ref={index === currentStep ? ref : undefined}
+          className="w-full"
+        >
+          {component}
+        </div>
+      ))}
+    </TransitionPanel>
   );
 }

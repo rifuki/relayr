@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+
+import { CheckCircle2Icon } from "lucide-react";
+import { motion } from "motion/react";
+
 import FileCard from "@/components/FileCard";
 import TransferHeader from "@/components/TransferHeader";
 import { WS_RELAY_API_URL } from "@/lib/api";
@@ -7,13 +10,29 @@ import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
+import { MotionButton } from "@/components/motion-primitives/motion-button";
+import {
+  fileListItemVariants,
+  fileListWrapperVariants,
+} from "@/lib/animations";
+
+const checkmarkVariants = {
+  hidden: { scale: 0, opacity: 0 },
+  visible: {
+    scale: [0, 1.2, 1],
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      case: "easeOut",
+      delay: 0.5,
+    },
+  },
+};
 
 export default function SelectedFile() {
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-
   const actions = useFileSenderActions();
-
   const [isGenerateLinkLoading, setIsGenerateLinkLoading] = useState(false);
 
   if (!fileMetadata) return;
@@ -34,30 +53,57 @@ export default function SelectedFile() {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-5">
+    <motion.div
+      className="flex flex-col items-center space-y-5"
+      variants={fileListWrapperVariants}
+      initial="hidden"
+      animate="show"
+    >
       <TransferHeader
         title="File Selected"
         description="Ready to generate a transfer link "
       />
 
-      <FileCard fileMetadata={fileMetadata} />
+      <motion.div className="relative w-full" variants={fileListItemVariants}>
+        <motion.div
+          className="absolute -right-2 -top-2 z-1 bg-white dark:bg-zinc-800 rounded-full"
+          variants={checkmarkVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <CheckCircle2Icon className="h-8 w-8 text-green-500" />
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        >
+          <FileCard fileMetadata={fileMetadata} />
+        </motion.div>
+      </motion.div>
 
-      <div className="w-full flex flex-col space-y-3 mt-2">
-        <Button
+      <motion.div
+        className="w-full flex flex-col space-y-3 mt-2"
+        variants={fileListItemVariants}
+      >
+        <MotionButton
           onClick={() => handleGenerateTransferShareLink()}
           disabled={isGenerateLinkLoading}
-          className="w-full"
+          className="w-full cursor-pointer"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           Generate Transfer Link
-        </Button>
-        <Button
+        </MotionButton>
+        <MotionButton
           onClick={handleUnselectFile}
           variant="destructive"
-          className="w-full"
+          className="w-full cursor-pointer"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           Remove File
-        </Button>
-      </div>
-    </div>
+        </MotionButton>
+      </motion.div>
+    </motion.div>
   );
 }

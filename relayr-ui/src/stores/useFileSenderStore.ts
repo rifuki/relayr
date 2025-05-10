@@ -17,10 +17,13 @@ interface FileTransferStatus {
   offset: number;
   chunkIndex: number;
   progress: number;
+  uploadedSize: number;
+  totalSize: number;
   isTransferring: boolean;
   isSenderComplete: boolean;
   isRecipientComplete: boolean;
   isError: boolean;
+  isCanceled: boolean;
 }
 
 interface WebSocketHandlers {
@@ -74,10 +77,13 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
     offset: 0,
     chunkIndex: 0,
     progress: 0,
+    uploadedSize: 0,
+    totalSize: 0,
     isTransferring: false,
     isSenderComplete: false,
     isRecipientComplete: false,
     isError: false,
+    isCanceled: false,
   },
   wsHandlers: {
     sendJsonMessage: undefined,
@@ -134,15 +140,16 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         return;
       }
 
+      if (transferStatus.isCanceled) {
+        set({ errorMessage: "You canceled the transfer" });
+        console.warn(
+          "Transfer has been canceled. No more chunks will be sent.",
+        );
+        return;
+      }
+
       if (chunkIndex >= totalChunks) {
-        console.log("All data sent. Sending fileEnd signal.");
-        set({
-          transferStatus: {
-            ...transferStatus,
-            isSenderComplete: true,
-            isTransferring: false,
-          },
-        });
+        //console.log("All data sent. Sending fileEnd signal.");
         sendJsonMessage({
           type: "fileEnd",
           fileName: file.name,
@@ -151,6 +158,15 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           lastChunkIndex: chunkIndex,
           uploadedSize: offset,
         } satisfies FileEndRequest);
+
+        set({
+          transferStatus: {
+            ...transferStatus,
+            isSenderComplete: true,
+            isTransferring: false,
+          },
+        });
+
         return;
       }
 
@@ -196,14 +212,16 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           transferStatus: {
             ...transferStatus,
             chunkDataSize,
+            uploadedSize,
+            totalSize: file.size,
             progress: transferProgress,
             isTransferring: true,
           },
         });
 
-        console.log(
-          `Chunk ${chunkIndex}/${totalChunks} sent. Progress: ${transferProgress}%`,
-        );
+        //console.log(
+        //  `Chunk ${chunkIndex}/${totalChunks} sent. Progress: ${transferProgress}%`,
+        //);
       } catch (error: unknown) {
         const errorMsg = "Failed to send next chunk";
         set({ errorMessage: errorMsg });
@@ -218,10 +236,13 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           offset: 0,
           chunkIndex: 0,
           progress: 0,
+          uploadedSize: 0,
+          totalSize: 0,
           isTransferring: false,
           isSenderComplete: false,
           isRecipientComplete: false,
           isError: false,
+          isCanceled: false,
         },
       }),
     setHasReset: (value) => set({ hasReset: value }),

@@ -6,7 +6,8 @@ import {
   FileVideoIcon,
   ImageIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+import { cn, formatFileSize } from "@/lib/utils";
 import { FileMetadata } from "@/types/file";
 
 interface FileCardProps {
@@ -64,16 +65,6 @@ function getFileIcon(type: string) {
     default:
       return <FileIcon className="h-5 w-5 text-primary/80" />;
   }
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 function getFileTypeLabel(mimeType: string) {

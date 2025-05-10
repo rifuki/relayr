@@ -1,4 +1,5 @@
 import { getConnectionStatus } from "@/lib/utils";
+import { motion } from "motion/react";
 
 interface WebSocketStatusProps {
   readyState: number;
@@ -6,9 +7,23 @@ interface WebSocketStatusProps {
 
 export default function WebSocketStatus({ readyState }: WebSocketStatusProps) {
   return (
-    <div>
-      <span className="font-medium">Websocket status: </span>
-      <span className="font-bold">{getConnectionStatus(readyState)}</span>
-    </div>
+    <>
+      <motion.span
+        className="font-medium"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        Websocket status:{" "}
+      </motion.span>
+      <motion.span
+        className="font-bold"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        {getConnectionStatus(readyState)}
+      </motion.span>
+    </>
   );
 }

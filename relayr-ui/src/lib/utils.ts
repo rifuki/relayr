@@ -26,6 +26,17 @@ export function getConnectionStatus(readyState: ReadyState): string {
   }[readyState];
 }
 
+export function formatFileSize(bytes: number, decimals = 2) {
+  if (bytes === 0) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
 export async function copyToClipboard(text: string): Promise<boolean> {
   if (navigator.clipboard && window.isSecureContext) {
     try {
@@ -83,7 +94,7 @@ export async function readFileAsArrayBuffer(
 export async function handlePrepareDummyFile(
   setIsFileLoading: (isFileLoading: boolean) => void,
   setFile: (file: File) => void,
-  setDummyDownloadProgress?: (dummyDownloadProgress: number) => void,
+  setProgress?: (progress: number) => void,
 ) {
   setIsFileLoading(true);
 
@@ -96,9 +107,9 @@ export async function handlePrepareDummyFile(
     signal: controller.signal,
     onDownloadProgress: (progress: AxiosProgressEvent) => {
       const { loaded, total } = progress;
-      if (total && setDummyDownloadProgress) {
+      if (total && setProgress) {
         const percent = Math.round((loaded / total) * 100);
-        setDummyDownloadProgress(percent);
+        setProgress(percent);
       }
     },
   });

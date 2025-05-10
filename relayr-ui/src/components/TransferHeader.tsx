@@ -1,3 +1,6 @@
+import { fileListItemVariants } from "@/lib/animations";
+import { motion } from "motion/react";
+
 interface TransferHeaderProps {
   title: string;
   description: string;
@@ -7,9 +10,12 @@ export default function TransferHeader({
   description,
 }: TransferHeaderProps) {
   return (
-    <div className="text-center space-y-2">
+    <motion.div
+      className="text-center space-y-2"
+      variants={fileListItemVariants}
+    >
       <h1 className="text-2xl font-bold">{title}</h1>
       <p className="text-sm text-muted-foreground">{description}</p>
-    </div>
+    </motion.div>
   );
 }

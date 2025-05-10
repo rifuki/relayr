@@ -113,6 +113,12 @@ export function useFileSenderSocket() {
       return;
     }
 
+    if (transferStatus.isCanceled) {
+      actions.setErrorMessage("You canceled the file transfer");
+      console.warn("Transfer has been canceled. No more chunks will be sent.");
+      return;
+    }
+
     if (ack.status === "acknowledged") {
       if (transferStatus.chunkIndex != ack.chunkIndex) {
         actions.setErrorMessage(

@@ -1,7 +1,13 @@
+import { useEffect } from "react";
+
+import { useShallow } from "zustand/shallow";
 import { CloudLightningIcon } from "lucide-react";
+import { motion, useAnimation } from "motion/react";
+
 import { Badge } from "@/components/ui/badge";
 import FileCard from "@/components/FileCard";
 import { Button } from "@/components/ui/button";
+import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 import SenderProgressBar from "@/components/SenderProgressBar";
 import TransferHeader from "@/components/TransferHeader";
 import ShareableLinkInput from "@/components/ShareableLinkInput";
@@ -15,19 +21,56 @@ import {
   useFileSenderStore,
   useWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
-import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
+import {
+  fileListItemVariants,
+  fileListWrapperVariants,
+} from "@/lib/animations";
+import { MotionButton } from "@/components/motion-primitives/motion-button";
 
 export default function ReadyToTransfer() {
-  const transferShareLink = useFileSenderStore(
-    (state) => state.transferShareLink,
-  );
-  const { recipientId } = useFileSenderStore(
-    (state) => state.transferConnection,
-  );
-  const file = useFileSenderStore((state) => state.file);
-  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const { isTransferring, isRecipientComplete } = useFileSenderStore(
-    (state) => state.transferStatus,
+  const controls = useAnimation();
+
+  const handleMouseEnter = () => {
+    controls.stop();
+    controls.start({ rotate: 0 });
+  };
+
+  const handleMouseLeave = () => {
+    controls.start({
+      rotate: [0, 5, -5, 0],
+      transition: {
+        duration: 1,
+        repeat: Infinity,
+      },
+    });
+  };
+
+  useEffect(() => {
+    controls.start({
+      rotate: [0, 5, -5, 0],
+      transition: {
+        duration: 1,
+        repeat: Infinity,
+      },
+    });
+  }, [controls]);
+
+  const {
+    file,
+    fileMetadata,
+    transferShareLink,
+    recipientId,
+    isTransferring,
+    isRecipientComplete,
+  } = useFileSenderStore(
+    useShallow((state) => ({
+      file: state.file,
+      fileMetadata: state.fileMetadata,
+      transferShareLink: state.transferShareLink,
+      recipientId: state.transferConnection.recipientId,
+      isTransferring: state.transferStatus.isTransferring,
+      isRecipientComplete: state.transferStatus.isRecipientComplete,
+    })),
   );
 
   const { sendJsonMessage } = useWebSocketHandlers();
@@ -40,6 +83,7 @@ export default function ReadyToTransfer() {
       const errorMsg = "Missing file or recipient";
       actions.setErrorMessage(errorMsg);
       console.error(errorMsg);
+      return;
     }
 
     actions.resetTransferStatus();
@@ -61,36 +105,61 @@ export default function ReadyToTransfer() {
       type: "cancelSenderTransfer",
     } satisfies cancelSenderTransferRequest);
     actions.resetTransferStatus();
+    actions.setTransferStatus({ isCanceled: true });
   };
 
   if (!transferShareLink || !fileMetadata) return;
 
   return (
-    <div className="flex flex-col items-center space-y-5">
+    <motion.div
+      className="flex flex-col items-center space-y-5"
+      variants={fileListWrapperVariants}
+      initial="hidden"
+      animate="show"
+    >
       <TransferHeader
         title="Ready to Transfer"
         description="Recipient connected. You can now transfer the file"
       />
 
-      <CloudLightningIcon className="h-10 w-10 my-10" />
+      <motion.div
+        variants={fileListItemVariants}
+        animate={{ scale: [1, 1, 1, 1], rotate: [0, 5, -5, 0] }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "reverse",
+          repeatDelay: 1,
+        }}
+      >
+        <CloudLightningIcon className="h-10 w-10 my-10" />
+      </motion.div>
 
-      <div className="w-full flex flex-col items-center space-y-5">
+      <motion.div
+        variants={fileListItemVariants}
+        className="w-full flex flex-col items-center space-y-5"
+      >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
-
         <ShareableLinkInput value={transferShareLink} />
-
         <FileCard fileMetadata={fileMetadata} />
-      </div>
+      </motion.div>
 
-      <div className="w-full space-y-2">
-        <SenderProgressBar />
-      </div>
+      <SenderProgressBar />
 
-      <div className="w-full flex flex-col space-y-3 mt-2">
+      <motion.div
+        variants={fileListItemVariants}
+        className="w-full flex flex-col space-y-3 mt-2"
+      >
         {!isTransferring && !isRecipientComplete ? (
-          <Button onClick={handleSendFile} className="w-full">
+          <MotionButton
+            animate={controls}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={handleSendFile}
+            className="w-full hover:cursor-pointer"
+          >
             Start Transfer
-          </Button>
+          </MotionButton>
         ) : (
           <TextShimmer className="text-center" duration={1}>
             ⚠️ Transfer in progress — stay on this page.
@@ -100,7 +169,7 @@ export default function ReadyToTransfer() {
           <Button
             onClick={handleCancelSenderReady}
             variant="destructive"
-            className="w-full"
+            className="w-full hover:cursor-pointer"
           >
             Cancel Transfer Setup
           </Button>
@@ -108,12 +177,12 @@ export default function ReadyToTransfer() {
           <Button
             onClick={handleCancelSenderTransfer}
             variant="destructive"
-            className="w-full"
+            className="w-full hover:cursor-pointer"
           >
-            Abort Trasnfer
+            Abort Transfer
           </Button>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
