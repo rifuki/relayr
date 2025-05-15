@@ -11,7 +11,8 @@ import {
   FileMetaRequest,
   RecipientReadyResponse,
   RegisterResponse,
-  WebSocketMessageResponse,
+  WebSocketSenderTextMessageResponse,
+  SenderAckRequest,
 } from "@/types/webSocketMessages";
 
 export function useFileSenderSocket() {
@@ -28,7 +29,6 @@ export function useFileSenderSocket() {
     useWebSocket(webSocketUrl, {
       onMessage: (wsMsg: MessageEvent<string>) => {
         actions.setErrorMessage(null);
-
         try {
           const parsedMessage = JSON.parse(wsMsg.data);
           processWebSocketTextMessage(parsedMessage);
@@ -36,15 +36,25 @@ export function useFileSenderSocket() {
           console.error("❌ Error parsing websocket message:", error);
         }
       },
-      onClose: (error: CloseEvent) => processWebSocketOnClose(error),
+      onClose: (close: CloseEvent) => processWebSocketOnClose(close),
       onError: (error: Event) => {
         console.error("🔥 Error", error);
         actions.setErrorMessage("WebSocket error occurred");
       },
     });
 
-  const processWebSocketTextMessage = (wsMsg: WebSocketMessageResponse) => {
+  const processWebSocketTextMessage = (
+    wsMsg: WebSocketSenderTextMessageResponse,
+  ) => {
     if (!wsMsg.success) {
+      if (wsMsg.message.includes("is no longer connected")) {
+        actions.setErrorMessage(
+          "Recipient is no longer connection. Please try again.",
+        );
+        actions.setTransferConnection({ recipientId: null });
+        actions.resetTransferStatus();
+      }
+
       actions.setErrorMessage(wsMsg.message ?? "Unknown error occurred");
       return;
     }
@@ -91,6 +101,12 @@ export function useFileSenderSocket() {
 
   const processRecipientReadyMessage = (msg: RecipientReadyResponse) => {
     actions.setTransferConnection({ recipientId: msg.recipientId });
+    sendJsonMessage({
+      type: "senderAck",
+      requestType: "recipientReady",
+      recipientId: msg.recipientId,
+      status: "success",
+    } satisfies SenderAckRequest);
   };
 
   const processCancelRecipientReadyMessage = (
@@ -116,11 +132,15 @@ export function useFileSenderSocket() {
     if (transferStatus.isCanceled) {
       actions.setErrorMessage("You canceled the file transfer");
       console.warn("Transfer has been canceled. No more chunks will be sent.");
+      actions.resetTransferStatus();
       return;
     }
 
     if (ack.status === "acknowledged") {
-      if (transferStatus.chunkIndex != ack.chunkIndex) {
+      if (
+        transferStatus.chunkIndex !== ack.chunkIndex &&
+        transferStatus.senderProgress !== ack.recipientTransferProgress
+      ) {
         actions.setErrorMessage(
           " Upload out of sync. Please try again or check your connection ",
         );
@@ -130,11 +150,23 @@ export function useFileSenderSocket() {
       actions.setTransferStatus({
         offset: transferStatus.offset + transferStatus.chunkDataSize,
         chunkIndex: transferStatus.chunkIndex + 1,
+        receiverProgress: ack.recipientTransferProgress,
       });
       actions.sendNextChunk();
     } else if (ack.status === "completed") {
       transferStatus.isRecipientComplete = true;
       transferStatus.isTransferring = false;
+    } else if (ack.status === "error") {
+      actions.setTransferStatus({
+        isError: true,
+        isTransferring: false,
+      });
+      actions.setErrorMessage("Transfer failed: receiver reported an error.");
+      console.error("[Sender] Receiver reported file transfer error", {
+        chunkIndex: ack.chunkIndex,
+        receiverProgress: ack.recipientTransferProgress,
+        uploadedSize: ack.uploadedSize,
+      });
     } else {
       const errorMsg = `Unknown acknowledgment status: ${ack.status}`;
       actions.setErrorMessage(errorMsg);
@@ -142,8 +174,8 @@ export function useFileSenderSocket() {
     }
   };
 
-  const processWebSocketOnClose = (error: CloseEvent) => {
-    console.info("❌ Disconnected", error.code);
+  const processWebSocketOnClose = (close: CloseEvent) => {
+    console.info("❌ Disconnected", close.code);
 
     actions.setWebSocketUrl(null);
 
@@ -152,11 +184,11 @@ export function useFileSenderSocket() {
     actions.setIsLoading(false);
     actions.setErrorMessage(null);
 
-    if (error.code === 1000) return;
-    else if (error.code === 1006) {
+    if (close.code === 1000) return;
+    else if (close.code === 1006) {
       actions.setErrorMessage("Lost connection to the server");
     } else {
-      actions.setErrorMessage(`Disconnected: Code ${error.code}`);
+      actions.setErrorMessage(`Disconnected: Code ${close.code}`);
     }
   };
 

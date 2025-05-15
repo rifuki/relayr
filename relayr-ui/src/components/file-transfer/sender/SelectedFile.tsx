@@ -5,12 +5,12 @@ import { motion } from "motion/react";
 
 import FileCard from "@/components/FileCard";
 import TransferHeader from "@/components/TransferHeader";
-import { WS_RELAY_API_URL } from "@/lib/api";
 import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
+import { WS_RELAY_API_URL } from "@/lib/constants";
 import {
   fileListItemVariants,
   fileListWrapperVariants,
@@ -30,6 +30,7 @@ const checkmarkVariants = {
 };
 
 export default function SelectedFile() {
+  const initId = useFileSenderStore((state) => state.initId);
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const actions = useFileSenderActions();
@@ -44,7 +45,7 @@ export default function SelectedFile() {
     }
 
     actions.resetTransferStatus();
-    actions.setWebSocketUrl(WS_RELAY_API_URL);
+    actions.setWebSocketUrl(`${WS_RELAY_API_URL}?id=${initId}`);
     setIsGenerateLinkLoading(false);
   };
 
@@ -88,19 +89,10 @@ export default function SelectedFile() {
         <MotionButton
           onClick={() => handleGenerateTransferShareLink()}
           disabled={isGenerateLinkLoading}
-          className="w-full cursor-pointer"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           Generate Transfer Link
         </MotionButton>
-        <MotionButton
-          onClick={handleUnselectFile}
-          variant="destructive"
-          className="w-full cursor-pointer"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
+        <MotionButton onClick={handleUnselectFile} variant="destructive">
           Remove File
         </MotionButton>
       </motion.div>

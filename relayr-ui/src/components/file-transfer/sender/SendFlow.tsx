@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import useMeasure from "react-use-measure";
 
 import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
+import InitialTransitionLoader from "@/components/motion-primitives/initial-transition-loader";
 import FileSelector from "./FileSelector";
 import SelectedFile from "./SelectedFile";
 import WaitingForRecipient from "./WaitingForRecipient";
 import ReadyToTransfer from "./ReadyToTransfer";
-import TransferCompleted from "./TransferCompleted";
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
+import { transitionPanelTransition } from "@/lib/animations";
+import TransferInProgress from "./TransferInProgress";
+import SenderTransferCompleted from "./SenderTransferCompleted";
 
 export default function SendFlow() {
   const file = useFileSenderStore((state) => state.file);
@@ -18,7 +21,7 @@ export default function SendFlow() {
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
-  const { isRecipientComplete } = useFileSenderStore(
+  const { isTransferring, isRecipientComplete } = useFileSenderStore(
     (state) => state.transferStatus,
   );
 
@@ -29,14 +32,16 @@ export default function SendFlow() {
   useEffect(() => {
     function determineStep() {
       // File selection state
+
       if (
         !file &&
         !senderId &&
         !transferShareLink &&
         !recipientId &&
+        !isTransferring &&
         !isRecipientComplete
       )
-        return 0;
+        return 1;
 
       // File selected state
       if (
@@ -44,9 +49,10 @@ export default function SendFlow() {
         !senderId &&
         !transferShareLink &&
         !recipientId &&
+        !isTransferring &&
         !isRecipientComplete
       )
-        return 1;
+        return 2;
 
       // Waiting for recipient state
       if (
@@ -54,9 +60,10 @@ export default function SendFlow() {
         senderId &&
         transferShareLink &&
         !recipientId &&
+        !isTransferring &&
         !isRecipientComplete
       )
-        return 2;
+        return 3;
 
       // Ready to transfer state
       if (
@@ -64,9 +71,10 @@ export default function SendFlow() {
         senderId &&
         transferShareLink &&
         recipientId &&
+        !isTransferring &&
         !isRecipientComplete
       )
-        return 3;
+        return 4;
 
       // Transfer completed state
       if (
@@ -74,9 +82,20 @@ export default function SendFlow() {
         senderId &&
         transferShareLink &&
         recipientId &&
+        isTransferring &&
+        !isRecipientComplete
+      )
+        return 5;
+
+      if (
+        file &&
+        senderId &&
+        transferShareLink &&
+        recipientId &&
+        !isTransferring &&
         isRecipientComplete
       )
-        return 4;
+        return 6;
 
       return 0;
     }
@@ -92,15 +111,18 @@ export default function SendFlow() {
     transferShareLink,
     recipientId,
     isRecipientComplete,
+    isTransferring,
     currentStep,
   ]);
 
   const FLOW_COMPONENTS = [
+    <InitialTransitionLoader key="initialTransitionLoader" />,
     <FileSelector key="fileSelector" />,
     <SelectedFile key="selectedFile" />,
     <WaitingForRecipient key="waitingForRecipient" />,
     <ReadyToTransfer key="readyToTransfer" />,
-    <TransferCompleted key="transferCompleted" />,
+    <TransferInProgress key="TransferInProgress" />,
+    <SenderTransferCompleted key="senderTransferCompleted" />,
   ];
 
   // Fallback (should never happen ideally)
@@ -130,11 +152,7 @@ export default function SendFlow() {
           width: "100%",
         }),
       }}
-      transition={{
-        x: { type: "spring", stiffness: 300, damping: 30 },
-        opacity: { duration: 0.2 },
-        height: { type: "spring", stiffness: 500, damping: 50 },
-      }}
+      transition={transitionPanelTransition}
       custom={direction}
     >
       {FLOW_COMPONENTS.map((component, index) => (

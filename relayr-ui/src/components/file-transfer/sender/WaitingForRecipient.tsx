@@ -4,8 +4,8 @@ import { ClockIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
 import { Badge } from "@components/ui/badge";
-import { Button } from "@/components/ui/button";
 import FileCard from "@/components/FileCard";
+import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 import TransferHeader from "@/components/TransferHeader";
 import ShareableLinkInput from "@/components/ShareableLinkInput";
@@ -28,8 +28,6 @@ const clockAnimation = {
     ease: "linear",
   },
 };
-
-const MotionButton = motion.create(Button);
 
 export default function WaitingForRecipient() {
   const transferShareLink = useFileSenderStore(
@@ -79,11 +77,11 @@ export default function WaitingForRecipient() {
       />
 
       <motion.div
-        className="flex flex-col items-center my-10"
+        className="flex flex-col items-center"
         variants={fileListItemVariants}
         animate={clockAnimation}
       >
-        <ClockIcon className="h-10 w-10 text-primary" />
+        <ClockIcon className="h-15 w-15 my-10" />
       </motion.div>
 
       <motion.div
@@ -94,7 +92,7 @@ export default function WaitingForRecipient() {
           Recipient ID: <Loader2Icon className="animate-spin" />
         </Badge>
 
-        <ShareableLinkInput value={transferShareLink} />
+        <ShareableLinkInput text={transferShareLink} className="mt-2" />
 
         <FileCard fileMetadata={fileMetadata} />
       </motion.div>
@@ -110,9 +108,6 @@ export default function WaitingForRecipient() {
           onClick={handleStopSharing}
           disabled={isLoading}
           variant="destructive"
-          className="w-full cursor-pointer"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           Stop Sharing
         </MotionButton>

@@ -23,6 +23,12 @@ pub enum RelayIncomingPayload {
     CancelSenderTransfer(CancelSenderTransferPayload),
     #[serde(rename = "cancelRecipientTransfer")]
     CancelRecipientTransfer(CancelRecipientTransferPayload),
+    #[serde(rename = "senderAck")]
+    SenderAck(SenderAckPayload),
+    #[serde(rename = "recipientAck")]
+    RecipientAck(RecipientAckPayload),
+    #[serde(rename = "restartTransfer")]
+    RestartTransfer,
     #[serde(rename = "terminate")]
     Terminate,
     #[serde(other)]
@@ -69,12 +75,12 @@ pub struct CancelSenderReadyPayload {
 pub struct FileChunkPayload {
     pub sender_id: Option<String>,
     pub file_name: String,
-    pub total_chunks: u16,
     pub total_size: u64,
+    pub total_chunks: u16,
     pub chunk_index: u32,
     pub chunk_data_size: u32,
     pub uploaded_size: u64,
-    pub transfer_progress: u8,
+    pub sender_transfer_progress: u8,
 }
 
 #[derive(Deserialize)]
@@ -87,8 +93,8 @@ pub struct FileTransferAckPayload {
     pub total_chunks: u16,
     pub chunk_index: u32,
     pub uploaded_size: u64,
-    pub chunk_data_size: Option<u32>,
-    pub transfer_progress: Option<u8>,
+    pub chunk_data_size: u32,
+    pub recipient_transfer_progress: u8,
 }
 
 #[derive(Deserialize)]
@@ -96,8 +102,8 @@ pub struct FileTransferAckPayload {
 pub struct FileEndPayload {
     pub sender_id: Option<String>,
     pub file_name: String,
-    pub total_chunks: u16,
     pub total_size: u64,
+    pub total_chunks: u16,
     pub last_chunk_index: u32,
     pub uploaded_size: u64,
 }
@@ -113,4 +119,23 @@ pub struct CancelSenderTransferPayload {
 pub struct CancelRecipientTransferPayload {
     pub sender_id: String,
     pub recipient_id: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SenderAckPayload {
+    pub request_type: String,
+    pub sender_id: Option<String>,
+    pub recipient_id: String,
+    pub status: String,
+    pub message: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecipientAckPayload {
+    pub recipient_id: Option<String>,
+    pub sender_id: String,
+    pub status: String,
+    pub message: Option<String>,
 }

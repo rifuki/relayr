@@ -19,7 +19,7 @@ import { MotionButton } from "@/components/motion-primitives/motion-button";
 import SenderProgressBar from "@/components/SenderProgressBar";
 
 const burstAnimation = {
-  scale: [1, 1.5, 0],
+  scale: [1, 2, 0],
   opacity: [1, 0.8, 0],
   transition: {
     duration: 1.5,
@@ -28,16 +28,16 @@ const burstAnimation = {
 };
 
 const successAnimation = {
-  scale: [0, 1.2, 1],
+  scale: [0, 1.5, 1],
   opacity: [0, 1],
   rotate: [0, 0],
   transition: {
-    duration: 0.5,
+    duration: 1.5,
     ease: "easeOut",
   },
 };
 
-export default function TransferCompleted() {
+export default function SenderTransferCompleted() {
   const testFile = useFileSenderStore((state) => state.file);
 
   const { recipientId } = useFileSenderStore(
@@ -91,12 +91,12 @@ export default function TransferCompleted() {
       animate="show"
     >
       <TransferHeader
-        title="Transfer Successful"
+        title="Transfer Completed"
         description="Your file has been successfully transferred"
       />
 
       <motion.div
-        className="relative flex justify-center items-center my-10"
+        className="relative flex justify-center items-center my-10 mb-15"
         variants={fileListItemVariants}
       >
         <motion.div
@@ -105,7 +105,7 @@ export default function TransferCompleted() {
           animate={burstAnimation}
         />
         <motion.div
-          className="bg-white dark:bg-zinc-800 rounded-full p-2 relative z-10"
+          className="relative z-1"
           initial={{ scale: 0, opacity: 0 }}
           animate={successAnimation}
         >
@@ -131,20 +131,11 @@ export default function TransferCompleted() {
         className="w-full flex flex-col space-y-3 mt-2"
         variants={fileListItemVariants}
       >
-        <MotionButton
-          onClick={testHandleSendFile}
-          variant="ghost"
-          className="w-full cursor-pointer"
-        >
+        <MotionButton onClick={testHandleSendFile} variant="ghost">
           Start Transfer
         </MotionButton>
 
-        <MotionButton
-          onClick={handleResetTransfer}
-          className="w-full cursor-pointer"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
+        <MotionButton onClick={handleResetTransfer}>
           <RefreshCw className="h-4 w-4" />
           Send Another File
         </MotionButton>

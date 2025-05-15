@@ -16,7 +16,8 @@ interface FileTransferStatus {
   chunkDataSize: number;
   offset: number;
   chunkIndex: number;
-  progress: number;
+  senderProgress: number;
+  receiverProgress: number;
   uploadedSize: number;
   totalSize: number;
   isTransferring: boolean;
@@ -33,6 +34,7 @@ interface WebSocketHandlers {
 }
 
 interface FileSenderActions {
+  setInitId: (id: string) => void;
   setFile: (file: File | null) => void;
   setErrorMessage: (message: string | null) => void;
   setWebSocketUrl: (wsUrl: string | null) => void;
@@ -47,6 +49,7 @@ interface FileSenderActions {
 }
 
 interface FileSenderState {
+  initId: string | null;
   file: File | null;
   fileMetadata: FileMetadata | null;
   errorMessage: string | null;
@@ -61,6 +64,7 @@ interface FileSenderState {
 }
 
 export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
+  initId: null,
   file: null,
   fileMetadata: null,
   errorMessage: null,
@@ -76,7 +80,8 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
     chunkDataSize: 0,
     offset: 0,
     chunkIndex: 0,
-    progress: 0,
+    senderProgress: 0,
+    receiverProgress: 0,
     uploadedSize: 0,
     totalSize: 0,
     isTransferring: false,
@@ -92,6 +97,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   },
   hasReset: false,
   actions: {
+    setInitId: (id) => set({ initId: id }),
     setFile: (file) =>
       set(() => ({
         file,
@@ -153,8 +159,8 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         sendJsonMessage({
           type: "fileEnd",
           fileName: file.name,
-          totalChunks: totalChunks,
           totalSize: file.size,
+          totalChunks,
           lastChunkIndex: chunkIndex,
           uploadedSize: offset,
         } satisfies FileEndRequest);
@@ -191,7 +197,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         }
 
         const uploadedSize = transferStatus.offset + chunkDataSize;
-        const transferProgress = Math.min(
+        const senderTransferProgress = Math.min(
           100,
           Math.floor((uploadedSize / file.size) * 100),
         );
@@ -199,12 +205,12 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         sendJsonMessage({
           type: "fileChunk",
           fileName: file.name,
-          totalChunks: transferStatus.totalChunks,
           totalSize: file.size,
+          totalChunks: transferStatus.totalChunks,
           chunkIndex: transferStatus.chunkIndex,
           chunkDataSize,
           uploadedSize,
-          transferProgress,
+          senderTransferProgress,
         } satisfies FileChunkRequest);
         sendMessage(chunkData);
 
@@ -214,7 +220,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
             chunkDataSize,
             uploadedSize,
             totalSize: file.size,
-            progress: transferProgress,
+            senderProgress: senderTransferProgress,
             isTransferring: true,
           },
         });
@@ -235,7 +241,8 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           chunkDataSize: 0,
           offset: 0,
           chunkIndex: 0,
-          progress: 0,
+          senderProgress: 0,
+          receiverProgress: 0,
           uploadedSize: 0,
           totalSize: 0,
           isTransferring: false,

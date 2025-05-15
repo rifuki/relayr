@@ -172,7 +172,7 @@ export default function FileSelector() {
           {isFileLoading ? (
             <Loader2Icon className="animate-spin text-primary" />
           ) : (
-            <FileIcon />
+            <FileIcon className="h-10 w-10" />
           )}
         </motion.div>
 

@@ -1,3 +1,14 @@
+import {
+  AckStatus,
+  fileTransferAckStatus,
+  SenderAckRequestType,
+} from "./shared";
+
+// ====================================================
+// 🟥 Sender Section
+// ====================================================
+
+// Sender Requests
 export interface FileMetaRequest {
   type: "fileMeta";
   senderId?: string;
@@ -15,44 +26,42 @@ export interface FileChunkRequest {
   type: "fileChunk";
   senderId?: string;
   fileName: string;
-  totalChunks: number;
   totalSize: number;
+  totalChunks: number;
   chunkIndex: number;
-  uploadedSize: number;
   chunkDataSize: number;
-  transferProgress: number;
+  uploadedSize: number;
+  senderTransferProgress: number;
 }
 
 export interface FileEndRequest {
   type: "fileEnd";
   senderId?: string;
   fileName: string;
-  totalChunks: number;
   totalSize: number;
+  totalChunks: number;
   lastChunkIndex: number;
   uploadedSize: number;
 }
 
-export interface cancelSenderTransferRequest {
+export interface CancelSenderTransferRequest {
   type: "cancelSenderTransfer";
   senderId?: string;
 }
 
-//export type WebSocketMessageRequest = FileMetaRequest | FileChunkRequest;
-
-export interface ErrorMessageResponse {
-  success: false;
-  message: string;
-  details?: string;
+export interface SenderAckRequest {
+  type: "senderAck";
+  requestType: SenderAckRequestType;
+  recipientId: string;
+  status: AckStatus;
+  message?: string;
 }
 
-export interface RegisterResponse {
-  success: true;
-  type: "register";
-  connId: string;
-  timestamp: number;
+export interface RestartTransferRequest {
+  type: "restartTransfer";
 }
 
+// Sender Responses
 export interface RecipientReadyResponse {
   success: true;
   type: "recipientReady";
@@ -70,18 +79,12 @@ export interface CancelRecipientReadyResponse {
 export interface FileTransferAckResponse {
   success: true;
   type: "fileTransferAck";
-  status: "acknowledged" | "completed";
+  status: fileTransferAckStatus;
   fileName: string;
   totalChunks: number;
   chunkIndex: number;
-  chunkDataSize?: number;
+  chunkDataSize: number;
   uploadedSize: number;
-  transferProgress?: number;
+  recipientTransferProgress: number;
+  timestamp: number;
 }
-
-export type WebSocketMessageResponse =
-  | ErrorMessageResponse
-  | RegisterResponse
-  | RecipientReadyResponse
-  | CancelRecipientReadyResponse
-  | FileTransferAckResponse;

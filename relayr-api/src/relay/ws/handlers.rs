@@ -14,7 +14,7 @@ use crate::{
                 CancelRecipientReadyResponseDto, CancelSenderReadyResponseDto,
                 CancelSenderTransferResponseDto, FileChunkResponseDto, FileEndResponseDto,
                 FileTransferAckResponseDto, RecipientReadyResponseDto, RegisterResponseDto,
-                WsResponse,
+                RestartTransferResponseDto, SenderAckResponseDto, WsResponse,
             },
         },
         error::ErrorMessage,
@@ -170,12 +170,12 @@ pub async fn handle_incoming_payload(
                     let success_msg = FileChunkResponseDto::new(
                         &sender_id,
                         &payload.file_name,
-                        payload.total_chunks,
                         payload.total_size,
+                        payload.total_chunks,
                         payload.chunk_index,
-                        payload.uploaded_size,
                         payload.chunk_data_size,
-                        payload.transfer_progress,
+                        payload.uploaded_size,
+                        payload.sender_transfer_progress,
                     )
                     .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
@@ -205,10 +205,10 @@ pub async fn handle_incoming_payload(
                     &payload.file_name,
                     payload.total_chunks,
                     payload.chunk_index,
+                    payload.chunk_data_size,
                     payload.uploaded_size,
+                    payload.recipient_transfer_progress,
                 )
-                .chunk_data_size(payload.chunk_data_size)
-                .transfer_progress(payload.transfer_progress)
                 .to_ws_msg();
                 send_or_break!(sender_tx, success_msg, stop_flag);
             } else {
@@ -228,8 +228,8 @@ pub async fn handle_incoming_payload(
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
                     let success_msg = FileEndResponseDto::new(
                         &payload.file_name,
-                        payload.total_chunks,
                         payload.total_size,
+                        payload.total_chunks,
                         payload.last_chunk_index,
                         payload.uploaded_size,
                     )
@@ -260,6 +260,51 @@ pub async fn handle_incoming_payload(
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
                     let success_msg = CancelSenderTransferResponseDto::new(&sender_id).to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
+                } else {
+                    let err_msg = ErrorMessage::new(&format!(
+                        "Recipient `{}` is no longer connected",
+                        current_recipient
+                    ))
+                    .to_ws_msg();
+                    send_or_break!(tx, err_msg, stop_flag);
+                }
+            } else {
+                let err_msg = ErrorMessage::new(&format!(
+                    "Active connection for sender_id: `{}` not found",
+                    sender_id
+                ))
+                .to_ws_msg();
+                send_or_break!(tx, err_msg, stop_flag);
+            }
+        }
+        RelayIncomingPayload::SenderAck(payload) => {
+            let sender_id = payload.sender_id.unwrap_or(base_conn_id.to_owned());
+
+            if let Some(recipient_tx) = state.get_user_tx(&payload.recipient_id).await {
+                let success_msg =
+                    SenderAckResponseDto::new(&payload.request_type, &sender_id, &payload.status)
+                        .to_ws_msg();
+                send_or_break!(recipient_tx, success_msg, stop_flag);
+            } else {
+                let err_msg = ErrorMessage::new(&format!(
+                    "Recipient `{}` is no longer connected",
+                    &payload.recipient_id
+                ))
+                .to_ws_msg();
+                send_or_break!(tx, err_msg, stop_flag);
+            }
+        }
+        //RelayIncomingPayload::RecipientAck(payload) => {
+        //    let recipient_id = payload.recipient_id.unwrap_or(base_conn_id.to_owned());
+        //}
+        RelayIncomingPayload::RestartTransfer => {
+            let sender_id = base_conn_id.to_owned();
+            let connected_recipient = state.get_connected_recipient(&sender_id).await;
+
+            if let Some(current_recipient) = connected_recipient {
+                if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
+                    let response_message = RestartTransferResponseDto::new(&sender_id).to_ws_msg();
+                    send_or_break!(recipient_tx, response_message, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(&format!(
                         "Recipient `{}` is no longer connected",

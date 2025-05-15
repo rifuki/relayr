@@ -1,6 +1,7 @@
 use std::fmt;
 
 use axum::extract::ws::Message;
+use chrono::Utc;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -9,6 +10,7 @@ pub struct ErrorMessage {
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub details: Option<String>,
+    pub timestamp: i64,
 }
 
 impl ErrorMessage {
@@ -17,6 +19,7 @@ impl ErrorMessage {
             success: false,
             message: msg.to_owned(),
             details: None,
+            timestamp: Utc::now().timestamp(),
         }
     }
 

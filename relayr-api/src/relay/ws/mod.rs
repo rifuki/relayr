@@ -12,19 +12,18 @@ use utils::wait_socket_tasks;
 
 use super::state::RelayState;
 
-pub async fn handle_socket(socket: WebSocket, state: RelayState) {
-    let base_conn_id = nanoid::nanoid!(7);
+pub async fn handle_socket(socket: WebSocket, state: RelayState, id: String) {
     let (tx, rx) = mpsc::channel(100);
     {
-        state.add_base_connection(&base_conn_id, tx.clone()).await;
+        state.add_base_connection(&id, tx.clone()).await;
     }
     let (sender, receiver) = socket.split();
 
     let sender_task = spawn_sender_task(sender, rx);
-    let receiver_task = spawn_receiver_task(receiver, tx, state.clone(), base_conn_id.clone());
+    let receiver_task = spawn_receiver_task(receiver, tx, state.clone(), id.clone());
 
     wait_socket_tasks(sender_task, receiver_task).await;
 
-    state.clear_file_meta(&base_conn_id).await;
-    state.remove_all_connections(&base_conn_id).await;
+    state.clear_file_meta(&id).await;
+    state.remove_all_connections(&id).await;
 }

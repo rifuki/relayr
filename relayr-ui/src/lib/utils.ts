@@ -16,6 +16,8 @@ export function isFolderLike(file: File): boolean {
   );
 }
 
+
+
 export function getConnectionStatus(readyState: ReadyState): string {
   return {
     [ReadyState.CONNECTING]: "Connecting",

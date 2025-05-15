@@ -1,37 +1,35 @@
-import { useShallow } from "zustand/shallow";
-import { useFileSenderStore } from "@/stores/useFileSenderStore";
-import { TextShimmer } from "./motion-primitives/text-shimmer";
-import { formatFileSize } from "@/lib/utils";
 import { motion } from "motion/react";
 import { fileListItemVariants } from "@/lib/animations";
+import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import { formatFileSize } from "@/lib/utils";
+import { TextShimmer } from "./motion-primitives/text-shimmer";
 
-export default function SenderProgressBar() {
-  const {
-    isTransferring,
-    isRecipientComplete,
-    receiverTransferProgress,
-    uploadedSize,
-    totalSize,
-  } = useFileSenderStore(
-    useShallow((state) => ({
-      isTransferring: state.transferStatus.isTransferring,
-      receiverTransferProgress: state.transferStatus.receiverProgress,
-      isRecipientComplete: state.transferStatus.isRecipientComplete,
-      uploadedSize: state.transferStatus.uploadedSize,
-      totalSize: state.transferStatus.totalSize,
-    })),
+export default function ReceiverProgressBar() {
+  const receivedBytes = useFileReceiverStore((state) => state.receivedBytes);
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+  const receiverTransferProgress = useFileReceiverStore(
+    (state) => state.receiverTransferProgress,
   );
+  const isSenderTransferring = useFileReceiverStore(
+    (state) => state.isSenderTransferring,
+  );
+
+  const isTransferCompleted = useFileReceiverStore(
+    (state) => state.isTransferCompleted,
+  );
+
+  if (!fileMetadata) return;
 
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
       <div className="flex justify-between text-sm">
         <span>
-          {isRecipientComplete ? (
+          {isTransferCompleted ? (
             <TextShimmer>Transfer Completed</TextShimmer>
-          ) : isTransferring ? (
-            `${formatFileSize(uploadedSize)} / ${formatFileSize(totalSize)}`
+          ) : isSenderTransferring ? (
+            `${formatFileSize(receivedBytes)} / ${formatFileSize(fileMetadata.size)}`
           ) : (
-            <TextShimmer>Click to start the transfer</TextShimmer>
+            <TextShimmer>Waiting for the sender</TextShimmer>
           )}
         </span>
         <span>{receiverTransferProgress}%</span>
@@ -48,7 +46,7 @@ export default function SenderProgressBar() {
         />
 
         {/* Wave effect overlay - only visible during transfer */}
-        {isTransferring && (
+        {isSenderTransferring && (
           <div className="absolute inset-0 w-full overflow-hidden">
             <div className="wave-effect">
               <style jsx>{`
@@ -75,7 +73,7 @@ export default function SenderProgressBar() {
                     rgba(255, 255, 255, 0.3),
                     transparent
                   );
-                  animation: wave 2s linear infinite;
+                  animation: wave 1.5s linear infinite;
                 }
               `}</style>
             </div>
