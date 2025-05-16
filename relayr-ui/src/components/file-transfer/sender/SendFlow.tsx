@@ -91,7 +91,6 @@ export default function SendFlow() {
         file &&
         senderId &&
         transferShareLink &&
-        recipientId &&
         !isTransferring &&
         isRecipientComplete
       )

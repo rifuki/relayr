@@ -236,8 +236,8 @@ export function UseFileReceiverSocket() {
       recipientTransferProgress: receiverTransferProgress,
     } satisfies FileTransferAckPayload);
 
+    actions.finalizeTransfer();
     actions.setIsSenderTransferring(false);
-    actions.setIsTransferCompleted(true);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

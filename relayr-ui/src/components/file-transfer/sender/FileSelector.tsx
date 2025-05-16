@@ -6,8 +6,8 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 import TransferHeader from "@/components/TransferHeader";
-import { useFileSenderActions } from "@/stores/useFileSenderStore";
 import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
+import { useFileSenderActions } from "@/stores/useFileSenderStore";
 
 export default function FileSelector() {
   const actions = useFileSenderActions();
@@ -194,30 +194,32 @@ export default function FileSelector() {
         </motion.div>
       </motion.div>
 
-      <motion.div
-        className="w-full"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <Button
-          onClick={() =>
-            handlePrepareDummyFile(
-              setIsFileLoading,
-              actions.setFile,
-              setProgress,
-            )
-          }
-          disabled={isFileLoading}
-          className="w-full my-2 cursor-pointer"
+      {process.env.NODE_ENV === "development" && (
+        <motion.div
+          className="w-full"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
         >
-          {isFileLoading ? (
-            <TextShimmer duration={1}>{`${progress}%`}</TextShimmer>
-          ) : (
-            <>Prepare Dummy File</>
-          )}
-        </Button>
-      </motion.div>
+          <Button
+            onClick={() =>
+              handlePrepareDummyFile(
+                setIsFileLoading,
+                actions.setFile,
+                setProgress,
+              )
+            }
+            disabled={isFileLoading}
+            className="w-full my-2 cursor-pointer"
+          >
+            {isFileLoading ? (
+              <TextShimmer duration={1}>{`${progress}%`}</TextShimmer>
+            ) : (
+              <>Prepare Dummy File</>
+            )}
+          </Button>
+        </motion.div>
+      )}
     </div>
   );
 }

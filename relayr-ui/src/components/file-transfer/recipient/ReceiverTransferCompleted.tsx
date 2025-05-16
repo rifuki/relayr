@@ -33,8 +33,18 @@ const successAnimation = {
 export default function ReceiverTransferCompleted() {
   const senderId = useFileReceiverStore((state) => state.senderId);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+  const fileUrl = useFileReceiverStore((state) => state.fileUrl);
 
-  if (!senderId || !fileMetadata) return;
+  if (!senderId || !fileMetadata || !fileUrl) return;
+
+  const handleDownloadFile = () => {
+    const a = document.createElement("a");
+    a.href = fileUrl;
+    a.download = fileMetadata.name || "downloaded-file";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   return (
     <motion.div
@@ -79,6 +89,7 @@ export default function ReceiverTransferCompleted() {
       <ReceiverProgressBar />
 
       <motion.div
+        onClick={handleDownloadFile}
         className="w-full flex flex-col space-y-5"
         variants={fileListItemVariants}
       >

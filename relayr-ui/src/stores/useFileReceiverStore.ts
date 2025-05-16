@@ -32,6 +32,7 @@ interface FileReceiverActions {
   setReceiverTransferProgress: (receiverTransferProgress: number) => void;
   setIsTransferCompleted: (isTransferCompleted: boolean) => void;
   setIsTransferError: (isTransferError: boolean) => void;
+  finalizeTransfer: () => void;
 }
 
 interface FileReceiverState {
@@ -55,10 +56,11 @@ interface FileReceiverState {
   receiverTransferProgress: number;
   isTransferCompleted: boolean;
   isTransferError: boolean;
+  fileUrl: string | null;
   actions: FileReceiverActions;
 }
 
-export const useFileReceiverStore = create<FileReceiverState>()((set) => ({
+export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   initId: null,
   senderId: null,
   recipientId: null,
@@ -82,6 +84,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set) => ({
   receiverTransferProgress: 0,
   isTransferCompleted: false,
   isTransferError: false,
+  fileUrl: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
     setSenderId: (senderId) => set({ senderId }),
@@ -137,6 +140,35 @@ export const useFileReceiverStore = create<FileReceiverState>()((set) => ({
     setIsTransferCompleted: (isTransferCompleted) =>
       set({ isTransferCompleted }),
     setIsTransferError: (isTransferError) => set({ isTransferError }),
+    finalizeTransfer: () => {
+      const { receivedChunkData, fileMetadata, fileUrl } = get();
+      const blobData = new Blob(receivedChunkData, {
+        type: fileMetadata?.type || "application/octet-stream",
+      });
+
+      if (blobData.size === 0 || blobData.size !== fileMetadata?.size) {
+        set({
+          errorMessage: "File reconstruction failed. Size mismatch.",
+          isTransferError: true,
+        });
+        console.error(
+          `File size mismatch. Blob size: ${blobData.size}. Expected: ${fileMetadata?.size}`,
+        );
+        return;
+      }
+
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
+      }
+
+      const newFileUrl = URL.createObjectURL(blobData);
+
+      set({
+        fileUrl: newFileUrl,
+        isTransferCompleted: true,
+        isTransferError: false,
+      });
+    },
   },
 }));
 

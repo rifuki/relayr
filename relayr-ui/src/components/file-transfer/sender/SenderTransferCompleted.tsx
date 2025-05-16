@@ -131,9 +131,11 @@ export default function SenderTransferCompleted() {
         className="w-full flex flex-col space-y-3 mt-2"
         variants={fileListItemVariants}
       >
-        <MotionButton onClick={testHandleSendFile} variant="ghost">
-          Start Transfer
-        </MotionButton>
+        {process.env.NODE_ENV === "development" && (
+          <MotionButton onClick={testHandleSendFile} variant="ghost">
+            Start Transfer
+          </MotionButton>
+        )}
 
         <MotionButton onClick={handleResetTransfer}>
           <RefreshCw className="h-4 w-4" />
