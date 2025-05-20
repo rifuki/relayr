@@ -1,0 +1,32 @@
+# Stage 1: Builder image based on Rust slim for smaller size
+FROM rust:slim AS builder
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy the entire source code into the container
+COPY . .
+
+# Build the release binary (optimized build)
+RUN cargo build --release
+
+# Stage 2: Minimal Debian image for runtime
+FROM debian:bookworm-slim
+
+# Create a non-root user for better security
+RUN useradd -m appuser
+
+# Copy the compiled binary from the builder stage
+COPY --from=builder /app/target/release/relayr-api /usr/local/bin/relayr-api
+
+# Change ownership of the binary to the non-root user
+RUN chown appuser:appuser /usr/local/bin/relayr-api
+
+# Switch to non-root user to run the app securely
+USER appuser
+
+# Expose port 9001 for the application
+EXPOSE 9001
+
+# Command to run the binary when container starts
+CMD ["relayr-api"]
