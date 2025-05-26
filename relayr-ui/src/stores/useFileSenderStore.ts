@@ -1,10 +1,8 @@
 import { create } from "zustand";
 import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 
-import { CHUNK_SIZE } from "@/lib/constants";
-import { readFileAsArrayBuffer } from "@/lib/utils";
 import { FileMetadata } from "@/types/file";
-import { FileChunkRequest, FileEndRequest } from "@/types/webSocketMessages";
+import { sendNextChunk as sendNextChunkHelper } from "@/lib/sendNextChunk";
 
 interface FileTransferConnection {
   senderId: string | null;
@@ -48,7 +46,7 @@ interface FileSenderActions {
   setHasReset: (value: boolean) => void;
 }
 
-interface FileSenderState {
+export interface FileSenderState {
   initId: string | null;
   file: File | null;
   fileMetadata: FileMetadata | null;
@@ -130,110 +128,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           ...transferStatus,
         },
       })),
-    sendNextChunk: async () => {
-      const { file, transferConnection, transferStatus, wsHandlers } = get();
-      const { sendJsonMessage, sendMessage } = wsHandlers;
-
-      const { chunkIndex, totalChunks, offset } = transferStatus;
-
-      if (
-        !file ||
-        !transferConnection.recipientId ||
-        !sendJsonMessage ||
-        !sendMessage
-      ) {
-        set({ errorMessage: "No file or recipient found" });
-        return;
-      }
-
-      if (transferStatus.isCanceled) {
-        set({ errorMessage: "You canceled the transfer" });
-        console.warn(
-          "Transfer has been canceled. No more chunks will be sent.",
-        );
-        return;
-      }
-
-      if (chunkIndex >= totalChunks) {
-        //console.log("All data sent. Sending fileEnd signal.");
-        sendJsonMessage({
-          type: "fileEnd",
-          fileName: file.name,
-          totalSize: file.size,
-          totalChunks,
-          lastChunkIndex: chunkIndex,
-          uploadedSize: offset,
-        } satisfies FileEndRequest);
-
-        set({
-          transferStatus: {
-            ...transferStatus,
-            isSenderComplete: true,
-            isTransferring: false,
-          },
-        });
-
-        return;
-      }
-
-      try {
-        const { chunkData, chunkDataSize } = await readFileAsArrayBuffer(
-          file,
-          transferStatus.offset,
-          CHUNK_SIZE,
-        );
-
-        // Stop if no data was read (e.g. offset beyond file size)
-        if (chunkDataSize === 0) {
-          console.warn("No chunk data read. Skipping send.");
-          set({
-            transferStatus: {
-              ...transferStatus,
-              isSenderComplete: true,
-              isTransferring: false,
-            },
-          });
-          return;
-        }
-
-        const uploadedSize = transferStatus.offset + chunkDataSize;
-        const senderTransferProgress = Math.min(
-          100,
-          Math.floor((uploadedSize / file.size) * 100),
-        );
-
-        sendJsonMessage({
-          type: "fileChunk",
-          fileName: file.name,
-          totalSize: file.size,
-          totalChunks: transferStatus.totalChunks,
-          chunkIndex: transferStatus.chunkIndex,
-          chunkDataSize,
-          uploadedSize,
-          senderTransferProgress,
-        } satisfies FileChunkRequest);
-        sendMessage(chunkData);
-
-        set({
-          transferStatus: {
-            ...transferStatus,
-            chunkDataSize,
-            uploadedSize,
-            totalSize: file.size,
-            senderProgress: senderTransferProgress,
-            isTransferring: true,
-          },
-        });
-
-        //console.log(
-        //  `Chunk ${chunkIndex}/${totalChunks} sent. Progress: ${transferProgress}%`,
-        //);
-      } catch (error: unknown) {
-        const errorMsg = "Failed to send next chunk";
-        set({ errorMessage: errorMsg });
-        console.error(errorMsg + error);
-      }
-    },
+    sendNextChunk: () => sendNextChunkHelper({ get, set }),
     resetTransferStatus: () =>
       set({
         transferStatus: {

@@ -27,3 +27,15 @@ tower-http = { version = "0.6.2", features = ["cors"] }
 
 [features]
 console = ["dep:console-subscriber"]
+
+[profile.release]
+opt-level = 3
+lto =  true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.release-debug]
+inherits = "release"
+strip = false
+debug = true
