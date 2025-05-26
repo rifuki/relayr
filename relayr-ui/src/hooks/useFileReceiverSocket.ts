@@ -22,7 +22,7 @@ import { toast } from "sonner";
 export function UseFileReceiverSocket() {
   const webSocketUrl = useFileReceiverStore((state) => state.webSocketUrl);
 
-  const senderId = useFileReceiverStore((state) => state.senderId as string);
+  const senderId = useFileReceiverStore((state) => state.transferConnection.senderId as string);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
 
   const totalChunks = useFileReceiverStore((state) => state.totalChunks);
@@ -155,7 +155,7 @@ export function UseFileReceiverSocket() {
   };
 
   const processRegisterMessage = (msg: RegisterResponse) => {
-    actions.setRecipientId(msg.connId);
+    actions.setTransferConnection({ recipientId: msg.connId });
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -164,7 +164,7 @@ export function UseFileReceiverSocket() {
     actions.setErrorMessage(errMsg);
     actions.setIsConnectedToSender(false);
     getWebSocket()?.close(1000, errMsg);
-    actions.setRecipientId(null);
+    actions.setTransferConnection({ recipientId: null });
   };
 
   const processSenderAckMessage = (msg: SenderAckResponse) => {

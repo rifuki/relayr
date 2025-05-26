@@ -17,7 +17,7 @@ import {
 
 export default function ReadyToReceive() {
   const initId = useFileReceiverStore((state) => state.initId);
-  const senderId = useFileReceiverStore((state) => state.senderId);
+  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
 
   const actions = useFileReceiverActions();

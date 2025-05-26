@@ -31,7 +31,7 @@ const successAnimation = {
 };
 
 export default function ReceiverTransferCompleted() {
-  const senderId = useFileReceiverStore((state) => state.senderId);
+  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const fileUrl = useFileReceiverStore((state) => state.fileUrl);
 

@@ -48,7 +48,7 @@ export default function ReceivePageContent() {
   }, [data, actions]);
 
   useEffect(() => {
-    actions.setSenderId(senderId);
+    actions.setTransferConnection({ senderId });
   }, [senderId, actions]);
 
   if (!senderId) return <div>Please ask sender for the correct link</div>;

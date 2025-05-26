@@ -26,7 +26,7 @@ const clockAnimation = {
 };
 
 export default function WaitingForSender() {
-  const senderId = useFileReceiverStore((state) => state.senderId);
+  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const isConnectedToSender = useFileReceiverStore(
     (state) => state.isConnectedToSender,
@@ -56,7 +56,7 @@ export default function WaitingForSender() {
     ws.close(1000, "Recipient canceled before transfer started");
 
     actions.setIsConnectedToSender(false);
-    actions.setRecipientId(null);
+    actions.setTransferConnection({ recipientId: null });
   };
 
   return (

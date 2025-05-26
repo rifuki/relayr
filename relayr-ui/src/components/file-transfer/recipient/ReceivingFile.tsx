@@ -14,7 +14,7 @@ import {
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 
 export default function ReceivingFile() {
-  const senderId = useFileReceiverStore((state) => state.senderId);
+  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const isConnectedToSender = useFileReceiverStore(
     (state) => state.isConnectedToSender,

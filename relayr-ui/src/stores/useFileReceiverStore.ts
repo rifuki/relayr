@@ -3,6 +3,11 @@ import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 
 import { FileMetadata } from "@/types/file";
 
+interface FileTransferConnection {
+  senderId: string | null;
+  recipientId: string | null;
+}
+
 interface WebSocketHandlers {
   sendJsonMessage: ((msg: unknown) => void) | undefined;
   getWebSocket: (() => WebSocketLike | null) | undefined;
@@ -10,8 +15,7 @@ interface WebSocketHandlers {
 
 interface FileReceiverActions {
   setInitId: (id: string) => void;
-  setSenderId: (senderId: string | null) => void;
-  setRecipientId: (recipientId: string | null) => void;
+  setTransferConnection: (connection: Partial<FileTransferConnection>) => void;
   setFileMetadata: (fileMetadata: FileMetadata) => void;
   setErrorMessage: (message: string | null) => void;
   setWebSocketUrl: (wsUrl: string | null) => void;
@@ -37,8 +41,7 @@ interface FileReceiverActions {
 
 interface FileReceiverState {
   initId: string | null;
-  senderId: string | null;
-  recipientId: string | null;
+  transferConnection: FileTransferConnection;
   fileMetadata: FileMetadata | null;
   errorMessage: string | null;
   webSocketUrl: string | null;
@@ -62,8 +65,10 @@ interface FileReceiverState {
 
 export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   initId: null,
-  senderId: null,
-  recipientId: null,
+  transferConnection: {
+    senderId: null,
+    recipientId: null
+  },
   fileMetadata: null,
   errorMessage: null,
   webSocketUrl: null,
@@ -87,8 +92,12 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   fileUrl: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
-    setSenderId: (senderId) => set({ senderId }),
-    setRecipientId: (recipientId) => set({ recipientId }),
+    setTransferConnection: (connection) => set((state => ({
+      transferConnection: {
+        ...state.transferConnection,
+        ...connection,
+      }
+    }))),
     setFileMetadata: (fileMetadata) =>
       set({
         fileMetadata,
