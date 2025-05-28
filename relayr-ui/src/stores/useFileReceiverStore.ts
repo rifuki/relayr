@@ -67,7 +67,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   initId: null,
   transferConnection: {
     senderId: null,
-    recipientId: null
+    recipientId: null,
   },
   fileMetadata: null,
   errorMessage: null,
@@ -92,12 +92,13 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   fileUrl: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
-    setTransferConnection: (connection) => set((state => ({
-      transferConnection: {
-        ...state.transferConnection,
-        ...connection,
-      }
-    }))),
+    setTransferConnection: (connection) =>
+      set((state) => ({
+        transferConnection: {
+          ...state.transferConnection,
+          ...connection,
+        },
+      })),
     setFileMetadata: (fileMetadata) =>
       set({
         fileMetadata,
@@ -136,7 +137,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 
     setReceivedChunkData: (receivedChunkData: ArrayBuffer) =>
       set((state) => ({
-        receivedChunkData: state.receivedChunkData.concat(receivedChunkData),
+        receivedChunkData: [...state.receivedChunkData, receivedChunkData],
       })),
     setReceivedBytes: (receivedBytes: number) =>
       set({
