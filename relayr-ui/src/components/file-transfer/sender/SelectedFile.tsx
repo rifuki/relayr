@@ -44,7 +44,11 @@ export default function SelectedFile() {
       return { errorMessage: "File or file metadata is missing." };
     }
 
-    actions.resetTransferStatus();
+    actions.clearTransferState();
+    actions.setTransferStatus({
+      isTransferError: false,
+      isTransferCanceled: false,
+    });
     actions.setWebSocketUrl(`${WS_RELAY_API_URL}?id=${initId}`);
     setIsGenerateLinkLoading(false);
   };

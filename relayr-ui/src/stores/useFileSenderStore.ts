@@ -1,28 +1,33 @@
-import { create } from "zustand";
 import { WebSocketLike } from "react-use-websocket/dist/lib/types";
+import { create } from "zustand";
 
 import { FileMetadata } from "@/types/file";
 import { sendNextChunk as sendNextChunkHelper } from "@/lib/sendNextChunk";
 
-interface FileTransferConnection {
+interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
 }
 
-interface FileTransferStatus {
+interface FileTransferInfo {
+  totalSize: number;
   totalChunks: number;
-  chunkDataSize: number;
+}
+
+interface TransferStatus {
+  uploadedSize: number;
   offset: number;
   chunkIndex: number;
-  senderProgress: number;
-  receiverProgress: number;
-  uploadedSize: number;
-  totalSize: number;
+  chunkDataSize: number;
   isTransferring: boolean;
-  isSenderComplete: boolean;
-  isRecipientComplete: boolean;
-  isError: boolean;
-  isCanceled: boolean;
+  isTransferError: boolean;
+  isTransferCanceled: boolean;
+  isTransferCompleted: boolean;
+}
+
+interface TransferProgress {
+  sender: number;
+  receiver: number;
 }
 
 interface WebSocketHandlers {
@@ -34,30 +39,32 @@ interface WebSocketHandlers {
 interface FileSenderActions {
   setInitId: (id: string) => void;
   setFile: (file: File | null) => void;
+  setTransferConnection: (connection: Partial<TransferConnection>) => void;
   setErrorMessage: (message: string | null) => void;
   setWebSocketUrl: (wsUrl: string | null) => void;
-  setTransferConnection: (connection: Partial<FileTransferConnection>) => void;
+  setWebSocketHandlers: (webSocketHandlers: Partial<WebSocketHandlers>) => void;
   setIsLoading: (isLoading: boolean) => void;
   setTransferShareLink: (link: string | null) => void;
-  setWebSocketHandlers: (handlers: Partial<WebSocketHandlers>) => void;
-  setTransferStatus: (transferStatus: Partial<FileTransferStatus>) => void;
+  setFileTransferInfo: (fileTransferInfo: Partial<FileTransferInfo>) => void;
+  setTransferStatus: (transferStatus: Partial<TransferStatus>) => void;
+  setTransferProgress: (transferProgress: Partial<TransferProgress>) => void;
   sendNextChunk: () => void;
-  resetTransferStatus: () => void;
-  setHasReset: (value: boolean) => void;
+  clearTransferState: () => void;
 }
 
 export interface FileSenderState {
   initId: string | null;
   file: File | null;
   fileMetadata: FileMetadata | null;
+  transferConnection: TransferConnection;
   errorMessage: string | null;
   webSocketUrl: string | null;
-  transferConnection: FileTransferConnection;
+  webSocketHandlers: WebSocketHandlers;
   isLoading: boolean;
   transferShareLink: string | null;
-  transferStatus: FileTransferStatus;
-  wsHandlers: WebSocketHandlers;
-  hasReset: boolean;
+  fileTransferInfo: FileTransferInfo;
+  transferStatus: TransferStatus;
+  transferProgress: TransferProgress;
   actions: FileSenderActions;
 }
 
@@ -65,89 +72,103 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   initId: null,
   file: null,
   fileMetadata: null,
-  errorMessage: null,
-  webSocketUrl: null,
   transferConnection: {
     senderId: null,
     recipientId: null,
   },
-  isLoading: false,
-  transferShareLink: null,
-  transferStatus: {
-    totalChunks: 0,
-    chunkDataSize: 0,
-    offset: 0,
-    chunkIndex: 0,
-    senderProgress: 0,
-    receiverProgress: 0,
-    uploadedSize: 0,
-    totalSize: 0,
-    isTransferring: false,
-    isSenderComplete: false,
-    isRecipientComplete: false,
-    isError: false,
-    isCanceled: false,
-  },
-  wsHandlers: {
+  errorMessage: null,
+  webSocketUrl: null,
+  webSocketHandlers: {
     sendJsonMessage: undefined,
     sendMessage: undefined,
     getWebSocket: undefined,
   },
-  hasReset: false,
+  isLoading: false,
+  transferShareLink: null,
+  fileTransferInfo: {
+    totalSize: 0,
+    totalChunks: 0,
+  },
+  transferStatus: {
+    uploadedSize: 0,
+    offset: 0,
+    chunkIndex: 0,
+    chunkDataSize: 0,
+    isTransferring: false,
+    isTransferError: false,
+    isTransferCanceled: false,
+    isTransferCompleted: false,
+  },
+  transferProgress: {
+    sender: 0,
+    receiver: 0,
+  },
   actions: {
     setInitId: (id) => set({ initId: id }),
     setFile: (file) =>
-      set(() => ({
+      set({
         file,
         fileMetadata: file
           ? { name: file.name, size: file.size, type: file.type }
           : null,
-      })),
-    setErrorMessage: (message) => set({ errorMessage: message }),
-    setWebSocketUrl: (wsUrl) => set({ webSocketUrl: wsUrl }),
-    setTransferConnection: (connection) =>
-      set((state) => ({
-        transferConnection: {
-          ...state.transferConnection,
-          ...connection,
-        },
-      })),
-    setIsLoading: (isLoading) => set({ isLoading }),
-    setTransferShareLink: (link) => set({ transferShareLink: link }),
-    setWebSocketHandlers: (handlers) =>
-      set((state) => ({
-        wsHandlers: {
-          ...state.wsHandlers,
-          ...handlers,
-        },
-      })),
-    setTransferStatus: (transferStatus) =>
-      set((state) => ({
-        transferStatus: {
-          ...state.transferStatus,
-          ...transferStatus,
-        },
-      })),
-    sendNextChunk: () => sendNextChunkHelper({ get, set }),
-    resetTransferStatus: () =>
+      }),
+    setTransferConnection: (transferConnection) =>
       set({
-        transferStatus: {
-          totalChunks: 0,
-          chunkDataSize: 0,
-          offset: 0,
-          chunkIndex: 0,
-          senderProgress: 0,
-          receiverProgress: 0,
-          uploadedSize: 0,
-          totalSize: 0,
-          isTransferring: false,
-          isSenderComplete: false,
-          isRecipientComplete: false,
-          isError: false,
-          isCanceled: false,
+        transferConnection: {
+          ...get().transferConnection,
+          ...transferConnection,
         },
       }),
-    setHasReset: (value) => set({ hasReset: value }),
+    setErrorMessage: (errorMessage) => set({ errorMessage }),
+    setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
+    setWebSocketHandlers: (webSocketHandlers) =>
+      set({
+        webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
+      }),
+    setIsLoading: (isLoading) => set({ isLoading }),
+    setTransferShareLink: (link) => set({ transferShareLink: link }),
+    setFileTransferInfo: (fileTransferInfo) =>
+      set({
+        fileTransferInfo: {
+          ...get().fileTransferInfo,
+          ...fileTransferInfo,
+        },
+      }),
+    setTransferStatus: (transferStatus) =>
+      set({
+        transferStatus: {
+          ...get().transferStatus,
+          ...transferStatus,
+        },
+      }),
+    setTransferProgress: (transferProgress) =>
+      set({
+        transferProgress: {
+          ...get().transferProgress,
+          ...transferProgress,
+        },
+      }),
+    sendNextChunk: () => sendNextChunkHelper({ get, set }),
+    clearTransferState: () =>
+      set({
+        fileTransferInfo: {
+          totalChunks: 0,
+          totalSize: 0,
+        },
+        transferStatus: {
+          ...get().transferStatus,
+          uploadedSize: 0,
+          offset: 0,
+          chunkIndex: 0,
+          chunkDataSize: 0,
+          isTransferring: false,
+          isTransferCompleted: false,
+        },
+        transferProgress: {
+          sender: 0,
+          receiver: 0,
+        },
+      }),
   },
 }));
 
@@ -155,4 +176,4 @@ export const useFileSenderActions = () =>
   useFileSenderStore((state) => state.actions);
 
 export const useWebSocketHandlers = () =>
-  useFileSenderStore((state) => state.wsHandlers);
+  useFileSenderStore((state) => state.webSocketHandlers);

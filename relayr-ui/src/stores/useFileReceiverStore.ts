@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import { WebSocketLike } from "react-use-websocket/dist/lib/types";
+import { create } from "zustand";
 
 import { FileMetadata } from "@/types/file";
 

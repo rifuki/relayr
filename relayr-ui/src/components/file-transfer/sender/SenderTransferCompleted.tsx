@@ -1,22 +1,22 @@
-import { motion } from "motion/react";
 import { FileCheckIcon, RefreshCw } from "lucide-react";
+import { motion } from "motion/react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import TransferHeader from "@/components/TransferHeader";
 import FileCard from "@/components/FileCard";
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-  useWebSocketHandlers,
-} from "@/stores/useFileSenderStore";
+import { MotionButton } from "@/components/motion-primitives/motion-button";
+import SenderProgressBar from "@/components/SenderProgressBar";
 import { CHUNK_SIZE } from "@/lib/constants";
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
-import { MotionButton } from "@/components/motion-primitives/motion-button";
-import SenderProgressBar from "@/components/SenderProgressBar";
+import {
+  useFileSenderActions,
+  useFileSenderStore,
+  useWebSocketHandlers,
+} from "@/stores/useFileSenderStore";
 
 const burstAnimation = {
   scale: [1, 2, 0],
@@ -53,9 +53,13 @@ export default function SenderTransferCompleted() {
   const testHandleSendFile = () => {
     if (!testFile || !recipientId) return;
 
-    actions.resetTransferStatus();
+    actions.clearTransferState();
+    actions.setTransferStatus({
+      isTransferCanceled: false,
+      isTransferError: false,
+    });
     const totalChunks = Math.ceil(testFile.size / CHUNK_SIZE);
-    actions.setTransferStatus({ totalChunks });
+    actions.setFileTransferInfo({ totalChunks });
 
     actions.sendNextChunk();
   };
@@ -78,7 +82,7 @@ export default function SenderTransferCompleted() {
     actions.setFile(null);
     actions.setTransferConnection({ senderId: null, recipientId: null });
     actions.setTransferShareLink(null);
-    actions.resetTransferStatus();
+    actions.clearTransferState();
   };
 
   if (!fileMetadata || !transferShareLink) return;

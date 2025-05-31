@@ -4,15 +4,22 @@ import { readFileAsArrayBuffer } from "./utils";
 import { CHUNK_SIZE } from "./constants";
 
 interface SendNextChunkProps {
-  get: () => FileSenderState,
-  set: (partial: Partial<FileSenderState>) => void
+  get: () => FileSenderState;
+  set: (partial: Partial<FileSenderState>) => void;
 }
 
 export async function sendNextChunk({ get, set }: SendNextChunkProps) {
-  const { file, transferConnection, transferStatus, wsHandlers } = get();
-  const { sendJsonMessage, sendMessage } = wsHandlers;
+  const {
+    file,
+    transferConnection,
+    fileTransferInfo,
+    transferStatus,
+    webSocketHandlers,
+  } = get();
+  const { sendJsonMessage, sendMessage } = webSocketHandlers;
 
-  const { chunkIndex, totalChunks, offset } = transferStatus;
+  const { totalChunks } = fileTransferInfo;
+  const { chunkIndex, offset, isTransferCanceled } = transferStatus;
 
   if (
     !file ||
@@ -24,11 +31,9 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
     return;
   }
 
-  if (transferStatus.isCanceled) {
+  if (isTransferCanceled) {
     set({ errorMessage: "You canceled the transfer" });
-    console.warn(
-      "Transfer has been canceled. No more chunks will be sent.",
-    );
+    console.warn("Transfer has been canceled. No more chunks will be sent.");
     return;
   }
 
@@ -46,7 +51,6 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
     set({
       transferStatus: {
         ...transferStatus,
-        isSenderComplete: true,
         isTransferring: false,
       },
     });
@@ -67,7 +71,6 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
       set({
         transferStatus: {
           ...transferStatus,
-          isSenderComplete: true,
           isTransferring: false,
         },
       });
@@ -84,7 +87,7 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
       type: "fileChunk",
       fileName: file.name,
       totalSize: file.size,
-      totalChunks: transferStatus.totalChunks,
+      totalChunks: fileTransferInfo.totalChunks,
       chunkIndex: transferStatus.chunkIndex,
       chunkDataSize,
       uploadedSize,
@@ -95,18 +98,19 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
     set({
       transferStatus: {
         ...transferStatus,
-        chunkDataSize,
         uploadedSize,
-        totalSize: file.size,
-        senderProgress: senderTransferProgress,
+        chunkDataSize,
         isTransferring: true,
+      },
+      transferProgress: {
+        ...get().transferProgress,
+        sender: senderTransferProgress,
       },
     });
 
     //console.log(
     //  `Chunk ${chunkIndex}/${totalChunks} sent. Progress: ${transferProgress}%`,
     //);
-
   } catch (error: unknown) {
     const errorMsg = "Failed to send next chunk";
     set({ errorMessage: errorMsg });

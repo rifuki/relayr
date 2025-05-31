@@ -18,11 +18,20 @@ import {
 export function useFileSenderSocket() {
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const transferConnection = useFileSenderStore(
+  const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
   const webSocketUrl = useFileSenderStore((state) => state.webSocketUrl);
-  const transferStatus = useFileSenderStore((state) => state.transferStatus);
+  const {
+    offset,
+    chunkIndex,
+    chunkDataSize,
+    isTransferring,
+    isTransferCanceled,
+  } = useFileSenderStore((state) => state.transferStatus);
+  const { sender: senderProgress } = useFileSenderStore(
+    (state) => state.transferProgress,
+  );
   const actions = useFileSenderActions();
 
   const { sendJsonMessage, readyState, sendMessage, getWebSocket } =
@@ -52,7 +61,8 @@ export function useFileSenderSocket() {
           "Recipient is no longer connection. Please try again.",
         );
         actions.setTransferConnection({ recipientId: null });
-        actions.resetTransferStatus();
+        actions.clearTransferState();
+        return;
       }
 
       actions.setErrorMessage(wsMsg.message ?? "Unknown error occurred");
@@ -129,37 +139,42 @@ export function useFileSenderSocket() {
       return;
     }
 
-    if (transferStatus.isCanceled) {
+    if (isTransferCanceled) {
       actions.setErrorMessage("You canceled the file transfer");
       console.warn("Transfer has been canceled. No more chunks will be sent.");
-      actions.resetTransferStatus();
+      actions.clearTransferState();
       return;
     }
 
     if (ack.status === "acknowledged") {
       if (
-        transferStatus.chunkIndex !== ack.chunkIndex &&
-        transferStatus.senderProgress !== ack.recipientTransferProgress
+        chunkIndex !== ack.chunkIndex &&
+        senderProgress !== ack.recipientTransferProgress
       ) {
         actions.setErrorMessage(
           " Upload out of sync. Please try again or check your connection ",
         );
-        actions.setTransferStatus({ isError: true });
+        actions.setTransferStatus({
+          isTransferError: true,
+          isTransferring: false,
+        });
         return;
       }
       actions.setTransferStatus({
-        offset: transferStatus.offset + transferStatus.chunkDataSize,
-        chunkIndex: transferStatus.chunkIndex + 1,
-        receiverProgress: ack.recipientTransferProgress,
+        offset: offset + chunkDataSize,
+        chunkIndex: chunkIndex + 1,
       });
+      actions.setTransferProgress({ receiver: ack.recipientTransferProgress });
       actions.sendNextChunk();
     } else if (ack.status === "completed") {
-      transferStatus.isRecipientComplete = true;
-      transferStatus.isTransferring = false;
+      actions.setTransferStatus({
+        isTransferring: false,
+        isTransferCompleted: true,
+      });
     } else if (ack.status === "error") {
       actions.setTransferStatus({
-        isError: true,
         isTransferring: false,
+        isTransferError: true,
       });
       actions.setErrorMessage("Transfer failed: receiver reported an error.");
       console.error("[Sender] Receiver reported file transfer error", {
@@ -204,12 +219,9 @@ export function useFileSenderSocket() {
 
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
-      if (transferStatus.isTransferring) {
+      if (isTransferring) {
         e.preventDefault();
-      } else if (
-        readyState === WebSocket.OPEN &&
-        transferConnection.recipientId
-      ) {
+      } else if (readyState === WebSocket.OPEN && recipientId) {
         sendJsonMessage({
           type: "cancelSenderReady",
         } satisfies CancelSenderReadyRequest);
@@ -217,12 +229,7 @@ export function useFileSenderSocket() {
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [
-    transferStatus.isTransferring,
-    readyState,
-    sendJsonMessage,
-    transferConnection.recipientId,
-  ]);
+  }, [isTransferring, readyState, sendJsonMessage, recipientId]);
 
   return { readyState };
 }

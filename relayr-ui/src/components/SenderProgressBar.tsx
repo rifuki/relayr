@@ -1,50 +1,41 @@
-import { useShallow } from "zustand/shallow";
+import { motion } from "motion/react";
+
+import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
+import { formatFileSize } from "@/lib/utils";
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { TextShimmer } from "./motion-primitives/text-shimmer";
-import { formatFileSize } from "@/lib/utils";
-import { motion } from "motion/react";
-import { fileListItemVariants } from "@/lib/animations";
 
 export default function SenderProgressBar() {
-  const {
-    isTransferring,
-    isRecipientComplete,
-    receiverTransferProgress,
-    uploadedSize,
-    totalSize,
-  } = useFileSenderStore(
-    useShallow((state) => ({
-      isTransferring: state.transferStatus.isTransferring,
-      receiverTransferProgress: state.transferStatus.receiverProgress,
-      isRecipientComplete: state.transferStatus.isRecipientComplete,
-      uploadedSize: state.transferStatus.uploadedSize,
-      totalSize: state.transferStatus.totalSize,
-    })),
+  const { size: fileSize } = useFileSenderStore((state) => state.fileMetadata!);
+  const { uploadedSize, isTransferring, isTransferCompleted } =
+    useFileSenderStore((state) => state.transferStatus);
+  const { receiver: receiverProgress } = useFileSenderStore(
+    (state) => state.transferProgress,
   );
 
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
       <div className="flex justify-between text-sm">
         <span>
-          {isRecipientComplete ? (
+          {isTransferCompleted ? (
             <TextShimmer>Transfer Completed</TextShimmer>
           ) : isTransferring ? (
-            `${formatFileSize(uploadedSize)} / ${formatFileSize(totalSize)}`
+            `${formatFileSize(uploadedSize)} / ${formatFileSize(fileSize)}`
           ) : (
             <TextShimmer>Click to start the transfer</TextShimmer>
           )}
         </span>
-        <span>{receiverTransferProgress}%</span>
+        <span>{receiverProgress}%</span>
       </div>
 
       <div className="relative h-3 overflow-hidden rounded-full bg-secondary">
         {/* Background progress bar with transition */}
         <motion.div
           className="h-full bg-primary"
-          style={{ width: `${receiverTransferProgress}%` }}
+          style={{ width: `${receiverProgress}%` }}
           initial={{ width: "0%" }}
-          animate={{ width: `${receiverTransferProgress}%` }}
-          transition={{ duration: 0.3 }}
+          animate={{ width: `${receiverProgress}%` }}
+          transition={{ duration: ANIMATION_DURATIONS.progress }}
         />
 
         {/* Wave effect overlay - only visible during transfer */}
@@ -75,7 +66,7 @@ export default function SenderProgressBar() {
                     rgba(255, 255, 255, 0.3),
                     transparent
                   );
-                  animation: wave 2s linear infinite;
+                  animation: wave ${ANIMATION_DURATIONS.wave}s linear infinite;
                 }
               `}</style>
             </div>

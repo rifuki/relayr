@@ -35,11 +35,11 @@ export default function TransferInProgress() {
     return;
 
   const handleCancelSenderTransfer = () => {
+    actions.setTransferStatus({ isTransferCanceled: true });
     sendJsonMessage({
       type: "cancelSenderTransfer",
     } satisfies CancelSenderTransferRequest);
-    actions.resetTransferStatus();
-    actions.setTransferStatus({ isCanceled: true });
+    actions.clearTransferState();
   };
 
   return (

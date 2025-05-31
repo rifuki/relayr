@@ -60,7 +60,7 @@ export default function ReadyToTransfer() {
   const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
-  const { isError: isTransferError } = useFileSenderStore(
+  const { isTransferError } = useFileSenderStore(
     (state) => state.transferStatus,
   );
   const { sendJsonMessage } = useWebSocketHandlers();
@@ -76,9 +76,9 @@ export default function ReadyToTransfer() {
       return;
     }
 
-    actions.resetTransferStatus();
+    actions.clearTransferState();
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-    actions.setTransferStatus({ totalChunks });
+    actions.setFileTransferInfo({ totalChunks });
 
     actions.sendNextChunk();
   };
@@ -87,7 +87,7 @@ export default function ReadyToTransfer() {
     sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
-    actions.resetTransferStatus();
+    actions.clearTransferState();
     actions.setTransferConnection({ recipientId: null });
   };
 

@@ -4,12 +4,12 @@ import useMeasure from "react-use-measure";
 
 import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
 import InitialTransitionLoader from "@/components/motion-primitives/initial-transition-loader";
-import FileSelector from "./FileSelector";
-import SelectedFile from "./SelectedFile";
-import WaitingForRecipient from "./WaitingForRecipient";
-import ReadyToTransfer from "./ReadyToTransfer";
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { transitionPanelTransition } from "@/lib/animations";
+import FileSelector from "./FileSelector";
+import SelectedFile from "./SelectedFile";
+import ReadyToTransfer from "./ReadyToTransfer";
+import WaitingForRecipient from "./WaitingForRecipient";
 import TransferInProgress from "./TransferInProgress";
 import SenderTransferCompleted from "./SenderTransferCompleted";
 
@@ -21,7 +21,7 @@ export default function SendFlow() {
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
-  const { isTransferring, isRecipientComplete } = useFileSenderStore(
+  const { isTransferring, isTransferCompleted } = useFileSenderStore(
     (state) => state.transferStatus,
   );
 
@@ -39,7 +39,7 @@ export default function SendFlow() {
         !transferShareLink &&
         !recipientId &&
         !isTransferring &&
-        !isRecipientComplete
+        !isTransferCompleted
       )
         return 1;
 
@@ -50,7 +50,7 @@ export default function SendFlow() {
         !transferShareLink &&
         !recipientId &&
         !isTransferring &&
-        !isRecipientComplete
+        !isTransferCompleted
       )
         return 2;
 
@@ -61,7 +61,7 @@ export default function SendFlow() {
         transferShareLink &&
         !recipientId &&
         !isTransferring &&
-        !isRecipientComplete
+        !isTransferCompleted
       )
         return 3;
 
@@ -72,27 +72,27 @@ export default function SendFlow() {
         transferShareLink &&
         recipientId &&
         !isTransferring &&
-        !isRecipientComplete
+        !isTransferCompleted
       )
         return 4;
 
-      // Transfer completed state
       if (
         file &&
         senderId &&
         transferShareLink &&
         recipientId &&
         isTransferring &&
-        !isRecipientComplete
+        !isTransferCompleted
       )
         return 5;
 
+      // Transfer completed state
       if (
         file &&
         senderId &&
         transferShareLink &&
         !isTransferring &&
-        isRecipientComplete
+        isTransferCompleted
       )
         return 6;
 
@@ -109,8 +109,8 @@ export default function SendFlow() {
     senderId,
     transferShareLink,
     recipientId,
-    isRecipientComplete,
     isTransferring,
+    isTransferCompleted,
     currentStep,
   ]);
 
