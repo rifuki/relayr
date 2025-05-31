@@ -1,3 +1,8 @@
+import { useEffect } from "react";
+
+import useWebsocket, { ReadyState } from "react-use-websocket";
+import { toast } from "sonner";
+
 import {
   useFileReceiverActions,
   useFileReceiverStore,
@@ -15,32 +20,29 @@ import {
   SenderAckResponse,
   WebSocketReceiverTextMessageResponse,
 } from "@/types/webSocketMessages";
-import { useEffect } from "react";
-import useWebsocket from "react-use-websocket";
-import { toast } from "sonner";
 
-export function UseFileReceiverSocket() {
+export function UseFileReceiverSocket(): { readyState: ReadyState } {
   const webSocketUrl = useFileReceiverStore((state) => state.webSocketUrl);
 
-  const senderId = useFileReceiverStore((state) => state.transferConnection.senderId as string);
+  const { senderId, isConnected } = useFileReceiverStore(
+    (state) =>
+      state.transferConnection as { senderId: string; isConnected: boolean },
+  );
+
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
 
-  const totalChunks = useFileReceiverStore((state) => state.totalChunks);
-  //const totalSize = useFileReceiverStore((state) => state.totalSize);
-  const chunkIndex = useFileReceiverStore((state) => state.chunkIndex);
-  const chunkDataSize = useFileReceiverStore((state) => state.chunkDataSize);
-  const uploadedSize = useFileReceiverStore((state) => state.uploadedSize);
-
-  const receivedBytes = useFileReceiverStore((state) => state.receivedBytes);
-  const receiverTransferProgress = useFileReceiverStore(
-    (state) => state.receiverTransferProgress,
+  const { totalChunks } = useFileReceiverStore(
+    (state) => state.fileTransferInfo,
   );
-
-  const isSenderTransferring = useFileReceiverStore(
-    (state) => state.isSenderTransferring,
-  );
-  const isConnectedToSender = useFileReceiverStore(
-    (state) => state.isConnectedToSender,
+  const {
+    uploadedSize,
+    receivedBytes,
+    chunkIndex,
+    chunkDataSize,
+    isTransferring,
+  } = useFileReceiverStore((state) => state.transferStatus);
+  const { receiver: receiverTransferProgress } = useFileReceiverStore(
+    (state) => state.transferProgress,
   );
 
   const actions = useFileReceiverActions();
@@ -82,12 +84,12 @@ export function UseFileReceiverSocket() {
       const arrayBufferData = await blobData.arrayBuffer();
       actions.setReceivedChunkData(arrayBufferData);
       const newReceivedBytes = receivedBytes + arrayBufferData.byteLength;
-      actions.setReceivedBytes(newReceivedBytes);
+      actions.setTransferStatus({ receivedBytes: newReceivedBytes });
       const receiverTransferProgress = Math.min(
         100,
         Math.floor((newReceivedBytes / fileMetadata.size) * 100),
       );
-      actions.setReceiverTransferProgress(receiverTransferProgress);
+      actions.setTransferProgress({ receiver: receiverTransferProgress });
 
       sendJsonMessage({
         type: "fileTransferAck",
@@ -161,16 +163,19 @@ export function UseFileReceiverSocket() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const processCancelSenderReadyMessage = (_msg: CancelSenderReadyResponse) => {
     const errMsg = "The sender has canceled the connection";
-    actions.setErrorMessage(errMsg);
-    actions.setIsConnectedToSender(false);
     getWebSocket()?.close(1000, errMsg);
-    actions.setTransferConnection({ recipientId: null });
+    actions.setErrorMessage(errMsg);
+    actions.clearTransferState();
+    actions.setTransferConnection({
+      isConnected: false,
+      recipientId: null,
+    });
   };
 
   const processSenderAckMessage = (msg: SenderAckResponse) => {
     switch (msg.requestType) {
       case "recipientReady":
-        actions.setIsConnectedToSender(true);
+        actions.setTransferConnection({ isConnected: true });
         break;
       default:
         console.error("[WebSocket] Unknown ack request type received:", msg);
@@ -179,20 +184,26 @@ export function UseFileReceiverSocket() {
   };
 
   const processFileChunkMessage = (msg: FileChunkResponse) => {
-    actions.setIsSenderTransferring(true);
-    actions.setTotalSize(msg.totalSize);
-    actions.setTotalChunks(msg.totalChunks);
-    actions.setChunkIndex(msg.chunkIndex);
-    actions.setChunkDataSize(msg.chunkDataSize);
-    actions.setUploadedSize(msg.uploadedSize);
-    actions.setSenderTransferProgress(msg.senderTransferProgress);
+    actions.setFileTransferInfo({
+      totalSize: msg.totalSize,
+      totalChunks: msg.totalChunks,
+    });
+
+    actions.setTransferStatus({
+      isTransferring: true,
+      uploadedSize: msg.uploadedSize,
+      chunkIndex: msg.chunkIndex,
+      chunkDataSize: msg.chunkDataSize,
+    });
+
+    actions.setTransferProgress({ sender: msg.senderTransferProgress });
   };
 
   const processFileEndMessage = (msg: FileEndResponse) => {
     if (!fileMetadata) return;
 
     const isChunkIndexConsistent = msg.lastChunkIndex === chunkIndex + 1;
-    actions.setChunkIndex(msg.lastChunkIndex);
+    actions.setTransferStatus({ chunkIndex: msg.lastChunkIndex });
     const isUploadedSizeConsistent = msg.uploadedSize === receivedBytes;
 
     if (!isChunkIndexConsistent || !isUploadedSizeConsistent) {
@@ -202,12 +213,6 @@ export function UseFileReceiverSocket() {
         uploadedSizeFromSender: msg.uploadedSize,
         receivedBytesFromClient: receivedBytes,
       });
-      actions.setIsTransferError(true);
-
-      actions.setErrorMessage(
-        "Mismatch in file transfer data. Transfer may be corrupted.",
-      );
-
       sendJsonMessage({
         type: "fileTransferAck",
         senderId,
@@ -220,7 +225,14 @@ export function UseFileReceiverSocket() {
         recipientTransferProgress: receiverTransferProgress,
       } satisfies FileTransferAckPayload);
 
-      actions.setIsSenderTransferring(false);
+      actions.setErrorMessage(
+        "Mismatch in file transfer data. Transfer may be corrupted.",
+      );
+      actions.setTransferStatus({
+        isTransferError: true,
+        isTransferring: false,
+      });
+
       return;
     }
 
@@ -237,22 +249,19 @@ export function UseFileReceiverSocket() {
     } satisfies FileTransferAckPayload);
 
     actions.finalizeTransfer();
-    actions.setIsSenderTransferring(false);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const processRestartTransferMessage = (_msg: RestartTransferResponse) => {
-    actions.resetTransferStatus();
-    actions.setIsSenderTransferring(false);
-    actions.setIsTransferError(false);
+    actions.clearTransferState();
     toast.info("Sender restarted the transfer.");
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const processCancelSenderTransferMessage = (_msg: CancelSenderTransfer) => {
-    actions.resetTransferStatus();
-    actions.setIsSenderTransferring(false);
-    actions.setIsTransferError(false);
+    actions.setTransferStatus({ isTransferCanceled: true });
+    actions.clearTransferState();
+    toast.error("Transfer aborted by sender.");
     actions.setErrorMessage("Transfer aborted by sender.");
   };
 
@@ -278,25 +287,19 @@ export function UseFileReceiverSocket() {
 
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
-      if (isSenderTransferring) {
+      if (isTransferring) {
         e.preventDefault();
-      } else if (readyState === WebSocket.OPEN && isConnectedToSender) {
+      } else if (readyState === WebSocket.OPEN && senderId && isConnected) {
         sendJsonMessage({
           type: "cancelRecipientReady",
-          senderId,
+          senderId: senderId,
         } satisfies CancelRecipientReadyPayload);
       }
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [
-    isSenderTransferring,
-    readyState,
-    isConnectedToSender,
-    sendJsonMessage,
-    senderId,
-  ]);
+  }, [isTransferring, readyState, isConnected, sendJsonMessage, senderId]);
 
   return { readyState };
 }

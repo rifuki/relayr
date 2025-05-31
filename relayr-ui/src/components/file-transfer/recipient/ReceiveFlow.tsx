@@ -12,14 +12,11 @@ import ReceivingFile from "./ReceivingFile";
 import ReceiverTransferCompleted from "./ReceiverTransferCompleted";
 
 export default function ReceiveFlow() {
-  const isConnectedToSender = useFileReceiverStore(
-    (state) => state.isConnectedToSender,
+  const { isConnected } = useFileReceiverStore(
+    (state) => state.transferConnection,
   );
-  const isSenderTransferring = useFileReceiverStore(
-    (state) => state.isSenderTransferring,
-  );
-  const isTransferCompleted = useFileReceiverStore(
-    (state) => state.isTransferCompleted,
+  const { isTransferring, isTransferCompleted } = useFileReceiverStore(
+    (state) => state.transferStatus,
   );
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -28,43 +25,31 @@ export default function ReceiveFlow() {
 
   useEffect(() => {
     function determineStep() {
-      if (
-        !isConnectedToSender &&
-        !isSenderTransferring &&
-        !isTransferCompleted
-      ) {
+      if (!isConnected && !isTransferring && !isTransferCompleted) {
         return 1;
       }
 
-      if (
-        isConnectedToSender &&
-        !isSenderTransferring &&
-        !isTransferCompleted
-      ) {
+      if (isConnected && !isTransferring && !isTransferCompleted) {
         return 2;
       }
 
-      if (isConnectedToSender && isSenderTransferring && !isTransferCompleted) {
+      if (isConnected && isTransferring && !isTransferCompleted) {
         return 3;
       }
 
-      if (isConnectedToSender && !isSenderTransferring && isTransferCompleted) {
+      if (isConnected && !isTransferring && isTransferCompleted) {
         return 4;
       }
 
       return 0;
     }
+
     const newStep = determineStep();
     if (newStep !== currentStep) {
       setDirection(newStep > currentStep ? 1 : -1);
       setCurrentStep(newStep);
     }
-  }, [
-    isConnectedToSender,
-    isSenderTransferring,
-    isTransferCompleted,
-    currentStep,
-  ]);
+  }, [isConnected, isTransferring, isTransferCompleted, currentStep]);
 
   const FLOW_COMPONENTS = [
     <InitialTransitionLoader key="initialTransitionLoader" />,

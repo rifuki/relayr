@@ -1,3 +1,8 @@
+export const ANIMATION_DURATIONS = {
+  progress: 0.3,
+  wave: 1.5,
+};
+
 export const transitionPanelTransition = {
   x: { type: "spring", stiffness: 300, damping: 30 },
   opacity: { duration: 0.2 },

@@ -2,6 +2,7 @@ import { FileCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
 import FileCard from "@/components/FileCard";
+import { MotionButton } from "@/components/motion-primitives/motion-button";
 import ReceiverProgressBar from "@/components/ReceiverProgressBar";
 import TransferHeader from "@/components/TransferHeader";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,6 @@ import {
   fileListWrapperVariants,
 } from "@/lib/animations";
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
-import { MotionButton } from "@/components/motion-primitives/motion-button";
 
 const burstAnimation = {
   scale: [1, 2, 0],
@@ -31,7 +31,9 @@ const successAnimation = {
 };
 
 export default function ReceiverTransferCompleted() {
-  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
+  const { senderId } = useFileReceiverStore(
+    (state) => state.transferConnection,
+  );
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const fileUrl = useFileReceiverStore((state) => state.fileUrl);
 

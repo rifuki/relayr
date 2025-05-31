@@ -1,5 +1,6 @@
 import { ClockIcon } from "lucide-react";
 import { motion } from "motion/react";
+
 import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
@@ -26,17 +27,12 @@ const clockAnimation = {
 };
 
 export default function WaitingForSender() {
-  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-  const isConnectedToSender = useFileReceiverStore(
-    (state) => state.isConnectedToSender,
+  const { senderId } = useFileReceiverStore(
+    (state) => state.transferConnection,
   );
-  const isSenderTransferring = useFileReceiverStore(
-    (state) => state.isSenderTransferring,
-  );
-
   const { sendJsonMessage, getWebSocket } = useFileReceiverStore(
-    (state) => state.wsHandlers,
+    (state) => state.webSocketHandlers,
   );
   const actions = useFileReceiverActions();
 
@@ -55,8 +51,7 @@ export default function WaitingForSender() {
     }
     ws.close(1000, "Recipient canceled before transfer started");
 
-    actions.setIsConnectedToSender(false);
-    actions.setTransferConnection({ recipientId: null });
+    actions.setTransferConnection({ recipientId: null, isConnected: false });
   };
 
   return (
@@ -90,19 +85,17 @@ export default function WaitingForSender() {
 
       <ReceiverProgressBar />
 
-      {isConnectedToSender && !isSenderTransferring && (
-        <motion.div className="w-full flex flex-col space-y-3 mt-2">
-          <TextShimmer className="text-center" duration={1}>
-            ⚠️ Transfer in progress — stay on this page.
-          </TextShimmer>
-          <MotionButton
-            onClick={handleCancelRecipientReady}
-            variant="destructive"
-          >
-            Cancel
-          </MotionButton>
-        </motion.div>
-      )}
+      <motion.div className="w-full flex flex-col space-y-3 mt-2">
+        <TextShimmer className="text-center" duration={1}>
+          ⚠️ Transfer in progress — stay on this page.
+        </TextShimmer>
+        <MotionButton
+          onClick={handleCancelRecipientReady}
+          variant="destructive"
+        >
+          Cancel
+        </MotionButton>
+      </motion.div>
     </motion.div>
   );
 }

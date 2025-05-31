@@ -17,7 +17,9 @@ import {
 
 export default function ReadyToReceive() {
   const initId = useFileReceiverStore((state) => state.initId);
-  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
+  const { senderId } = useFileReceiverStore(
+    (state) => state.transferConnection,
+  );
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
 
   const actions = useFileReceiverActions();
@@ -25,6 +27,7 @@ export default function ReadyToReceive() {
   if (!fileMetadata) return;
 
   const handleConnectToSender = () => {
+    actions.clearTransferState();
     actions.setWebSocketUrl(`${WS_RELAY_API_URL}?id=${initId}`);
   };
 

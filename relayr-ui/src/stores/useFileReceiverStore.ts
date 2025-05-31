@@ -3,9 +3,31 @@ import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 
 import { FileMetadata } from "@/types/file";
 
-interface FileTransferConnection {
+interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
+  isConnected: boolean;
+}
+
+interface FileTransferInfo {
+  totalSize: number;
+  totalChunks: number;
+}
+
+interface TransferStatus {
+  uploadedSize: number;
+  receivedBytes: number;
+  chunkIndex: number;
+  chunkDataSize: number;
+  isTransferring: boolean;
+  isTransferError: boolean;
+  isTransferCanceled: boolean;
+  isTransferCompleted: boolean;
+}
+
+interface TransferProgress {
+  sender: number;
+  receiver: number;
 }
 
 interface WebSocketHandlers {
@@ -15,50 +37,32 @@ interface WebSocketHandlers {
 
 interface FileReceiverActions {
   setInitId: (id: string) => void;
-  setTransferConnection: (connection: Partial<FileTransferConnection>) => void;
+  setTransferConnection: (
+    transferConnection: Partial<TransferConnection>,
+  ) => void;
   setFileMetadata: (fileMetadata: FileMetadata) => void;
-  setErrorMessage: (message: string | null) => void;
-  setWebSocketUrl: (wsUrl: string | null) => void;
-  setWebSocketHandlers: (handlers: Partial<WebSocketHandlers>) => void;
-  setIsConnectedToSender: (isConnectedToSender: boolean) => void;
-  setIsSenderTransferring: (isSenderTransferring: boolean) => void;
-
-  setTotalSize: (totalSize: number) => void;
-  setTotalChunks: (totalChunks: number) => void;
-  setChunkIndex: (chunkIndex: number) => void;
-  setChunkDataSize: (chunkDataSize: number) => void;
-  setUploadedSize: (uploadedSize: number) => void;
-  setSenderTransferProgress: (senderTransferProgress: number) => void;
-  resetTransferStatus: () => void;
-
+  setErrorMessage: (errorMessage: string | null) => void;
+  setWebSocketUrl: (webSocketUrl: string | null) => void;
+  setWebSocketHandlers: (webSocketHandlers: Partial<WebSocketHandlers>) => void;
+  setFileTransferInfo: (fileTransferInfo: Partial<FileTransferInfo>) => void;
+  setTransferStatus: (transferStatus: Partial<TransferStatus>) => void;
+  setTransferProgress: (transferProgress: Partial<TransferProgress>) => void;
   setReceivedChunkData: (receivedChunkData: ArrayBuffer) => void;
-  setReceivedBytes: (receivedBytes: number) => void;
-  setReceiverTransferProgress: (receiverTransferProgress: number) => void;
-  setIsTransferCompleted: (isTransferCompleted: boolean) => void;
-  setIsTransferError: (isTransferError: boolean) => void;
+  clearTransferState: () => void;
   finalizeTransfer: () => void;
 }
 
 interface FileReceiverState {
   initId: string | null;
-  transferConnection: FileTransferConnection;
+  transferConnection: TransferConnection;
   fileMetadata: FileMetadata | null;
   errorMessage: string | null;
   webSocketUrl: string | null;
-  wsHandlers: WebSocketHandlers;
-  isConnectedToSender: boolean;
-  isSenderTransferring: boolean;
-  totalSize: number;
-  totalChunks: number;
-  chunkIndex: number;
-  chunkDataSize: number;
-  uploadedSize: number;
-  senderTransferProgress: number;
+  webSocketHandlers: WebSocketHandlers;
+  fileTransferInfo: FileTransferInfo;
+  transferStatus: TransferStatus;
+  transferProgress: TransferProgress;
   receivedChunkData: ArrayBuffer[];
-  receivedBytes: number;
-  receiverTransferProgress: number;
-  isTransferCompleted: boolean;
-  isTransferError: boolean;
   fileUrl: string | null;
   actions: FileReceiverActions;
 }
@@ -68,88 +72,105 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   transferConnection: {
     senderId: null,
     recipientId: null,
+    isConnected: false,
   },
   fileMetadata: null,
   errorMessage: null,
   webSocketUrl: null,
-  wsHandlers: {
+  webSocketHandlers: {
     sendJsonMessage: undefined,
     getWebSocket: undefined,
   },
-  isConnectedToSender: false,
   isSenderTransferring: false,
-  totalSize: 0,
-  totalChunks: 0,
-  chunkIndex: 0,
-  chunkDataSize: 0,
-  uploadedSize: 0,
-  senderTransferProgress: 0,
+  fileTransferInfo: {
+    totalSize: 0,
+    totalChunks: 0,
+  },
+  transferStatus: {
+    uploadedSize: 0,
+    receivedBytes: 0,
+    chunkIndex: 0,
+    chunkDataSize: 0,
+    isTransferring: false,
+    isTransferError: false,
+    isTransferCanceled: false,
+    isTransferCompleted: false,
+  },
+  transferProgress: {
+    sender: 0,
+    receiver: 0,
+  },
   receivedChunkData: [],
-  receivedBytes: 0,
-  receiverTransferProgress: 0,
-  isTransferCompleted: false,
-  isTransferError: false,
   fileUrl: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
-    setTransferConnection: (connection) =>
-      set((state) => ({
+    setTransferConnection: (transferConnection) =>
+      set({
         transferConnection: {
-          ...state.transferConnection,
-          ...connection,
+          ...get().transferConnection,
+          ...transferConnection,
         },
-      })),
-    setFileMetadata: (fileMetadata) =>
-      set({
-        fileMetadata,
       }),
-    setErrorMessage: (message) => set({ errorMessage: message }),
-    setWebSocketUrl: (wsUrl) => set({ webSocketUrl: wsUrl }),
-    setWebSocketHandlers: (handlers) =>
-      set((state) => ({
-        wsHandlers: { ...state.wsHandlers, ...handlers },
-      })),
-    setIsConnectedToSender: (isConnectedToSender) =>
-      set({ isConnectedToSender }),
-    setIsSenderTransferring: (isSenderTransferring) =>
-      set({ isSenderTransferring }),
-
-    setTotalSize: (totalSize: number) => set({ totalSize }),
-    setTotalChunks: (totalChunks: number) => set({ totalChunks }),
-    setChunkIndex: (chunkIndex: number) => set({ chunkIndex }),
-    setChunkDataSize: (chunkDataSize: number) => set({ chunkDataSize }),
-    setUploadedSize: (uploadedSize: number) => set({ uploadedSize }),
-    setSenderTransferProgress: (senderTransferProgress: number) =>
-      set({ senderTransferProgress }),
-    resetTransferStatus: () =>
+    setFileMetadata: (fileMetadata) => set({ fileMetadata }),
+    setErrorMessage: (errorMessage) => set({ errorMessage }),
+    setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
+    setWebSocketHandlers: (webSocketHandlers) =>
       set({
-        isSenderTransferring: false,
-        totalSize: 0,
-        totalChunks: 0,
-        chunkIndex: 0,
-        chunkDataSize: 0,
-        uploadedSize: 0,
-        senderTransferProgress: 0,
-        receivedChunkData: [],
-        receivedBytes: 0,
-        receiverTransferProgress: 0,
+        webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
       }),
+    setFileTransferInfo: (fileTransferInfo) =>
+      set({
+        fileTransferInfo: {
+          ...get().fileTransferInfo,
+          ...fileTransferInfo,
+        },
+      }),
+    setTransferStatus: (transferStatus) => {
+      if (get().transferStatus.isTransferCanceled) return get().transferStatus;
 
+      set({
+        transferStatus: {
+          ...get().transferStatus,
+          ...transferStatus,
+        },
+      });
+    },
+    setTransferProgress: (transferProgress) =>
+      set({
+        transferProgress: {
+          ...get().transferProgress,
+          ...transferProgress,
+        },
+      }),
     setReceivedChunkData: (receivedChunkData: ArrayBuffer) =>
-      set((state) => ({
-        receivedChunkData: [...state.receivedChunkData, receivedChunkData],
-      })),
-    setReceivedBytes: (receivedBytes: number) =>
       set({
-        receivedBytes,
+        receivedChunkData: [...get().receivedChunkData, receivedChunkData],
       }),
-    setReceiverTransferProgress: (receiverTransferProgress: number) =>
+    clearTransferState: () => {
       set({
-        receiverTransferProgress,
-      }),
-    setIsTransferCompleted: (isTransferCompleted) =>
-      set({ isTransferCompleted }),
-    setIsTransferError: (isTransferError) => set({ isTransferError }),
+        fileTransferInfo: {
+          totalChunks: 0,
+          totalSize: 0,
+        },
+        transferStatus: {
+          ...get().transferStatus,
+          uploadedSize: 0,
+          receivedBytes: 0,
+          chunkIndex: 0,
+          chunkDataSize: 0,
+          isTransferring: false,
+          isTransferError: false,
+          isTransferCompleted: false,
+        },
+        transferProgress: {
+          sender: 0,
+          receiver: 0,
+        },
+        receivedChunkData: [],
+      });
+
+      console.log("clearTransferState called, state reset!");
+    },
     finalizeTransfer: () => {
       const { receivedChunkData, fileMetadata, fileUrl } = get();
       const blobData = new Blob(receivedChunkData, {
@@ -159,7 +180,11 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
       if (blobData.size === 0 || blobData.size !== fileMetadata?.size) {
         set({
           errorMessage: "File reconstruction failed. Size mismatch.",
-          isTransferError: true,
+          transferStatus: {
+            ...get().transferStatus,
+            isTransferError: true,
+            isTransferCompleted: false,
+          },
         });
         console.error(
           `File size mismatch. Blob size: ${blobData.size}. Expected: ${fileMetadata?.size}`,
@@ -175,8 +200,12 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 
       set({
         fileUrl: newFileUrl,
-        isTransferCompleted: true,
-        isTransferError: false,
+        transferStatus: {
+          ...get().transferStatus,
+          isTransferring: false,
+          isTransferCompleted: true,
+          isTransferError: false,
+        },
       });
     },
   },

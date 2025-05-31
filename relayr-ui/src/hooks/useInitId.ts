@@ -7,12 +7,12 @@ import {
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
 import { useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 
 function generateAndStoreId(user: "sender" | "receiver"): string {
   const storedId = localStorage.getItem(user);
   if (!storedId) {
-    const newId = uuidv4();
+    const newId = nanoid(7);
     localStorage.setItem(user, newId);
     return newId;
   }

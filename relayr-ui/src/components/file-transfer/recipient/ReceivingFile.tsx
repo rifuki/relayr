@@ -14,14 +14,10 @@ import {
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 
 export default function ReceivingFile() {
-  const { senderId } = useFileReceiverStore((state) => state.transferConnection);
+  const { senderId } = useFileReceiverStore(
+    (state) => state.transferConnection,
+  );
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-  const isConnectedToSender = useFileReceiverStore(
-    (state) => state.isConnectedToSender,
-  );
-  const isSenderTransferring = useFileReceiverStore(
-    (state) => state.isSenderTransferring,
-  );
 
   if (!senderId || !fileMetadata) return;
 
@@ -60,15 +56,13 @@ export default function ReceivingFile() {
 
       <ReceiverProgressBar />
 
-      {isConnectedToSender && isSenderTransferring && (
-        <motion.div className="w-full flex flex-col space-y-3 mt-2">
-          <TextShimmer className="text-center" duration={1}>
-            ⚠️ Transfer in progress — stay on this page.
-          </TextShimmer>
+      <motion.div className="w-full flex flex-col space-y-3 mt-2">
+        <TextShimmer className="text-center" duration={1}>
+          ⚠️ Transfer in progress — stay on this page.
+        </TextShimmer>
 
-          <MotionButton variant="destructive">Abort Transfer</MotionButton>
-        </motion.div>
-      )}
+        <MotionButton variant="destructive">Abort Transfer</MotionButton>
+      </motion.div>
     </motion.div>
   );
 }

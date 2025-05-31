@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Realyr",
+  title: "Relayr",
   description:
     "A fast and secure file transfer app powered by WebSocket technology.",
 };

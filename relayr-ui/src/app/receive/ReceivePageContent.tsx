@@ -28,9 +28,10 @@ export default function ReceivePageContent() {
   const id = useInitId("receiver");
 
   const { readyState } = UseFileReceiverSocket();
+
   const errorMessage = useFileReceiverStore((state) => state.errorMessage);
-  const isSenderTransferring = useFileReceiverStore(
-    (state) => state.isSenderTransferring,
+  const { isTransferring } = useFileReceiverStore(
+    (state) => state.transferStatus,
   );
   const actions = useFileReceiverActions();
 
@@ -42,14 +43,14 @@ export default function ReceivePageContent() {
   } = useRelayFileMetadata(senderId ?? "");
 
   useEffect(() => {
+    actions.setTransferConnection({ senderId });
+  }, [senderId, actions]);
+
+  useEffect(() => {
     if (data) {
       actions.setFileMetadata(data);
     }
   }, [data, actions]);
-
-  useEffect(() => {
-    actions.setTransferConnection({ senderId });
-  }, [senderId, actions]);
 
   if (!senderId) return <div>Please ask sender for the correct link</div>;
 
@@ -60,7 +61,7 @@ export default function ReceivePageContent() {
     <>
       <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden">
         <CardHeader>
-          {isSenderTransferring ? (
+          {isTransferring ? (
             <CardTitle>
               <WebSocketStatus readyState={readyState} />
             </CardTitle>
