@@ -118,15 +118,33 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
       set({
         webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
       }),
-    setFileTransferInfo: (fileTransferInfo) =>
+    setFileTransferInfo: (fileTransferInfo) => {
+      if (get().transferStatus.isTransferCanceled) return;
+
       set({
         fileTransferInfo: {
           ...get().fileTransferInfo,
           ...fileTransferInfo,
         },
-      }),
+      });
+    },
     setTransferStatus: (transferStatus) => {
-      if (get().transferStatus.isTransferCanceled) return get().transferStatus;
+      if (
+        get().transferStatus.isTransferCanceled &&
+        transferStatus.isTransferCanceled !== false
+      )
+        return;
+
+      if (transferStatus.isTransferCanceled) {
+        set({
+          transferStatus: {
+            ...get().transferStatus,
+            ...transferStatus,
+          },
+        });
+        get().actions.clearTransferState();
+        return;
+      }
 
       set({
         transferStatus: {
@@ -135,17 +153,23 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         },
       });
     },
-    setTransferProgress: (transferProgress) =>
+    setTransferProgress: (transferProgress) => {
+      if (get().transferStatus.isTransferCanceled) return;
+
       set({
         transferProgress: {
           ...get().transferProgress,
           ...transferProgress,
         },
-      }),
-    setReceivedChunkData: (receivedChunkData: ArrayBuffer) =>
+      });
+    },
+    setReceivedChunkData: (receivedChunkData: ArrayBuffer) => {
+      if (get().transferStatus.isTransferCanceled) return;
+
       set({
         receivedChunkData: [...get().receivedChunkData, receivedChunkData],
-      }),
+      });
+    },
     clearTransferState: () => {
       set({
         fileTransferInfo: {
@@ -159,7 +183,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
           chunkIndex: 0,
           chunkDataSize: 0,
           isTransferring: false,
-          isTransferError: false,
           isTransferCompleted: false,
         },
         transferProgress: {
@@ -213,3 +236,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 
 export const useFileReceiverActions = () =>
   useFileReceiverStore((state) => state.actions);
+
+export const useReceiverWebSocketHandlers = () =>
+  useFileReceiverStore((state) => state.webSocketHandlers);

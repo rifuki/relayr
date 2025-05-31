@@ -33,6 +33,12 @@ export interface FileTransferAckPayload {
   recipientTransferProgress: number;
 }
 
+export interface CancelRecipientTransferPayload {
+  type: "cancelRecipientTransfer";
+  senderId: string;
+  recipientId?: string;
+}
+
 // Receiver Responses
 export interface CancelSenderReadyResponse {
   success: true;

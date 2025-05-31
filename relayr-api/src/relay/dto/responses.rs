@@ -269,6 +269,27 @@ impl_response_dto!(CancelSenderTransferResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct CancelRecipientTransferResponseDto {
+    pub success: bool,
+    #[serde(rename = "type")]
+    pub msg_type: String,
+    pub recipient_id: String,
+    pub timestamp: i64,
+}
+impl CancelRecipientTransferResponseDto {
+    pub fn new(recipient_id: &str) -> Self {
+        Self {
+            success: true,
+            msg_type: "cancelRecipientTransfer".to_owned(),
+            recipient_id: recipient_id.to_owned(),
+            timestamp: Utc::now().timestamp(),
+        }
+    }
+}
+impl_response_dto!(CancelRecipientTransferResponseDto);
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SenderAckResponseDto {
     pub success: bool,
     #[serde(rename = "type")]

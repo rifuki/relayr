@@ -7,10 +7,21 @@ import { TextShimmer } from "./motion-primitives/text-shimmer";
 
 export default function SenderProgressBar() {
   const { size: fileSize } = useFileSenderStore((state) => state.fileMetadata!);
-  const { uploadedSize, isTransferring, isTransferCompleted } =
-    useFileSenderStore((state) => state.transferStatus);
-  const { receiver: receiverProgress } = useFileSenderStore(
-    (state) => state.transferProgress,
+  const { offset, isTransferring, isTransferCompleted } = useFileSenderStore(
+    (state) => state.transferStatus,
+  );
+  const { receiver: receiverProgress, sender: senderProgress } =
+    useFileSenderStore((state) => state.transferProgress);
+
+  console.log(
+    "Sender Progress:",
+    senderProgress,
+    "Receiver Progress:",
+    receiverProgress,
+    "isTransferring",
+    isTransferring,
+    "offset",
+    offset,
   );
 
   return (
@@ -20,7 +31,7 @@ export default function SenderProgressBar() {
           {isTransferCompleted ? (
             <TextShimmer>Transfer Completed</TextShimmer>
           ) : isTransferring ? (
-            `${formatFileSize(uploadedSize)} / ${formatFileSize(fileSize)}`
+            `${formatFileSize(offset)} / ${formatFileSize(fileSize)}`
           ) : (
             <TextShimmer>Click to start the transfer</TextShimmer>
           )}

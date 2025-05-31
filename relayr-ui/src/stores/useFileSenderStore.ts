@@ -119,7 +119,10 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           ...transferConnection,
         },
       }),
-    setErrorMessage: (errorMessage) => set({ errorMessage }),
+    setErrorMessage: (errorMessage) => {
+      console.log("DUA, setErrorMessage", errorMessage);
+      set({ errorMessage });
+    },
     setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
     setWebSocketHandlers: (webSocketHandlers) =>
       set({
@@ -127,28 +130,55 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
       }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setTransferShareLink: (link) => set({ transferShareLink: link }),
-    setFileTransferInfo: (fileTransferInfo) =>
+    setFileTransferInfo: (fileTransferInfo) => {
+      if (get().transferStatus.isTransferCanceled) return;
+
       set({
         fileTransferInfo: {
           ...get().fileTransferInfo,
           ...fileTransferInfo,
         },
-      }),
-    setTransferStatus: (transferStatus) =>
+      });
+    },
+    setTransferStatus: (transferStatus) => {
+      if (
+        get().transferStatus.isTransferCanceled &&
+        transferStatus.isTransferCanceled !== false
+      )
+        return;
+
+      if (transferStatus.isTransferCanceled) {
+        set({
+          transferStatus: {
+            ...get().transferStatus,
+            ...transferStatus,
+          },
+        });
+        get().actions.clearTransferState();
+        return;
+      }
+
       set({
         transferStatus: {
           ...get().transferStatus,
           ...transferStatus,
         },
-      }),
-    setTransferProgress: (transferProgress) =>
+      });
+    },
+    setTransferProgress: (transferProgress) => {
+      if (get().transferStatus.isTransferCanceled) return;
+
       set({
         transferProgress: {
           ...get().transferProgress,
           ...transferProgress,
         },
-      }),
-    sendNextChunk: () => sendNextChunkHelper({ get, set }),
+      });
+    },
+    sendNextChunk: () => {
+      if (get().transferStatus.isTransferCanceled) return;
+      sendNextChunkHelper({ get, set });
+    },
     clearTransferState: () =>
       set({
         fileTransferInfo: {
@@ -175,5 +205,5 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
 export const useFileSenderActions = () =>
   useFileSenderStore((state) => state.actions);
 
-export const useWebSocketHandlers = () =>
+export const useSenderWebSocketHandlers = () =>
   useFileSenderStore((state) => state.webSocketHandlers);

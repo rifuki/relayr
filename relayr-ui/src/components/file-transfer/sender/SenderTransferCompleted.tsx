@@ -7,7 +7,6 @@ import TransferHeader from "@/components/TransferHeader";
 import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import SenderProgressBar from "@/components/SenderProgressBar";
-import { CHUNK_SIZE } from "@/lib/constants";
 import {
   fileListItemVariants,
   fileListWrapperVariants,
@@ -15,7 +14,7 @@ import {
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useWebSocketHandlers,
+  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 
 const burstAnimation = {
@@ -38,9 +37,7 @@ const successAnimation = {
 };
 
 export default function SenderTransferCompleted() {
-  const testFile = useFileSenderStore((state) => state.file);
-
-  const { recipientId } = useFileSenderStore(
+  const { senderId, recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -48,37 +45,25 @@ export default function SenderTransferCompleted() {
     (state) => state.transferShareLink,
   );
   const actions = useFileSenderActions();
-  const { getWebSocket } = useWebSocketHandlers();
-
-  const testHandleSendFile = () => {
-    if (!testFile || !recipientId) return;
-
-    actions.clearTransferState();
-    actions.setTransferStatus({
-      isTransferCanceled: false,
-      isTransferError: false,
-    });
-    const totalChunks = Math.ceil(testFile.size / CHUNK_SIZE);
-    actions.setFileTransferInfo({ totalChunks });
-
-    actions.sendNextChunk();
-  };
+  const { getWebSocket } = useSenderWebSocketHandlers();
 
   const handleResetTransfer = () => {
     const ws = getWebSocket?.();
     if (!ws) {
       actions.setErrorMessage("WebSocket is not available.");
+      actions.setFile(null);
+      actions.setTransferConnection({ senderId: null, recipientId: null });
+      actions.setTransferShareLink(null);
+      actions.clearTransferState();
       return;
     }
-
     if (ws.readyState === WebSocket.OPEN) {
       actions.setWebSocketUrl(null);
       ws.close(
         1000,
-        "Sender success reset transfer, closing WebSocket connection.",
+        `Sender: ${senderId} success reset transfer, closing WebSocket connection.`,
       );
     }
-
     actions.setFile(null);
     actions.setTransferConnection({ senderId: null, recipientId: null });
     actions.setTransferShareLink(null);
@@ -135,12 +120,6 @@ export default function SenderTransferCompleted() {
         className="w-full flex flex-col space-y-3 mt-2"
         variants={fileListItemVariants}
       >
-        {process.env.NODE_ENV === "development" && (
-          <MotionButton onClick={testHandleSendFile} variant="ghost">
-            Start Transfer
-          </MotionButton>
-        )}
-
         <MotionButton onClick={handleResetTransfer}>
           <RefreshCw className="h-4 w-4" />
           Send Another File

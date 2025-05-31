@@ -15,6 +15,8 @@ import SenderTransferCompleted from "./SenderTransferCompleted";
 
 export default function SendFlow() {
   const file = useFileSenderStore((state) => state.file);
+  const errorMessage = useFileSenderStore((state) => state.errorMessage);
+
   const { senderId, recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
@@ -123,6 +125,8 @@ export default function SendFlow() {
     <TransferInProgress key="TransferInProgress" />,
     <SenderTransferCompleted key="senderTransferCompleted" />,
   ];
+
+  console.log(errorMessage);
 
   // Fallback (should never happen ideally)
   return (

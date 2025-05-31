@@ -12,7 +12,7 @@ import ShareableLinkInput from "@/components/ShareableLinkInput";
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useWebSocketHandlers,
+  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 import {
   fileListItemVariants,
@@ -36,7 +36,7 @@ export default function WaitingForRecipient() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const { senderId } = useFileSenderStore((state) => state.transferConnection);
 
-  const { getWebSocket } = useWebSocketHandlers();
+  const { getWebSocket } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
   const [isLoading, setIsLoading] = useState(false);

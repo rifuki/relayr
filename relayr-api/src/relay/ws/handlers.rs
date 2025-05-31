@@ -11,10 +11,11 @@ use crate::{
         dto::{
             requests::RelayIncomingPayload,
             responses::{
-                CancelRecipientReadyResponseDto, CancelSenderReadyResponseDto,
-                CancelSenderTransferResponseDto, FileChunkResponseDto, FileEndResponseDto,
-                FileTransferAckResponseDto, RecipientReadyResponseDto, RegisterResponseDto,
-                RestartTransferResponseDto, SenderAckResponseDto, WsResponse,
+                CancelRecipientReadyResponseDto, CancelRecipientTransferResponseDto,
+                CancelSenderReadyResponseDto, CancelSenderTransferResponseDto,
+                FileChunkResponseDto, FileEndResponseDto, FileTransferAckResponseDto,
+                RecipientReadyResponseDto, RegisterResponseDto, RestartTransferResponseDto,
+                SenderAckResponseDto, WsResponse,
             },
         },
         error::ErrorMessage,
@@ -272,6 +273,41 @@ pub async fn handle_incoming_payload(
                 let err_msg = ErrorMessage::new(&format!(
                     "Active connection for sender_id: `{}` not found",
                     sender_id
+                ))
+                .to_ws_msg();
+                send_or_break!(tx, err_msg, stop_flag);
+            }
+        }
+        RelayIncomingPayload::CancelRecipientTransfer(payload) => {
+            let recipient_id = payload.recipient_id.unwrap_or(base_conn_id.to_owned());
+            let connected_recipient = state.get_connected_recipient(&payload.sender_id).await;
+
+            if let Some(current_recipient) = connected_recipient {
+                if current_recipient == recipient_id {
+                    if let Some(sender_tx) = state.get_user_tx(&payload.sender_id).await {
+                        let success_msg =
+                            CancelRecipientTransferResponseDto::new(&recipient_id).to_ws_msg();
+                        send_or_break!(sender_tx, success_msg, stop_flag);
+                    } else {
+                        let err_msg = ErrorMessage::new(&format!(
+                            "Sender `{}` is no longer connected",
+                            &payload.sender_id
+                        ))
+                        .to_ws_msg();
+                        send_or_break!(tx, err_msg, stop_flag);
+                    }
+                } else {
+                    let err_msg = ErrorMessage::new(&format!(
+                        "Recipient ID mismatch. Expected `{}`, `{}`",
+                        current_recipient, recipient_id
+                    ))
+                    .to_ws_msg();
+                    send_or_break!(tx, err_msg, stop_flag);
+                }
+            } else {
+                let err_msg = ErrorMessage::new(&format!(
+                    "Active connection for sender_id: `{}` not found",
+                    &payload.sender_id
                 ))
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);

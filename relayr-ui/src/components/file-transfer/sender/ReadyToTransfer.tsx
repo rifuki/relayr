@@ -17,7 +17,7 @@ import {
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useWebSocketHandlers,
+  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 import {
   fileListItemVariants,
@@ -63,7 +63,7 @@ export default function ReadyToTransfer() {
   const { isTransferError } = useFileSenderStore(
     (state) => state.transferStatus,
   );
-  const { sendJsonMessage } = useWebSocketHandlers();
+  const { sendJsonMessage } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
   if (!file || !fileMetadata || !transferShareLink || !sendJsonMessage) return;
@@ -76,7 +76,12 @@ export default function ReadyToTransfer() {
       return;
     }
 
-    actions.clearTransferState();
+    actions.setErrorMessage(null);
+    actions.setTransferStatus({
+      isTransferCanceled: false,
+      isTransferError: false,
+    });
+
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     actions.setFileTransferInfo({ totalChunks });
 
@@ -87,7 +92,6 @@ export default function ReadyToTransfer() {
     sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
-    actions.clearTransferState();
     actions.setTransferConnection({ recipientId: null });
   };
 

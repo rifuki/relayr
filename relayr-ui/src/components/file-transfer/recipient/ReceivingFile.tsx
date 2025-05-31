@@ -11,15 +11,31 @@ import {
   fileListWrapperVariants,
   fileListItemVariants,
 } from "@/lib/animations";
-import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import {
+  useFileReceiverActions,
+  useFileReceiverStore,
+  useReceiverWebSocketHandlers,
+} from "@/stores/useFileReceiverStore";
+import { CancelRecipientTransferPayload } from "@/types/webSocketMessages";
 
 export default function ReceivingFile() {
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+  const { sendJsonMessage } = useReceiverWebSocketHandlers();
+  const actions = useFileReceiverActions();
 
-  if (!senderId || !fileMetadata) return;
+  if (!senderId || !fileMetadata || !sendJsonMessage) return;
+
+  const handleCancelRecipientTransfer = () => {
+    sendJsonMessage({
+      type: "cancelRecipientTransfer",
+      senderId,
+    } satisfies CancelRecipientTransferPayload);
+    actions.setTransferStatus({ isTransferCanceled: true });
+    actions.setErrorMessage("You canceled the transfer");
+  };
 
   return (
     <motion.div
@@ -61,7 +77,12 @@ export default function ReceivingFile() {
           ⚠️ Transfer in progress — stay on this page.
         </TextShimmer>
 
-        <MotionButton variant="destructive">Abort Transfer</MotionButton>
+        <MotionButton
+          onClick={handleCancelRecipientTransfer}
+          variant="destructive"
+        >
+          Abort Transfer
+        </MotionButton>
       </motion.div>
     </motion.div>
   );

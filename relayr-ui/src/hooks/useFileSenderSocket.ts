@@ -13,7 +13,9 @@ import {
   RegisterResponse,
   WebSocketSenderTextMessageResponse,
   SenderAckRequest,
+  CancelRecipientTransferResponse,
 } from "@/types/webSocketMessages";
+import { toast } from "sonner";
 
 export function useFileSenderSocket() {
   const file = useFileSenderStore((state) => state.file);
@@ -22,13 +24,8 @@ export function useFileSenderSocket() {
     (state) => state.transferConnection,
   );
   const webSocketUrl = useFileSenderStore((state) => state.webSocketUrl);
-  const {
-    offset,
-    chunkIndex,
-    chunkDataSize,
-    isTransferring,
-    isTransferCanceled,
-  } = useFileSenderStore((state) => state.transferStatus);
+  const { offset, chunkIndex, chunkDataSize, isTransferring } =
+    useFileSenderStore((state) => state.transferStatus);
   const { sender: senderProgress } = useFileSenderStore(
     (state) => state.transferProgress,
   );
@@ -37,7 +34,6 @@ export function useFileSenderSocket() {
   const { sendJsonMessage, readyState, sendMessage, getWebSocket } =
     useWebSocket(webSocketUrl, {
       onMessage: (wsMsg: MessageEvent<string>) => {
-        actions.setErrorMessage(null);
         try {
           const parsedMessage = JSON.parse(wsMsg.data);
           processWebSocketTextMessage(parsedMessage);
@@ -82,6 +78,10 @@ export function useFileSenderSocket() {
       case "fileTransferAck":
         processFileTransferAcknowledgmentMessage(wsMsg);
         break;
+      case "cancelRecipientTransfer":
+        processCancelRecipientTransferMessage(wsMsg);
+        break;
+
       default:
         console.error("[WebSocket] Unknown message type received:", wsMsg);
         break;
@@ -111,6 +111,11 @@ export function useFileSenderSocket() {
 
   const processRecipientReadyMessage = (msg: RecipientReadyResponse) => {
     actions.setTransferConnection({ recipientId: msg.recipientId });
+    actions.clearTransferState();
+    actions.setTransferStatus({
+      isTransferCanceled: false,
+      isTransferError: false,
+    });
     sendJsonMessage({
       type: "senderAck",
       requestType: "recipientReady",
@@ -139,12 +144,8 @@ export function useFileSenderSocket() {
       return;
     }
 
-    if (isTransferCanceled) {
-      actions.setErrorMessage("You canceled the file transfer");
-      console.warn("Transfer has been canceled. No more chunks will be sent.");
-      actions.clearTransferState();
-      return;
-    }
+    const { isTransferCanceled } = useFileSenderStore.getState().transferStatus;
+    if (isTransferCanceled) return;
 
     if (ack.status === "acknowledged") {
       if (
@@ -165,7 +166,8 @@ export function useFileSenderSocket() {
         chunkIndex: chunkIndex + 1,
       });
       actions.setTransferProgress({ receiver: ack.recipientTransferProgress });
-      actions.sendNextChunk();
+
+      if (!isTransferCanceled) actions.sendNextChunk();
     } else if (ack.status === "completed") {
       actions.setTransferStatus({
         isTransferring: false,
@@ -187,6 +189,22 @@ export function useFileSenderSocket() {
       actions.setErrorMessage(errorMsg);
       console.error(errorMsg);
     }
+  };
+
+  /**
+   * Handles the cancellation of the file transfer by the recipient.
+   * Updates the transfer status and displays an error message.
+   *
+   * @param _msg - The CancelRecipientTransferResponse message indicating the transfer was canceled.
+   */
+  const processCancelRecipientTransferMessage = (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _msg: CancelRecipientTransferResponse,
+  ) => {
+    console.log("SATU");
+    actions.setErrorMessage("Transfer aborted by receiver.");
+    toast.error("Transfer aborted by receiver.");
+    actions.setTransferStatus({ isTransferCanceled: true });
   };
 
   const processWebSocketOnClose = (close: CloseEvent) => {
@@ -221,6 +239,12 @@ export function useFileSenderSocket() {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       if (isTransferring) {
         e.preventDefault();
+        if (readyState === WebSocket.OPEN && recipientId) {
+          sendJsonMessage({
+            type: "cancelSenderTransfer",
+            recipientId,
+          });
+        }
       } else if (readyState === WebSocket.OPEN && recipientId) {
         sendJsonMessage({
           type: "cancelSenderReady",

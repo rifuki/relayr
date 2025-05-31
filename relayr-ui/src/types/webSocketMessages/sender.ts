@@ -88,3 +88,10 @@ export interface FileTransferAckResponse {
   recipientTransferProgress: number;
   timestamp: number;
 }
+
+export interface CancelRecipientTransferResponse {
+  success: true;
+  type: "cancelRecipientTransfer";
+  recipientId: string;
+  timestamp: number;
+}

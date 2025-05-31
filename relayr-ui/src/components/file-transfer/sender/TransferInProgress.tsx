@@ -15,7 +15,7 @@ import {
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useWebSocketHandlers,
+  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
 
@@ -28,18 +28,19 @@ export default function TransferInProgress() {
     (state) => state.transferConnection,
   );
 
-  const { sendJsonMessage } = useWebSocketHandlers();
+  const { sendJsonMessage } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
   if (!fileMetadata || !recipientId || !transferShareLink || !sendJsonMessage)
     return;
 
   const handleCancelSenderTransfer = () => {
-    actions.setTransferStatus({ isTransferCanceled: true });
     sendJsonMessage({
       type: "cancelSenderTransfer",
     } satisfies CancelSenderTransferRequest);
-    actions.clearTransferState();
+    actions.setTransferStatus({ isTransferCanceled: true });
+    actions.setErrorMessage("You canceled the transfer");
+    console.warn("Transfer has been canceled. No more chunks will be sent.");
   };
 
   return (

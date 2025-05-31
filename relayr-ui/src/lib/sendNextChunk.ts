@@ -19,7 +19,7 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
   const { sendJsonMessage, sendMessage } = webSocketHandlers;
 
   const { totalChunks } = fileTransferInfo;
-  const { chunkIndex, offset, isTransferCanceled } = transferStatus;
+  const { chunkIndex, offset } = transferStatus;
 
   if (
     !file ||
@@ -28,12 +28,6 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
     !sendMessage
   ) {
     set({ errorMessage: "No file or recipient found" });
-    return;
-  }
-
-  if (isTransferCanceled) {
-    set({ errorMessage: "You canceled the transfer" });
-    console.warn("Transfer has been canceled. No more chunks will be sent.");
     return;
   }
 

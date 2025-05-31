@@ -8,6 +8,7 @@ import {
   RecipientReadyResponse,
   CancelRecipientReadyResponse,
   FileTransferAckResponse,
+  CancelRecipientTransferResponse,
 } from "./sender";
 
 import {
@@ -24,7 +25,8 @@ export type WebSocketSenderTextMessageResponse =
   | RegisterResponse
   | RecipientReadyResponse
   | CancelRecipientReadyResponse
-  | FileTransferAckResponse;
+  | FileTransferAckResponse
+  | CancelRecipientTransferResponse;
 
 export type WebSocketReceiverTextMessageResponse =
   | ErrorMessageResponse

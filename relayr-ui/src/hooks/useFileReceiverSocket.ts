@@ -191,6 +191,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
 
     actions.setTransferStatus({
       isTransferring: true,
+      isTransferCanceled: false,
       uploadedSize: msg.uploadedSize,
       chunkIndex: msg.chunkIndex,
       chunkDataSize: msg.chunkDataSize,
@@ -260,7 +261,6 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const processCancelSenderTransferMessage = (_msg: CancelSenderTransfer) => {
     actions.setTransferStatus({ isTransferCanceled: true });
-    actions.clearTransferState();
     toast.error("Transfer aborted by sender.");
     actions.setErrorMessage("Transfer aborted by sender.");
   };
@@ -289,10 +289,17 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       if (isTransferring) {
         e.preventDefault();
+
+        if (readyState === WebSocket.OPEN && senderId && isConnected) {
+          sendJsonMessage({
+            type: "cancelRecipientTransfer",
+            senderId,
+          });
+        }
       } else if (readyState === WebSocket.OPEN && senderId && isConnected) {
         sendJsonMessage({
           type: "cancelRecipientReady",
-          senderId: senderId,
+          senderId,
         } satisfies CancelRecipientReadyPayload);
       }
     }

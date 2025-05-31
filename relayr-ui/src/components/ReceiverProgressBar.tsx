@@ -10,24 +10,22 @@ export default function ReceiverProgressBar() {
 
   const { receivedBytes, isTransferring, isTransferCompleted } =
     useFileReceiverStore((state) => state.transferStatus);
-  const chunk = useFileReceiverStore((state) => state.receivedChunkData);
 
-  const { receiver: receiverProgress } = useFileReceiverStore(
-    (state) => state.transferProgress,
-  );
+  const { receiver: receiverProgress, sender: senderProgress } =
+    useFileReceiverStore((state) => state.transferProgress);
 
   if (!fileMetadata) return null;
+
   console.log(
-    "receiverProgress",
+    "Sender Progress:",
+    senderProgress,
+    "Receiver Progress:",
     receiverProgress,
-    "receivedBytes",
-    receivedBytes,
     "isTransferring",
     isTransferring,
-    "chunk",
-    chunk.length,
+    "receivedBytes",
+    receivedBytes,
   );
-
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
       <div className="flex justify-between text-sm">
