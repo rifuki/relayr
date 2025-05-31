@@ -119,10 +119,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           ...transferConnection,
         },
       }),
-    setErrorMessage: (errorMessage) => {
-      console.log("DUA, setErrorMessage", errorMessage);
-      set({ errorMessage });
-    },
+    setErrorMessage: (errorMessage) => set({ errorMessage }),
     setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
     setWebSocketHandlers: (webSocketHandlers) =>
       set({

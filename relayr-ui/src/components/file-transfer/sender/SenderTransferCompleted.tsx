@@ -47,17 +47,13 @@ export default function SenderTransferCompleted() {
   const actions = useFileSenderActions();
   const { getWebSocket } = useSenderWebSocketHandlers();
 
+  if (!fileMetadata || !transferShareLink) return;
+
   const handleResetTransfer = () => {
     const ws = getWebSocket?.();
-    if (!ws) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
       actions.setErrorMessage("WebSocket is not available.");
-      actions.setFile(null);
-      actions.setTransferConnection({ senderId: null, recipientId: null });
-      actions.setTransferShareLink(null);
-      actions.clearTransferState();
-      return;
-    }
-    if (ws.readyState === WebSocket.OPEN) {
+    } else {
       actions.setWebSocketUrl(null);
       ws.close(
         1000,
@@ -65,12 +61,11 @@ export default function SenderTransferCompleted() {
       );
     }
     actions.setFile(null);
-    actions.setTransferConnection({ senderId: null, recipientId: null });
+    actions.setWebSocketUrl(null);
     actions.setTransferShareLink(null);
+    actions.setTransferConnection({ senderId: null, recipientId: null });
     actions.clearTransferState();
   };
-
-  if (!fileMetadata || !transferShareLink) return;
 
   return (
     <motion.div

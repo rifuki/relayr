@@ -1,12 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import axios, { AxiosProgressEvent } from "axios";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-import { ReadyState } from "react-use-websocket";
-import axios, { AxiosProgressEvent } from "axios";
 
 export function isFolderLike(file: File): boolean {
   const fileWithPath = file as File & { webkitRelativePath?: string };
@@ -14,18 +12,6 @@ export function isFolderLike(file: File): boolean {
     (file.size === 0 && file.type === "") ||
     fileWithPath.webkitRelativePath?.length > 0
   );
-}
-
-
-
-export function getConnectionStatus(readyState: ReadyState): string {
-  return {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Open",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Closed",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  }[readyState];
 }
 
 export function formatFileSize(bytes: number, decimals = 2) {

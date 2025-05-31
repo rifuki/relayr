@@ -1,5 +1,7 @@
 import { useEffect } from "react";
-import useWebSocket from "react-use-websocket";
+
+import useWebSocket, { ReadyState } from "react-use-websocket";
+
 import {
   useFileSenderStore,
   useFileSenderActions,
@@ -14,16 +16,16 @@ import {
   WebSocketSenderTextMessageResponse,
   SenderAckRequest,
   CancelRecipientTransferResponse,
+  CancelSenderTransferRequest,
 } from "@/types/webSocketMessages";
-import { toast } from "sonner";
 
-export function useFileSenderSocket() {
+export function useFileSenderSocket(): { readyState: ReadyState } {
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
+  const webSocketUrl = useFileSenderStore((state) => state.webSocketUrl);
   const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
-  const webSocketUrl = useFileSenderStore((state) => state.webSocketUrl);
   const { offset, chunkIndex, chunkDataSize, isTransferring } =
     useFileSenderStore((state) => state.transferStatus);
   const { sender: senderProgress } = useFileSenderStore(
@@ -31,7 +33,7 @@ export function useFileSenderSocket() {
   );
   const actions = useFileSenderActions();
 
-  const { sendJsonMessage, readyState, sendMessage, getWebSocket } =
+  const { readyState, sendJsonMessage, sendMessage, getWebSocket } =
     useWebSocket(webSocketUrl, {
       onMessage: (wsMsg: MessageEvent<string>) => {
         try {
@@ -58,10 +60,9 @@ export function useFileSenderSocket() {
         );
         actions.setTransferConnection({ recipientId: null });
         actions.clearTransferState();
-        return;
+      } else {
+        actions.setErrorMessage(wsMsg.message ?? "Unknown error occurred");
       }
-
-      actions.setErrorMessage(wsMsg.message ?? "Unknown error occurred");
       return;
     }
 
@@ -81,7 +82,6 @@ export function useFileSenderSocket() {
       case "cancelRecipientTransfer":
         processCancelRecipientTransferMessage(wsMsg);
         break;
-
       default:
         console.error("[WebSocket] Unknown message type received:", wsMsg);
         break;
@@ -89,13 +89,15 @@ export function useFileSenderSocket() {
   };
 
   const processRegisterMessage = (msg: RegisterResponse) => {
+    actions.setErrorMessage(null);
+    actions.setTransferConnection({ senderId: msg.connId });
+
     if (!fileMetadata) {
       const errorMsg = "File metadata not available";
       actions.setErrorMessage(errorMsg);
       console.error(errorMsg);
       return;
     }
-
     sendJsonMessage({
       type: "fileMeta",
       name: fileMetadata.name,
@@ -103,34 +105,33 @@ export function useFileSenderSocket() {
       mimeType: fileMetadata.type,
     } satisfies FileMetaRequest);
 
-    const transferShareLink = `${window.location.origin}/receive?id=${msg.connId}`;
-    actions.setTransferShareLink(transferShareLink);
-    actions.setTransferConnection({ senderId: msg.connId });
+    actions.setTransferShareLink(
+      `${window.location.origin}/receive?id=${msg.connId}`,
+    );
     actions.setIsLoading(false);
   };
 
   const processRecipientReadyMessage = (msg: RecipientReadyResponse) => {
+    actions.setErrorMessage(null);
     actions.setTransferConnection({ recipientId: msg.recipientId });
-    actions.clearTransferState();
-    actions.setTransferStatus({
-      isTransferCanceled: false,
-      isTransferError: false,
-    });
     sendJsonMessage({
       type: "senderAck",
       requestType: "recipientReady",
       recipientId: msg.recipientId,
       status: "success",
     } satisfies SenderAckRequest);
+    actions.setTransferStatus({
+      isTransferError: false,
+      isTransferCompleted: false,
+    });
+    actions.clearTransferState();
   };
 
   const processCancelRecipientReadyMessage = (
     msg: CancelRecipientReadyResponse,
   ) => {
     actions.setTransferConnection({ recipientId: null });
-
-    const recipientId = msg.recipientId;
-    const errorMsg = `Recipient \`${recipientId}\` canceled the connection`;
+    const errorMsg = `Recipient \`${msg.recipientId}\` canceled the connection`;
     actions.setErrorMessage(errorMsg);
   };
 
@@ -171,12 +172,14 @@ export function useFileSenderSocket() {
     } else if (ack.status === "completed") {
       actions.setTransferStatus({
         isTransferring: false,
+        isTransferError: false,
         isTransferCompleted: true,
       });
     } else if (ack.status === "error") {
       actions.setTransferStatus({
         isTransferring: false,
         isTransferError: true,
+        isTransferCanceled: false,
       });
       actions.setErrorMessage("Transfer failed: receiver reported an error.");
       console.error("[Sender] Receiver reported file transfer error", {
@@ -198,25 +201,20 @@ export function useFileSenderSocket() {
    * @param _msg - The CancelRecipientTransferResponse message indicating the transfer was canceled.
    */
   const processCancelRecipientTransferMessage = (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _msg: CancelRecipientTransferResponse,
+    msg: CancelRecipientTransferResponse,
   ) => {
-    console.log("SATU");
-    actions.setErrorMessage("Transfer aborted by receiver.");
-    toast.error("Transfer aborted by receiver.");
     actions.setTransferStatus({ isTransferCanceled: true });
+    const errorMsg = `Recipient \`${msg.recipientId}\` canceled the transfer`;
+    actions.setErrorMessage(errorMsg);
   };
 
   const processWebSocketOnClose = (close: CloseEvent) => {
     console.info("❌ Disconnected", close.code);
 
     actions.setWebSocketUrl(null);
-
     actions.setTransferShareLink(null);
     actions.setTransferConnection({ senderId: null, recipientId: null });
-    actions.setIsLoading(false);
-    actions.setErrorMessage(null);
-
+    actions.clearTransferState();
     if (close.code === 1000) return;
     else if (close.code === 1006) {
       actions.setErrorMessage("Lost connection to the server");
@@ -237,23 +235,23 @@ export function useFileSenderSocket() {
 
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
+      const canSend = readyState === WebSocket.OPEN && recipientId;
+      if (!canSend) return;
+
+      e.preventDefault();
+
       if (isTransferring) {
-        e.preventDefault();
-        if (readyState === WebSocket.OPEN && recipientId) {
-          sendJsonMessage({
-            type: "cancelSenderTransfer",
-            recipientId,
-          });
-        }
-      } else if (readyState === WebSocket.OPEN && recipientId) {
         sendJsonMessage({
-          type: "cancelSenderReady",
-        } satisfies CancelSenderReadyRequest);
+          type: "cancelSenderTransfer",
+        } satisfies CancelSenderTransferRequest);
       }
+      sendJsonMessage({
+        type: "cancelSenderReady",
+      } satisfies CancelSenderReadyRequest);
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isTransferring, readyState, sendJsonMessage, recipientId]);
+  }, [readyState, sendJsonMessage, isTransferring, recipientId]);
 
   return { readyState };
 }

@@ -170,7 +170,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         receivedChunkData: [...get().receivedChunkData, receivedChunkData],
       });
     },
-    clearTransferState: () => {
+    clearTransferState: () =>
       set({
         fileTransferInfo: {
           totalChunks: 0,
@@ -190,10 +190,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
           receiver: 0,
         },
         receivedChunkData: [],
-      });
-
-      console.log("clearTransferState called, state reset!");
-    },
+      }),
     finalizeTransfer: () => {
       const { receivedChunkData, fileMetadata, fileUrl } = get();
       const blobData = new Blob(receivedChunkData, {
@@ -226,8 +223,8 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         transferStatus: {
           ...get().transferStatus,
           isTransferring: false,
-          isTransferCompleted: true,
           isTransferError: false,
+          isTransferCompleted: true,
         },
       });
     },

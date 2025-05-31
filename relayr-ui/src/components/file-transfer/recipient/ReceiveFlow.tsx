@@ -18,6 +18,7 @@ export default function ReceiveFlow() {
   const { isTransferring, isTransferCompleted } = useFileReceiverStore(
     (state) => state.transferStatus,
   );
+  const transferStatus = useFileReceiverStore((state) => state.transferStatus);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -58,6 +59,8 @@ export default function ReceiveFlow() {
     <ReceivingFile key="receivingFile" />,
     <ReceiverTransferCompleted key="receiverTransferCompleted" />,
   ];
+
+  console.log(transferStatus.isTransferCanceled);
 
   return (
     <TransitionPanel

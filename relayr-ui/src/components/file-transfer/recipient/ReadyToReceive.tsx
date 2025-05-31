@@ -21,12 +21,15 @@ export default function ReadyToReceive() {
     (state) => state.transferConnection,
   );
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-
   const actions = useFileReceiverActions();
 
   if (!fileMetadata) return;
 
   const handleConnectToSender = () => {
+    actions.setTransferStatus({
+      isTransferCanceled: false,
+      isTransferError: false,
+    });
     actions.clearTransferState();
     actions.setWebSocketUrl(`${WS_RELAY_API_URL}?id=${initId}`);
   };

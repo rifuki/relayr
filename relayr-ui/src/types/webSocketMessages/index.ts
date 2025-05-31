@@ -13,7 +13,7 @@ import {
 
 import {
   CancelSenderReadyResponse,
-  CancelSenderTransfer,
+  CancelSenderTransferResponse,
   FileChunkResponse,
   FileEndResponse,
   RestartTransferResponse,
@@ -36,4 +36,4 @@ export type WebSocketReceiverTextMessageResponse =
   | FileChunkResponse
   | FileEndResponse
   | RestartTransferResponse
-  | CancelSenderTransfer;
+  | CancelSenderTransferResponse;

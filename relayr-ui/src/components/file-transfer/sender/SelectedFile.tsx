@@ -5,16 +5,16 @@ import { motion } from "motion/react";
 
 import FileCard from "@/components/FileCard";
 import TransferHeader from "@/components/TransferHeader";
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-} from "@/stores/useFileSenderStore";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { WS_RELAY_API_URL } from "@/lib/constants";
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+import {
+  useFileSenderActions,
+  useFileSenderStore,
+} from "@/stores/useFileSenderStore";
 
 const checkmarkVariants = {
   hidden: { scale: 0, opacity: 0 },
@@ -43,12 +43,6 @@ export default function SelectedFile() {
     if (!file || !fileMetadata) {
       return { errorMessage: "File or file metadata is missing." };
     }
-
-    actions.clearTransferState();
-    actions.setTransferStatus({
-      isTransferError: false,
-      isTransferCanceled: false,
-    });
     actions.setWebSocketUrl(`${WS_RELAY_API_URL}?id=${initId}`);
     setIsGenerateLinkLoading(false);
   };

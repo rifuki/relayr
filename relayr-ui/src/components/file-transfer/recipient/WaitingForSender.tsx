@@ -52,6 +52,7 @@ export default function WaitingForSender() {
     ws.close(1000, "Recipient canceled before transfer started");
 
     actions.setTransferConnection({ recipientId: null, isConnected: false });
+    actions.setErrorMessage(null);
   };
 
   return (

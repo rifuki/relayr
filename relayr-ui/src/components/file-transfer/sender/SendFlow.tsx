@@ -15,7 +15,6 @@ import SenderTransferCompleted from "./SenderTransferCompleted";
 
 export default function SendFlow() {
   const file = useFileSenderStore((state) => state.file);
-  const errorMessage = useFileSenderStore((state) => state.errorMessage);
 
   const { senderId, recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
@@ -26,6 +25,7 @@ export default function SendFlow() {
   const { isTransferring, isTransferCompleted } = useFileSenderStore(
     (state) => state.transferStatus,
   );
+  const transferStatus = useFileSenderStore((state) => state.transferStatus);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -34,7 +34,6 @@ export default function SendFlow() {
   useEffect(() => {
     function determineStep() {
       // File selection state
-
       if (
         !file &&
         !senderId &&
@@ -78,6 +77,7 @@ export default function SendFlow() {
       )
         return 4;
 
+      //
       if (
         file &&
         senderId &&
@@ -126,7 +126,15 @@ export default function SendFlow() {
     <SenderTransferCompleted key="senderTransferCompleted" />,
   ];
 
-  console.log(errorMessage);
+  console.log({
+    file,
+    senderId,
+    transferShareLink,
+    recipientId,
+    isTransferring,
+    isTransferCompleted,
+    isCanceled: transferStatus.isTransferCanceled,
+  });
 
   // Fallback (should never happen ideally)
   return (

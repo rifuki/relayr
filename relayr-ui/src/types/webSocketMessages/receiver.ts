@@ -89,7 +89,7 @@ export interface RestartTransferResponse {
   timestamp: number;
 }
 
-export interface CancelSenderTransfer {
+export interface CancelSenderTransferResponse {
   success: true;
   type: "cancelSenderTransfer";
   senderId: string;

@@ -10,18 +10,8 @@ export default function SenderProgressBar() {
   const { offset, isTransferring, isTransferCompleted } = useFileSenderStore(
     (state) => state.transferStatus,
   );
-  const { receiver: receiverProgress, sender: senderProgress } =
-    useFileSenderStore((state) => state.transferProgress);
-
-  console.log(
-    "Sender Progress:",
-    senderProgress,
-    "Receiver Progress:",
-    receiverProgress,
-    "isTransferring",
-    isTransferring,
-    "offset",
-    offset,
+  const { receiver: receiverProgress } = useFileSenderStore(
+    (state) => state.transferProgress,
   );
 
   return (

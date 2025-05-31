@@ -1,7 +1,7 @@
 import { FileSenderState } from "@/stores/useFileSenderStore";
 import { FileChunkRequest, FileEndRequest } from "@/types/webSocketMessages";
-import { readFileAsArrayBuffer } from "./utils";
 import { CHUNK_SIZE } from "./constants";
+import { readFileAsArrayBuffer } from "./utils";
 
 interface SendNextChunkProps {
   get: () => FileSenderState;
@@ -9,30 +9,15 @@ interface SendNextChunkProps {
 }
 
 export async function sendNextChunk({ get, set }: SendNextChunkProps) {
-  const {
-    file,
-    transferConnection,
-    fileTransferInfo,
-    transferStatus,
-    webSocketHandlers,
-  } = get();
+  const { file, fileTransferInfo, transferStatus, webSocketHandlers } = get();
   const { sendJsonMessage, sendMessage } = webSocketHandlers;
 
   const { totalChunks } = fileTransferInfo;
   const { chunkIndex, offset } = transferStatus;
 
-  if (
-    !file ||
-    !transferConnection.recipientId ||
-    !sendJsonMessage ||
-    !sendMessage
-  ) {
-    set({ errorMessage: "No file or recipient found" });
-    return;
-  }
+  if (!file || !sendJsonMessage || !sendMessage) return;
 
   if (chunkIndex >= totalChunks) {
-    //console.log("All data sent. Sending fileEnd signal.");
     sendJsonMessage({
       type: "fileEnd",
       fileName: file.name,
@@ -48,7 +33,6 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
         isTransferring: false,
       },
     });
-
     return;
   }
 
@@ -71,20 +55,31 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
       return;
     }
 
+    if (get().transferStatus.isTransferCanceled) {
+      console.warn("Transfer canceled after reading chunk, aborting send.");
+      return;
+    }
+
     const uploadedSize = transferStatus.offset + chunkDataSize;
     const senderTransferProgress = Math.min(
       100,
       Math.floor((uploadedSize / file.size) * 100),
     );
 
+    const { isTransferCanceled } = get().transferStatus; // Dapatkan nilai terbaru
+    if (isTransferCanceled) {
+      console.warn("Transfer canceled after chunk send.");
+      return;
+    }
+
     sendJsonMessage({
       type: "fileChunk",
       fileName: file.name,
       totalSize: file.size,
       totalChunks: fileTransferInfo.totalChunks,
-      chunkIndex: transferStatus.chunkIndex,
-      chunkDataSize,
       uploadedSize,
+      chunkIndex,
+      chunkDataSize,
       senderTransferProgress,
     } satisfies FileChunkRequest);
     sendMessage(chunkData);
@@ -101,10 +96,6 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
         sender: senderTransferProgress,
       },
     });
-
-    //console.log(
-    //  `Chunk ${chunkIndex}/${totalChunks} sent. Progress: ${transferProgress}%`,
-    //);
   } catch (error: unknown) {
     const errorMsg = "Failed to send next chunk";
     set({ errorMessage: errorMsg });

@@ -33,10 +33,6 @@ const MotionCardTitle = motion.create(CardTitle);
 
 export default function SendPage() {
   const { readyState } = useFileSenderSocket();
-
-  const isTransferring = useFileSenderStore(
-    (state) => state.transferStatus.isTransferring,
-  );
   const errorMessage = useFileSenderStore((state) => state.errorMessage);
   const id = useInitId("sender");
 
@@ -44,15 +40,9 @@ export default function SendPage() {
     <>
       <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden">
         <CardHeader>
-          {isTransferring ? (
-            <CardTitle>
-              <WebSocketStatus readyState={readyState} />
-            </CardTitle>
-          ) : (
-            <MotionCardTitle>
-              <WebSocketStatus readyState={readyState} />
-            </MotionCardTitle>
-          )}
+          <MotionCardTitle>
+            <WebSocketStatus readyState={readyState} />
+          </MotionCardTitle>
         </CardHeader>
         <CardContent className="flex flex-col space-y-5">
           {errorMessage && <AlertError message={errorMessage} />}
@@ -61,7 +51,7 @@ export default function SendPage() {
       </Card>
       {id && (
         <div className="fixed bottom-5 right-5 dark:text-white">
-          <span>Sender ID: {id}</span>
+          <strong>Sender ID: </strong> {id}
         </div>
       )}
     </>

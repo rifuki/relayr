@@ -81,6 +81,7 @@ export default function ReadyToTransfer() {
       isTransferCanceled: false,
       isTransferError: false,
     });
+    actions.clearTransferState();
 
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     actions.setFileTransferInfo({ totalChunks });
@@ -93,6 +94,7 @@ export default function ReadyToTransfer() {
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
     actions.setTransferConnection({ recipientId: null });
+    actions.setErrorMessage(null);
   };
 
   const handleRestartTransfer = () => {
