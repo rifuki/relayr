@@ -25,7 +25,6 @@ export default function SendFlow() {
   const { isTransferring, isTransferCompleted } = useFileSenderStore(
     (state) => state.transferStatus,
   );
-  const transferStatus = useFileSenderStore((state) => state.transferStatus);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -125,16 +124,6 @@ export default function SendFlow() {
     <TransferInProgress key="TransferInProgress" />,
     <SenderTransferCompleted key="senderTransferCompleted" />,
   ];
-
-  console.log({
-    file,
-    senderId,
-    transferShareLink,
-    recipientId,
-    isTransferring,
-    isTransferCompleted,
-    isCanceled: transferStatus.isTransferCanceled,
-  });
 
   // Fallback (should never happen ideally)
   return (

@@ -229,6 +229,10 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         uploadedSizeFromSender: msg.uploadedSize,
         receivedBytesFromClient: receivedBytes,
       });
+      actions.setErrorMessage(
+        "Mismatch in file transfer data. Transfer may be corrupted.",
+      );
+
       sendJsonMessage({
         type: "fileTransferAck",
         senderId,
@@ -241,9 +245,6 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         recipientTransferProgress: receiverTransferProgress,
       } satisfies FileTransferAckPayload);
 
-      actions.setErrorMessage(
-        "Mismatch in file transfer data. Transfer may be corrupted.",
-      );
       actions.setTransferStatus({
         isTransferError: true,
         isTransferring: false,

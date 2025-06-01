@@ -121,7 +121,9 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
       status: "success",
     } satisfies SenderAckRequest);
     actions.setTransferStatus({
+      isTransferring: false,
       isTransferError: false,
+      isTransferCanceled: false,
       isTransferCompleted: false,
     });
     actions.clearTransferState();
@@ -154,11 +156,13 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
         senderProgress !== ack.recipientTransferProgress
       ) {
         actions.setErrorMessage(
-          " Upload out of sync. Please try again or check your connection ",
+          "Upload out of sync. Please try again or check your connection",
         );
         actions.setTransferStatus({
-          isTransferError: true,
           isTransferring: false,
+          isTransferError: true,
+          isTransferCanceled: false,
+          isTransferCompleted: false,
         });
         return;
       }
@@ -173,6 +177,7 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
       actions.setTransferStatus({
         isTransferring: false,
         isTransferError: false,
+        isTransferCanceled: false,
         isTransferCompleted: true,
       });
     } else if (ack.status === "error") {
@@ -180,6 +185,7 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
         isTransferring: false,
         isTransferError: true,
         isTransferCanceled: false,
+        isTransferCompleted: false,
       });
       actions.setErrorMessage("Transfer failed: receiver reported an error.");
       console.error("[Sender] Receiver reported file transfer error", {
