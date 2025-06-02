@@ -10,7 +10,6 @@ interface TransferConnection {
 }
 
 interface FileTransferInfo {
-  totalSize: number;
   totalChunks: number;
 }
 
@@ -86,7 +85,6 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   isLoading: false,
   transferShareLink: null,
   fileTransferInfo: {
-    totalSize: 0,
     totalChunks: 0,
   },
   transferStatus: {
@@ -180,7 +178,6 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
       set({
         fileTransferInfo: {
           totalChunks: 0,
-          totalSize: 0,
         },
         transferStatus: {
           ...get().transferStatus,
