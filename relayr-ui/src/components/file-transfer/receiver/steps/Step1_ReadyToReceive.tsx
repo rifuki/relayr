@@ -15,7 +15,7 @@ import {
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
 
-export default function ReadyToReceive() {
+export default function Step1_ReadyToReceive() {
   const initId = useFileReceiverStore((state) => state.initId);
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,

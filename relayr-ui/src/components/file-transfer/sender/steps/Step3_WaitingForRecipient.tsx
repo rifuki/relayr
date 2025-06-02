@@ -27,7 +27,7 @@ const clockAnimation = {
   },
 };
 
-export default function WaitingForRecipient() {
+export default function Step3_WaitingForRecipient() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,

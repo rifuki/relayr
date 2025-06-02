@@ -2,10 +2,10 @@
 
 // External Libraries
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI Components
+import { motion } from "motion/react";
 
 // File Transfer Components
-import SendFlow from "@/components/file-transfer/sender/SendFlow";
-import { motion } from "motion/react";
+import SenderFlow from "@/components/file-transfer/sender/SenderFlow";
 
 // Custom UI Components
 import AlertError from "@/components/AlertError";
@@ -43,9 +43,10 @@ const MotionCardTitle = motion.create(CardTitle);
 // };
 
 export default function SendPage() {
+  const id = useInitId("sender");
+
   const { readyState } = useFileSenderSocket();
   const errorMessage = useFileSenderStore((state) => state.errorMessage);
-  const id = useInitId("sender");
 
   return (
     <>
@@ -57,7 +58,7 @@ export default function SendPage() {
         </CardHeader>
         <CardContent className="flex flex-col space-y-5">
           {errorMessage && <AlertError message={errorMessage} />}
-          <SendFlow />
+          <SenderFlow />
         </CardContent>
       </Card>
 

@@ -1,4 +1,4 @@
-import { ClockIcon } from "lucide-react";
+import { CloudDownload } from "lucide-react";
 import { motion } from "motion/react";
 
 import FileCard from "@/components/FileCard";
@@ -8,51 +8,33 @@ import ReceiverProgressBar from "@/components/ReceiverProgressBar";
 import TransferHeader from "@/components/TransferHeader";
 import { Badge } from "@/components/ui/badge";
 import {
-  fileListItemVariants,
   fileListWrapperVariants,
+  fileListItemVariants,
 } from "@/lib/animations";
 import {
   useFileReceiverActions,
   useFileReceiverStore,
+  useReceiverWebSocketHandlers,
 } from "@/stores/useFileReceiverStore";
-import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
+import { CancelRecipientTransferRequest } from "@/types/webSocketMessages";
 
-const clockAnimation = {
-  rotate: [0, 360],
-  transition: {
-    repeat: Infinity,
-    duration: 7.5,
-    ease: "linear",
-  },
-};
-
-export default function WaitingForSender() {
-  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+export default function Step3_Receiving() {
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
-  const { sendJsonMessage, getWebSocket } = useFileReceiverStore(
-    (state) => state.webSocketHandlers,
-  );
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+  const { sendJsonMessage } = useReceiverWebSocketHandlers();
   const actions = useFileReceiverActions();
 
   if (!senderId || !fileMetadata || !sendJsonMessage) return;
 
-  const handleCancelRecipientReady = () => {
+  const handleCancelRecipientTransfer = () => {
     sendJsonMessage({
-      type: "cancelRecipientReady",
+      type: "cancelRecipientTransfer",
       senderId,
-    } satisfies CancelRecipientReadyRequest);
-
-    const ws = getWebSocket?.();
-    if (!ws) {
-      actions.setErrorMessage("WebSocket is not available.");
-      return;
-    }
-    ws.close(1000, "Recipient canceled before transfer started");
-
-    actions.setTransferConnection({ recipientId: null, isConnected: false });
-    actions.setErrorMessage(null);
+    } satisfies CancelRecipientTransferRequest);
+    actions.setTransferStatus({ isTransferCanceled: true });
+    actions.setErrorMessage("You canceled the transfer");
   };
 
   return (
@@ -63,16 +45,21 @@ export default function WaitingForSender() {
       animate="show"
     >
       <TransferHeader
-        title="Getting Ready"
-        description="Waiting for the sender to start the upload"
+        title="Receiving File"
+        description="The file is being transferred. Please wait a moment"
       />
 
       <motion.div
-        className="flex flex-col items-center"
         variants={fileListItemVariants}
-        animate={clockAnimation}
+        animate={{ scale: [1, 1, 1, 1], rotate: [0, 5, -5, 0] }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "reverse",
+          repeatDelay: 1,
+        }}
       >
-        <ClockIcon className="h-15 w-15 my-10" />
+        <CloudDownload className="h-15 w-15 my-10" />
       </motion.div>
 
       <motion.div
@@ -80,7 +67,6 @@ export default function WaitingForSender() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
-
         <FileCard fileMetadata={fileMetadata} className="mt-2" />
       </motion.div>
 
@@ -90,11 +76,12 @@ export default function WaitingForSender() {
         <TextShimmer className="text-center" duration={1}>
           ⚠️ Transfer in progress — stay on this page.
         </TextShimmer>
+
         <MotionButton
-          onClick={handleCancelRecipientReady}
+          onClick={handleCancelRecipientTransfer}
           variant="destructive"
         >
-          Cancel
+          Abort Transfer
         </MotionButton>
       </motion.div>
     </motion.div>

@@ -9,7 +9,7 @@ import TransferHeader from "@/components/TransferHeader";
 import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
 import { useFileSenderActions } from "@/stores/useFileSenderStore";
 
-export default function FileSelector() {
+export default function Step1_FileSelector() {
   const actions = useFileSenderActions();
 
   const fileInputRef = useRef<HTMLInputElement>(null);

@@ -30,7 +30,7 @@ const successAnimation = {
   },
 };
 
-export default function ReceiverTransferCompleted() {
+export default function Step4_TransferCompleted() {
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );

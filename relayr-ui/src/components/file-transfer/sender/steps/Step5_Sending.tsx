@@ -19,7 +19,7 @@ import {
 } from "@/stores/useFileSenderStore";
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
 
-export default function TransferInProgress() {
+export default function Step5_Sending() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,

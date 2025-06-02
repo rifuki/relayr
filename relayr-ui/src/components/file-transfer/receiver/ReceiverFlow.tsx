@@ -4,14 +4,17 @@ import useMeasure from "react-use-measure";
 
 import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
 import InitialTransitionLoader from "@/components/motion-primitives/initial-transition-loader";
-import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 import { transitionPanelTransition } from "@/lib/animations";
-import ReadyToReceive from "./ReadyToReceive";
-import WaitingForSender from "./WaitingForSender";
-import ReceivingFile from "./ReceivingFile";
-import ReceiverTransferCompleted from "./ReceiverTransferCompleted";
+import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 
-export default function ReceiveFlow() {
+import {
+  Step1_ReadyToReceive,
+  Step2_WaitingForSender,
+  Step3_Receiving,
+  Step4_TransferCompleted,
+} from "./steps";
+
+export default function ReceiverFlow() {
   const { isConnected } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
@@ -52,11 +55,11 @@ export default function ReceiveFlow() {
   }, [isConnected, isTransferring, isTransferCompleted, currentStep]);
 
   const FLOW_COMPONENTS = [
-    <InitialTransitionLoader key="initialTransitionLoader" />,
-    <ReadyToReceive key="receiverReadyState" />,
-    <WaitingForSender key="waitingReadyState" />,
-    <ReceivingFile key="receivingFile" />,
-    <ReceiverTransferCompleted key="receiverTransferCompleted" />,
+    <InitialTransitionLoader key="step0" />,
+    <Step1_ReadyToReceive key="step1" />,
+    <Step2_WaitingForSender key="step2" />,
+    <Step3_Receiving key="step3" />,
+    <Step4_TransferCompleted key="step4" />,
   ];
 
   return (

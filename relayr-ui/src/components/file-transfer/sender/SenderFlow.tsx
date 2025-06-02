@@ -4,16 +4,19 @@ import useMeasure from "react-use-measure";
 
 import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
 import InitialTransitionLoader from "@/components/motion-primitives/initial-transition-loader";
-import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { transitionPanelTransition } from "@/lib/animations";
-import FileSelector from "./FileSelector";
-import SelectedFile from "./SelectedFile";
-import ReadyToTransfer from "./ReadyToTransfer";
-import WaitingForRecipient from "./WaitingForRecipient";
-import TransferInProgress from "./TransferInProgress";
-import SenderTransferCompleted from "./SenderTransferCompleted";
+import { useFileSenderStore } from "@/stores/useFileSenderStore";
 
-export default function SendFlow() {
+import {
+  Step1_FileSelector,
+  Step2_FileSelected,
+  Step3_WaitingForRecipient,
+  Step4_ReadyToSend,
+  Step5_Sending,
+  Step6_TransferCompleted,
+} from "./steps";
+
+export default function SenderFlow() {
   const file = useFileSenderStore((state) => state.file);
 
   const { senderId, recipientId } = useFileSenderStore(
@@ -32,7 +35,7 @@ export default function SendFlow() {
 
   useEffect(() => {
     function determineStep() {
-      // File selection state
+      // Step 1: Initial state, no file selected and no transfer connection yet
       if (
         !file &&
         !senderId &&
@@ -43,7 +46,7 @@ export default function SendFlow() {
       )
         return 1;
 
-      // File selected state
+      // Step 2: File is selected, but transfer connection not established yet
       if (
         file &&
         !senderId &&
@@ -54,7 +57,8 @@ export default function SendFlow() {
       )
         return 2;
 
-      // Waiting for recipient state
+      // Step 3: File selected, sender connection and share link available,
+      // but recipient not connected yet
       if (
         file &&
         senderId &&
@@ -65,7 +69,7 @@ export default function SendFlow() {
       )
         return 3;
 
-      // Ready to transfer state
+      // Step 4: Recipient connected, ready to start transfer
       if (
         file &&
         senderId &&
@@ -76,7 +80,7 @@ export default function SendFlow() {
       )
         return 4;
 
-      //
+      // Step 5: Transfer in progress
       if (
         file &&
         senderId &&
@@ -87,7 +91,7 @@ export default function SendFlow() {
       )
         return 5;
 
-      // Transfer completed state
+      // Step 6: Transfer completed
       if (
         file &&
         senderId &&
@@ -97,6 +101,7 @@ export default function SendFlow() {
       )
         return 6;
 
+      // Default fallback: unexpected state
       return 0;
     }
 
@@ -116,13 +121,13 @@ export default function SendFlow() {
   ]);
 
   const FLOW_COMPONENTS = [
-    <InitialTransitionLoader key="initialTransitionLoader" />,
-    <FileSelector key="fileSelector" />,
-    <SelectedFile key="selectedFile" />,
-    <WaitingForRecipient key="waitingForRecipient" />,
-    <ReadyToTransfer key="readyToTransfer" />,
-    <TransferInProgress key="TransferInProgress" />,
-    <SenderTransferCompleted key="senderTransferCompleted" />,
+    <InitialTransitionLoader key="step0" />,
+    <Step1_FileSelector key="step1" />,
+    <Step2_FileSelected key="step2" />,
+    <Step3_WaitingForRecipient key="step3" />,
+    <Step4_ReadyToSend key="step4" />,
+    <Step5_Sending key="step5" />,
+    <Step6_TransferCompleted key="step6" />,
   ];
 
   // Fallback (should never happen ideally)

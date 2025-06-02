@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "motion/react";
 
 // File Transfer Components
-import ReceiveFlow from "@/components/file-transfer/receiver/ReceiveFlow";
+import ReceiverFlow from "@/components/file-transfer/receiver/ReceiverFlow";
 
 // Custom UI Components
 import AlertError from "@/components/AlertError";
@@ -70,7 +70,7 @@ export default function ReceivePageContent() {
         </CardHeader>
         <CardContent className="flex flex-col space-y-5">
           {errorMessage && <AlertError message={errorMessage} />}
-          <ReceiveFlow />
+          <ReceiverFlow />
         </CardContent>
       </Card>
       {id && (

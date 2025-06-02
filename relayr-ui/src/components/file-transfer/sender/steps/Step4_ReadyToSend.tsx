@@ -24,7 +24,7 @@ import {
   fileListWrapperVariants,
 } from "@/lib/animations";
 
-export default function ReadyToTransfer() {
+export default function Step4_ReadyToSend() {
   const controls = useAnimation();
 
   const handleMouseEnter = () => {

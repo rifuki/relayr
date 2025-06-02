@@ -29,7 +29,7 @@ const checkmarkVariants = {
   },
 };
 
-export default function SelectedFile() {
+export default function Step2_FileSelected() {
   const initId = useFileSenderStore((state) => state.initId);
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
