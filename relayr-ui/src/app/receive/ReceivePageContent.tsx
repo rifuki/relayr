@@ -2,12 +2,11 @@
 
 import { useEffect } from "react";
 
-import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { Loader2Icon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import AlertError from "@/components/AlertError";
-import ReceiveFlow from "@/components/file-transfer/recipient/ReceiveFlow";
+import ReceiveFlow from "@/components/file-transfer/receiver/ReceiveFlow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WebSocketStatus from "@/components/WebSocketStatus";
 import { useRelayFileMetadata } from "@/hooks/query/useRelay";
@@ -17,10 +16,9 @@ import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
-
-function FetchingFileMetaLoadingAnimation() {
-  return <Loader2Icon className="h-15 w-15 animate-spin" />;
-}
+import MissingSenderId from "@/components/file-transfer/receiver/states/MissingSenderId";
+import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
+import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
 
 const MotionCardTitle = motion.create(CardTitle);
 
@@ -36,7 +34,6 @@ export default function ReceivePageContent() {
   const {
     data,
     isLoading: isFetchingFileMeta,
-    isError,
     error,
   } = useRelayFileMetadata(senderId ?? "");
 
@@ -47,10 +44,9 @@ export default function ReceivePageContent() {
     }
   }, [senderId, data, actions]);
 
-  if (!senderId) return <div>Please ask sender for the correct link</div>;
-  if (isError) return <div>Error: {error.message}</div>;
-
-  if (isFetchingFileMeta) return <FetchingFileMetaLoadingAnimation />;
+  if (!senderId) return <MissingSenderId />;
+  if (error) return <FileMetaError message={error.message} />;
+  if (isFetchingFileMeta) return <FileMetaLoading />;
 
   return (
     <>

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { ClockIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -30,39 +28,26 @@ const clockAnimation = {
 };
 
 export default function WaitingForRecipient() {
+  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
-  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const { senderId } = useFileSenderStore((state) => state.transferConnection);
-
   const { getWebSocket } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
-  const [isLoading, setIsLoading] = useState(false);
+  if (!fileMetadata || !transferShareLink) return;
 
   const handleStopSharing = () => {
-    if (isLoading) return;
-
-    setIsLoading(true);
+    actions.setErrorMessage(null);
 
     const ws = getWebSocket?.();
     if (!ws) {
       actions.setErrorMessage("WebSocket is not available.");
-      setIsLoading(false);
       return;
     }
 
     ws.close(1000, "Sender canceled the transfer link");
-
-    if (!transferShareLink || senderId) {
-      actions.setErrorMessage("Transfer stopped, all data reset.");
-    }
-
-    setIsLoading(false);
   };
-
-  if (!fileMetadata || !transferShareLink) return;
 
   return (
     <motion.div
@@ -104,11 +89,7 @@ export default function WaitingForRecipient() {
         <TextShimmer className="text-center mb-7" duration={1}>
           ⏳ Waiting for the recipient to connect...
         </TextShimmer>
-        <MotionButton
-          onClick={handleStopSharing}
-          disabled={isLoading}
-          variant="destructive"
-        >
+        <MotionButton onClick={handleStopSharing} variant="destructive">
           Stop Sharing
         </MotionButton>
       </motion.div>

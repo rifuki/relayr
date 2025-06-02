@@ -1,12 +1,13 @@
+// React
 import { Suspense } from "react";
 
-import { LoaderIcon } from "lucide-react";
-
+// Custom Components
+import ExperienceLoading from "@/components/loading/ExperienceLoading";
 import ReceivePageContent from "./ReceivePageContent";
 
 export default function ReceiverPageContent() {
   return (
-    <Suspense fallback={<LoaderIcon className="h-15 w-15 animate-spin" />}>
+    <Suspense fallback={<ExperienceLoading />}>
       <ReceivePageContent />
     </Suspense>
   );

@@ -1,35 +1,46 @@
 "use client";
 
-import { motion } from "motion/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// External Libraries
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI Components
+
+// Custom UI Components
 import WebSocketStatus from "@/components/WebSocketStatus";
-import SendFlow from "@/components/file-transfer/sender/SendFlow";
 import AlertError from "@/components/AlertError";
+
+// File Transfer Components
+import SendFlow from "@/components/file-transfer/sender/SendFlow";
+
+// Hooks
 import { useFileSenderSocket } from "@/hooks/useFileSenderSocket";
 import { useInitId } from "@/hooks/useInitId";
+
+// State Management (Store)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 
-//const cardVariants = {
-//  hidden: {
-//    opacity: 0,
-//    y: 50,
-//    scale: 1,
-//  },
-//  visible: {
-//    opacity: 1,
-//    y: 0,
-//    scale: 1,
-//    transition: {
-//      type: "spring",
-//      stiffness: 300,
-//      damping: 30,
-//      duration: 1,
-//    },
-//  },
-//};
-
-//const MotionCard = motion.create(Card);
+// Motion Components
+import { motion } from "motion/react";
 const MotionCardTitle = motion.create(CardTitle);
+// const MotionCard = motion.create(Card);
+
+// Motion Variants for Animations
+// const cardVariants = {
+//   hidden: {
+//     opacity: 0,
+//     y: 50,
+//     scale: 1,
+//   },
+//   visible: {
+//     opacity: 1,
+//     y: 0,
+//     scale: 1,
+//     transition: {
+//       type: "spring",
+//       stiffness: 300,
+//       damping: 30,
+//       duration: 1,
+//     },
+//   },
+// };
 
 export default function SendPage() {
   const { readyState } = useFileSenderSocket();
@@ -49,6 +60,7 @@ export default function SendPage() {
           <SendFlow />
         </CardContent>
       </Card>
+
       {id && (
         <div className="fixed bottom-5 right-5 dark:text-white">
           <strong>Sender ID: </strong> {id}
