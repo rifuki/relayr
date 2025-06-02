@@ -1,9 +1,14 @@
+// External Libraries
 import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 import { create } from "zustand";
 
+// Types
 import { FileMetadata } from "@/types/file";
+
+// Helper Functions
 import { sendNextChunk as sendNextChunkHelper } from "@/lib/sendNextChunk";
 
+// Interfaces for Transfer Connection, File Transfer Info, Transfer Status, and Progress
 interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
@@ -35,6 +40,7 @@ interface WebSocketHandlers {
   getWebSocket: (() => WebSocketLike | null) | undefined;
 }
 
+// FileSender Actions Interface: Actions interface for modifying the store
 interface FileSenderActions {
   setInitId: (id: string) => void;
   setFile: (file: File | null) => void;
@@ -51,6 +57,7 @@ interface FileSenderActions {
   clearTransferState: () => void;
 }
 
+// FileSender State Interface
 export interface FileSenderState {
   initId: string | null;
   file: File | null;
@@ -67,6 +74,7 @@ export interface FileSenderState {
   actions: FileSenderActions;
 }
 
+// Zustand Store for File Sender
 export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   initId: null,
   file: null,
@@ -126,7 +134,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
     setIsLoading: (isLoading) => set({ isLoading }),
     setTransferShareLink: (link) => set({ transferShareLink: link }),
     setFileTransferInfo: (fileTransferInfo) => {
-      if (get().transferStatus.isTransferCanceled) return;
+      if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
 
       set({
         fileTransferInfo: {
@@ -136,6 +144,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
       });
     },
     setTransferStatus: (transferStatus) => {
+      // Prevent status update if the transfer is canceled
       if (
         get().transferStatus.isTransferCanceled &&
         transferStatus.isTransferCanceled !== false
@@ -149,7 +158,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
             ...transferStatus,
           },
         });
-        get().actions.clearTransferState();
+        get().actions.clearTransferState(); // Clear transfer state if canceled
         return;
       }
 
@@ -161,7 +170,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
       });
     },
     setTransferProgress: (transferProgress) => {
-      if (get().transferStatus.isTransferCanceled) return;
+      if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
 
       set({
         transferProgress: {
@@ -196,6 +205,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   },
 }));
 
+// Custom Hooks for accessing store and actions
 export const useFileSenderActions = () =>
   useFileSenderStore((state) => state.actions);
 

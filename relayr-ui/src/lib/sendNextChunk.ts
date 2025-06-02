@@ -66,7 +66,7 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
       Math.floor((uploadedSize / file.size) * 100),
     );
 
-    const { isTransferCanceled } = get().transferStatus; // Dapatkan nilai terbaru
+    const { isTransferCanceled } = get().transferStatus;
     if (isTransferCanceled) {
       console.warn("Transfer canceled after chunk send.");
       return;

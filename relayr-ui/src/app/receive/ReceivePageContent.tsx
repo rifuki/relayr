@@ -1,25 +1,37 @@
 "use client";
 
+// React and Nexts.js
 import { useEffect } from "react";
-
-import { motion } from "motion/react";
 import { useSearchParams } from "next/navigation";
 
-import AlertError from "@/components/AlertError";
+// External Libraries
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI Components
+import { motion } from "motion/react";
+
+// File Transfer Components
 import ReceiveFlow from "@/components/file-transfer/receiver/ReceiveFlow";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Custom UI Components
+import AlertError from "@/components/AlertError";
 import WebSocketStatus from "@/components/WebSocketStatus";
-import { useRelayFileMetadata } from "@/hooks/query/useRelay";
+
+// Hooks
 import { UseFileReceiverSocket } from "@/hooks/useFileReceiverSocket";
 import { useInitId } from "@/hooks/useInitId";
+import { useRelayFileMetadata } from "@/hooks/query/useRelay";
+
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
+
+// State Components
 import MissingSenderId from "@/components/file-transfer/receiver/states/MissingSenderId";
 import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
 
+// Motion components
 const MotionCardTitle = motion.create(CardTitle);
 
 export default function ReceivePageContent() {

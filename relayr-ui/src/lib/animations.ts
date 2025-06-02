@@ -1,30 +1,34 @@
+// Animation Durations
 export const ANIMATION_DURATIONS = {
-  progress: 0.3,
-  wave: 1.5,
+  progress: 0.3, // Duration for progress animation
+  wave: 1.5, // Duration for wave animation
 };
 
+// Transition Settings for the Panel
 export const transitionPanelTransition = {
-  x: { type: "spring", stiffness: 300, damping: 30 },
-  opacity: { duration: 0.2 },
-  height: { type: "spring", stiffness: 500, damping: 50 },
+  x: { type: "spring", stiffness: 300, damping: 30 }, // Horizontal transition
+  opacity: { duration: 0.2 }, // Opacity transition duration
+  height: { type: "spring", stiffness: 500, damping: 50 }, // Height transition
 };
 
+// Variants for the File List Wrapper (container)
 export const fileListWrapperVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0 }, // Hidden state with no opacity
   show: {
-    opacity: 1,
+    opacity: 1, // Show state with full opacity
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
+      staggerChildren: 0.1, // Stagger the child elements' animations
+      delayChildren: 0.3, // Delay the child elements' animations
     },
   },
 };
 
+// Variants for individual File List Items
 export const fileListItemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 20 }, // Hidden state with opacity 0 and vertical offset
   show: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 30 },
+    opacity: 1, // Show state with full opacity
+    y: 0, // No vertical offset
+    transition: { type: "spring", stiffness: 300, damping: 30 }, // Spring animation for smooth transition
   },
 };

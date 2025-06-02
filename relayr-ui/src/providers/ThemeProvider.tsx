@@ -1,6 +1,9 @@
 "use client";
 
+// React
 import { ComponentProps } from "react";
+
+// External Libraries
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 
 export default function ThemeProvider({

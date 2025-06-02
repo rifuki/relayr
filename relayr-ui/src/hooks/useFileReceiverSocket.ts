@@ -1,11 +1,16 @@
+// React
 import { useEffect } from "react";
 
+// External Libraries
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
+
+// WebSocket Message Types
 import {
   CancelRecipientReadyRequest,
   CancelRecipientTransferRequest,
@@ -21,7 +26,13 @@ import {
   WebSocketReceiverTextMessageResponse,
 } from "@/types/webSocketMessages";
 
+/**
+ * Custom hook for managing WebSocket connection for file receiving
+ *
+ * @returns - An object containing the WebSocket ready state.
+ */
 export function UseFileReceiverSocket(): { readyState: ReadyState } {
+  // Extracting necessary values from the store
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const webSocketUrl = useFileReceiverStore((state) => state.webSocketUrl);
   const { senderId, isConnected } = useFileReceiverStore(
@@ -43,6 +54,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
   );
   const actions = useFileReceiverActions();
 
+  // Setting up WebSocket connection
   const { readyState, sendJsonMessage, getWebSocket } = useWebSocket(
     webSocketUrl,
     {
@@ -66,6 +78,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     },
   );
 
+  // Handle incoming Blob data from WebSocket
   const processWebSocketBlobMessage = async (blobData: Blob) => {
     const { isTransferCanceled } =
       useFileReceiverStore.getState().transferStatus;
@@ -98,6 +111,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Handle incoming text WebSocket messages
   const processWebSocketTextMessage = (
     wsMsg: WebSocketReceiverTextMessageResponse,
   ) => {
@@ -121,6 +135,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
       return;
     }
 
+    // Process specific WebSocket message types
     switch (wsMsg.type) {
       case "register":
         processRegisterMessage(wsMsg);
@@ -149,6 +164,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Process incoming 'register' WebSocket message
   const processRegisterMessage = (msg: RegisterResponse) => {
     actions.setErrorMessage(null);
     actions.setTransferConnection({ recipientId: msg.connId });
@@ -159,8 +175,9 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     } satisfies RecipientReadyRequest);
   };
 
+  // Process incoming 'cancelSenderReady' message
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const processCancelSenderReadyMessage = (_msg: CancelSenderReadyResponse) => {
+  const processCancelSenderReadyMessage = (msg: CancelSenderReadyResponse) => {
     const errMsg = "The sender has canceled the connection";
     getWebSocket()?.close(1000, errMsg);
     actions.setErrorMessage(errMsg);
@@ -171,6 +188,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     });
   };
 
+  // Process incoming 'senderAck' message
   const processSenderAckMessage = (msg: SenderAckResponse) => {
     switch (msg.requestType) {
       case "recipientReady":
@@ -182,6 +200,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Process incoming 'fileChunk' message
   const processFileChunkMessage = (msg: FileChunkResponse) => {
     const { isTransferCanceled } =
       useFileReceiverStore.getState().transferStatus;
@@ -213,6 +232,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.setTransferProgress({ sender: msg.senderTransferProgress });
   };
 
+  // Process incoming 'fileEnd' message
   const processFileEndMessage = (msg: FileEndResponse) => {
     const { isTransferCanceled } =
       useFileReceiverStore.getState().transferStatus;
@@ -268,8 +288,9 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.finalizeTransfer();
   };
 
+  // Process incoming 'restartTransfer' message
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const processRestartTransferMessage = (_msg: RestartTransferResponse) => {
+  const processRestartTransferMessage = (msg: RestartTransferResponse) => {
     actions.setErrorMessage(null);
     actions.setTransferStatus({
       isTransferCanceled: false,
@@ -279,6 +300,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.setErrorMessage("Sender restarted the transfer.");
   };
 
+  // Process incoming 'cancelSenderTransfer' message
   const processCancelSenderTransferMessage = (
     msg: CancelSenderTransferResponse,
   ) => {
@@ -287,6 +309,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.setErrorMessage(errorMsg);
   };
 
+  // WebSocket onClose handler
   const processWebSocketOnClose = (close: CloseEvent) => {
     console.info("❌ Disconnected", close.code);
 
@@ -300,6 +323,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Set WebSocket handlers in the store
   useEffect(() => {
     actions.setWebSocketHandlers({
       sendJsonMessage,
@@ -307,6 +331,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     });
   }, [sendJsonMessage, getWebSocket, actions]);
 
+  // Handle beforeunload event to cancel transfer if necessary
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       const canSend = readyState === WebSocket.OPEN && senderId && isConnected;

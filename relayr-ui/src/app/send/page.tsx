@@ -3,12 +3,13 @@
 // External Libraries
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI Components
 
-// Custom UI Components
-import WebSocketStatus from "@/components/WebSocketStatus";
-import AlertError from "@/components/AlertError";
-
 // File Transfer Components
 import SendFlow from "@/components/file-transfer/sender/SendFlow";
+import { motion } from "motion/react";
+
+// Custom UI Components
+import AlertError from "@/components/AlertError";
+import WebSocketStatus from "@/components/WebSocketStatus";
 
 // Hooks
 import { useFileSenderSocket } from "@/hooks/useFileSenderSocket";
@@ -18,7 +19,6 @@ import { useInitId } from "@/hooks/useInitId";
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 
 // Motion Components
-import { motion } from "motion/react";
 const MotionCardTitle = motion.create(CardTitle);
 // const MotionCard = motion.create(Card);
 

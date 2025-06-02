@@ -1,3 +1,10 @@
+// React
+import { useEffect } from "react";
+
+// External Libraries
+import { nanoid } from "nanoid";
+
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
@@ -6,9 +13,10 @@ import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
-import { useEffect } from "react";
-import { nanoid } from "nanoid";
 
+/**
+ * Generate a unique ID for sender/receiver, store it in localStorage, and return it.
+ */
 function generateAndStoreId(user: "sender" | "receiver"): string {
   const storedId = localStorage.getItem(user);
   if (!storedId) {
@@ -19,6 +27,9 @@ function generateAndStoreId(user: "sender" | "receiver"): string {
   return storedId;
 }
 
+/**
+ * Custom hook to initialize the user's ID and store it in the respective state.
+ */
 export function useInitId(user: "sender" | "receiver"): string | null {
   const senderInitId = useFileSenderStore((state) => state.initId);
   const receiverInitId = useFileReceiverStore((state) => state.initId);

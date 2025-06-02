@@ -1,8 +1,11 @@
+// External Libraries
 import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 import { create } from "zustand";
 
+// Types
 import { FileMetadata } from "@/types/file";
 
+// Interfaces for Transfer Connection, File Transfer Info, Transfer Status, and Progress
 interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
@@ -35,6 +38,7 @@ interface WebSocketHandlers {
   getWebSocket: (() => WebSocketLike | null) | undefined;
 }
 
+// FileReceiver Actions Interface: Actions interface for modifying the store
 interface FileReceiverActions {
   setInitId: (id: string) => void;
   setTransferConnection: (
@@ -52,6 +56,7 @@ interface FileReceiverActions {
   finalizeTransfer: () => void;
 }
 
+// FileReceiver State Interface
 interface FileReceiverState {
   initId: string | null;
   transferConnection: TransferConnection;
@@ -67,6 +72,7 @@ interface FileReceiverState {
   actions: FileReceiverActions;
 }
 
+// Zustand Store for File Receiver
 export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   initId: null,
   transferConnection: {
@@ -119,7 +125,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
       }),
     setFileTransferInfo: (fileTransferInfo) => {
-      if (get().transferStatus.isTransferCanceled) return;
+      if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
 
       set({
         fileTransferInfo: {
@@ -129,6 +135,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
       });
     },
     setTransferStatus: (transferStatus) => {
+      // Prevent status update if the transfer is canceled
       if (
         get().transferStatus.isTransferCanceled &&
         transferStatus.isTransferCanceled !== false
@@ -142,7 +149,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
             ...transferStatus,
           },
         });
-        get().actions.clearTransferState();
+        get().actions.clearTransferState(); // Clear transfer state if canceled
         return;
       }
 
@@ -154,7 +161,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
       });
     },
     setTransferProgress: (transferProgress) => {
-      if (get().transferStatus.isTransferCanceled) return;
+      if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
 
       set({
         transferProgress: {
@@ -164,7 +171,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
       });
     },
     setReceivedChunkData: (receivedChunkData: ArrayBuffer) => {
-      if (get().transferStatus.isTransferCanceled) return;
+      if (get().transferStatus.isTransferCanceled) return; // Don't store data if transfer is canceled
 
       set({
         receivedChunkData: [...get().receivedChunkData, receivedChunkData],
@@ -197,12 +204,15 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         type: fileMetadata?.type || "application/octet-stream",
       });
 
+      // File size mismatch validation
       if (blobData.size === 0 || blobData.size !== fileMetadata?.size) {
         set({
           errorMessage: "File reconstruction failed. Size mismatch.",
           transferStatus: {
             ...get().transferStatus,
+            isTransferring: false,
             isTransferError: true,
+            isTransferCanceled: false,
             isTransferCompleted: false,
           },
         });
@@ -212,10 +222,12 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         return;
       }
 
+      // Revoke existing file URL if any
       if (fileUrl) {
         URL.revokeObjectURL(fileUrl);
       }
 
+      // Create a new file URL for the reconstructed file
       const newFileUrl = URL.createObjectURL(blobData);
 
       set({
@@ -224,6 +236,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
           ...get().transferStatus,
           isTransferring: false,
           isTransferError: false,
+          isTransferCanceled: false,
           isTransferCompleted: true,
         },
       });
@@ -231,6 +244,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   },
 }));
 
+// Custom Hooks for accessing store and actions
 export const useFileReceiverActions = () =>
   useFileReceiverStore((state) => state.actions);
 

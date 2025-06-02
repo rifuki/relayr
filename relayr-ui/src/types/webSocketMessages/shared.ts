@@ -2,10 +2,16 @@
 // 🟦 Shared Types
 // ====================================================
 
+// Acknowledgement request type for the sender (to notify when the recipient is ready)
 export type SenderAckRequestType = "recipientReady";
-export type AckStatus = "success" | "error";
-export type fileTransferAckStatus = "acknowledged" | "completed" | "error";
 
+// Acknowledgement status for transfer operations
+export type AckStatus = "success" | "error";
+
+// Status for file transfer acknowledgment
+export type FileTransferAckStatus = "acknowledged" | "completed" | "error";
+
+// Error response structure
 export interface ErrorMessageResponse {
   success: false;
   message: string;
@@ -13,6 +19,7 @@ export interface ErrorMessageResponse {
   timestamp: string;
 }
 
+// Register response structure for successful connection registration
 export interface RegisterResponse {
   success: true;
   type: "register";
