@@ -27,9 +27,10 @@ import {
 } from "@/types/webSocketMessages";
 
 /**
- * Custom hook for managing WebSocket connection for file receiving
+ * Custom hook to manage the WebSocket connection for file receiving.
+ * It handles processing incoming messages, managing transfer status, and sending acknowledgments.
  *
- * @returns - An object containing the WebSocket ready state.
+ * @return {Object} - Contains the WebSocket ready state.
  */
 export function UseFileReceiverSocket(): { readyState: ReadyState } {
   // Extracting necessary values from the store

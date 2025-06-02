@@ -34,6 +34,7 @@ interface TransferProgress {
   receiver: number;
 }
 
+// WebSocket Handlers Interface: Contains functions for sending messages and getting WebSocket instance
 interface WebSocketHandlers {
   sendJsonMessage: ((msg: unknown) => void) | undefined;
   sendMessage: ((msg: string | ArrayBuffer | Blob) => void) | undefined;

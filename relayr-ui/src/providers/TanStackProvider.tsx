@@ -12,6 +12,15 @@ interface TanStackProviderProps {
   children: ReactNode;
 }
 
+/**
+ * TanStackProvider Component
+ *
+ * This component initializes the TanStack Query Client and provides it to the application.
+ * It wraps the children components with the QueryClientProvider to enable data fetching capabilities.
+ *
+ * @param {TanStackProviderProps} props - The properties for the provider, including children components.
+ * @returns JSX.Element The QueryClientProvider wrapping the children components.
+ */
 export default function TanStackProvider({ children }: TanStackProviderProps) {
   // Initialize QueryClient
   const [queryClient] = useState(
