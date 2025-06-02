@@ -4,7 +4,7 @@ interface WebSocketStatusProps {
   readyState: number;
 }
 
-export default function WebSocketStatus({ readyState }: WebSocketStatusProps) {
+export default function TransferConnectionStatus({ readyState }: WebSocketStatusProps) {
   let statusText = "";
   let statusColor = "";
 

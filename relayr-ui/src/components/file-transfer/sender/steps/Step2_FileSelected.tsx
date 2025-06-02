@@ -3,8 +3,6 @@ import { useState } from "react";
 import { CheckCircle2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
-import TransferHeader from "@/components/TransferHeader";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { WS_RELAY_API_URL } from "@/lib/constants";
 import {
@@ -15,6 +13,7 @@ import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
+import { TransferFileCard, TransferHeader } from "../../shared";
 
 const checkmarkVariants = {
   hidden: { scale: 0, opacity: 0 },
@@ -76,7 +75,7 @@ export default function Step2_FileSelected() {
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <FileCard fileMetadata={fileMetadata} />
+          <TransferFileCard fileMetadata={fileMetadata} />
         </motion.div>
       </motion.div>
 

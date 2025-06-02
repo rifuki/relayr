@@ -2,10 +2,8 @@ import { ClockIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
 import { Badge } from "@components/ui/badge";
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import TransferHeader from "@/components/TransferHeader";
 import ShareableLinkInput from "@/components/ShareableLinkInput";
 import {
   useFileSenderActions,
@@ -16,6 +14,7 @@ import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Clock animation for waiting state
 const clockAnimation = {
@@ -79,7 +78,7 @@ export default function Step3_WaitingForRecipient() {
 
         <ShareableLinkInput text={transferShareLink} className="mt-2" />
 
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
       <motion.div

@@ -1,15 +1,16 @@
-import { motion } from "motion/react";
-import { Alert, AlertDescription } from "./ui/alert";
 import { AlertCircleIcon } from "lucide-react";
+import { motion } from "motion/react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const MotionAlert = motion.create(Alert);
+const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
 
 interface AlertErrorProps {
   message: string;
 }
 
-const MotionAlert = motion.create(Alert);
-const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
-
-export default function AlertError({ message }: AlertErrorProps) {
+export default function TransferAlertError({ message }: AlertErrorProps) {
   return (
     <MotionAlert
       variant="destructive"

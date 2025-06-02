@@ -1,12 +1,9 @@
 import { CloudUploadIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import SenderProgressBar from "@/components/SenderProgressBar";
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import TransferHeader from "@/components/TransferHeader";
 import { Badge } from "@/components/ui/badge";
 import {
   fileListItemVariants,
@@ -18,6 +15,11 @@ import {
   useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
+import {
+  SenderTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
 
 export default function Step5_Sending() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -74,10 +76,10 @@ export default function Step5_Sending() {
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
         <ShareableLinkInput text={transferShareLink} className="mt-2" />
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <SenderProgressBar />
+      <SenderTransferProgress />
 
       <motion.div
         variants={fileListItemVariants}

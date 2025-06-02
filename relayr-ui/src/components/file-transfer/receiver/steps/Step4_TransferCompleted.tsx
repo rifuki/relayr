@@ -1,16 +1,18 @@
 import { FileCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import ReceiverProgressBar from "@/components/ReceiverProgressBar";
-import TransferHeader from "@/components/TransferHeader";
 import { Badge } from "@/components/ui/badge";
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import {
+  ReceiverTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
 
 const burstAnimation = {
   scale: [1, 2, 0],
@@ -85,10 +87,10 @@ export default function Step4_TransferCompleted() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <ReceiverProgressBar />
+      <ReceiverTransferProgress />
 
       <motion.div
         onClick={handleDownloadFile}

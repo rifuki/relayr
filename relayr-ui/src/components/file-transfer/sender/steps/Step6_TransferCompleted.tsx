@@ -3,10 +3,7 @@ import { motion } from "motion/react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import TransferHeader from "@/components/TransferHeader";
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import SenderProgressBar from "@/components/SenderProgressBar";
 import {
   fileListItemVariants,
   fileListWrapperVariants,
@@ -16,6 +13,11 @@ import {
   useFileSenderStore,
   useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
+import {
+  SenderTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
 
 const burstAnimation = {
   scale: [1, 2, 0],
@@ -104,9 +106,9 @@ export default function Step6_TransferCompleted() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
 
-        <SenderProgressBar />
+        <SenderTransferProgress />
 
         <Input value={transferShareLink} className="w-full" readOnly disabled />
       </motion.div>

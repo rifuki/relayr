@@ -4,10 +4,7 @@ import { motion, useAnimation } from "motion/react";
 import { HardDriveUpload } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import SenderProgressBar from "@/components/SenderProgressBar";
-import TransferHeader from "@/components/TransferHeader";
 import ShareableLinkInput from "@/components/ShareableLinkInput";
 import { CHUNK_SIZE } from "@/lib/constants";
 import {
@@ -23,6 +20,11 @@ import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+import {
+  SenderTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
 
 export default function Step4_ReadyToSend() {
   const controls = useAnimation();
@@ -127,10 +129,10 @@ export default function Step4_ReadyToSend() {
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
         <ShareableLinkInput text={transferShareLink} className="mt-2" />
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <SenderProgressBar />
+      <SenderTransferProgress />
 
       <motion.div
         variants={fileListItemVariants}

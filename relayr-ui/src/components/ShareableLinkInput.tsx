@@ -1,7 +1,9 @@
+import { nanoid } from "nanoid";
+
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+
 import CopyButton from "./CopyButton";
-import { nanoid } from "nanoid";
 
 interface ShareableLinkInputProps {
   text: string;

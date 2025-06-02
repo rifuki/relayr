@@ -5,9 +5,9 @@ import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import TransferHeader from "@/components/TransferHeader";
 import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
 import { useFileSenderActions } from "@/stores/useFileSenderStore";
+import { TransferHeader } from "../../shared";
 
 export default function Step1_FileSelector() {
   const actions = useFileSenderActions();

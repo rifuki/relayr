@@ -15,7 +15,10 @@ interface FileCardProps {
   className?: string;
 }
 
-export default function FileCard({ fileMetadata, className }: FileCardProps) {
+export default function TransferFileCard({
+  fileMetadata,
+  className,
+}: FileCardProps) {
   const fileType = fileMetadata.type.split("/")[0];
   const fileSize = formatFileSize(fileMetadata.size);
 

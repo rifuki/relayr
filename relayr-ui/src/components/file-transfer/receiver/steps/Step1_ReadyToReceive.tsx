@@ -1,9 +1,7 @@
 import { CloudLightningIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import TransferHeader from "@/components/TransferHeader";
 import { Badge } from "@/components/ui/badge";
 import {
   fileListItemVariants,
@@ -14,6 +12,7 @@ import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
+import { TransferFileCard, TransferHeader } from "../../shared";
 
 export default function Step1_ReadyToReceive() {
   const initId = useFileReceiverStore((state) => state.initId);
@@ -56,7 +55,7 @@ export default function Step1_ReadyToReceive() {
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
 
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
       <motion.div

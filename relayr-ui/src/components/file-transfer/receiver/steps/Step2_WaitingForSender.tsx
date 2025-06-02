@@ -1,11 +1,8 @@
 import { ClockIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import ReceiverProgressBar from "@/components/ReceiverProgressBar";
-import TransferHeader from "@/components/TransferHeader";
 import { Badge } from "@/components/ui/badge";
 import {
   fileListItemVariants,
@@ -16,6 +13,11 @@ import {
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
 import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
+import {
+  ReceiverTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
 
 const clockAnimation = {
   rotate: [0, 360],
@@ -81,10 +83,10 @@ export default function Step2_WaitingForSender() {
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
 
-        <FileCard fileMetadata={fileMetadata} className="mt-2" />
+        <TransferFileCard fileMetadata={fileMetadata} className="mt-2" />
       </motion.div>
 
-      <ReceiverProgressBar />
+      <ReceiverTransferProgress />
 
       <motion.div className="w-full flex flex-col space-y-3 mt-2">
         <TextShimmer className="text-center" duration={1}>

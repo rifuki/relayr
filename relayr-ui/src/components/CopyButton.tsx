@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { toast } from "sonner";
-import { copyToClipboard } from "@/lib/utils";
+
 import { Button } from "./ui/button";
+
+import { copyToClipboard } from "@/lib/utils";
 
 interface CopyButtonProps {
   text: string;

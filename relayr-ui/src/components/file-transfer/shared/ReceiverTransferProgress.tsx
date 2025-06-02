@@ -1,18 +1,21 @@
 import { motion } from "motion/react";
 
-import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
+import { fileListItemVariants, ANIMATION_DURATIONS } from "@/lib/animations";
+import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 import { formatFileSize } from "@/lib/utils";
-import { useFileSenderStore } from "@/stores/useFileSenderStore";
-import { TextShimmer } from "./motion-primitives/text-shimmer";
+import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
-export default function SenderProgressBar() {
-  const { size: fileSize } = useFileSenderStore((state) => state.fileMetadata!);
-  const { offset, isTransferring, isTransferCompleted } = useFileSenderStore(
-    (state) => state.transferStatus,
-  );
-  const { receiver: receiverProgress } = useFileSenderStore(
+export default function ReceiverTransferProgress() {
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+
+  const { receivedBytes, isTransferring, isTransferCompleted } =
+    useFileReceiverStore((state) => state.transferStatus);
+
+  const { receiver: receiverProgress } = useFileReceiverStore(
     (state) => state.transferProgress,
   );
+
+  if (!fileMetadata) return null;
 
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
@@ -21,9 +24,9 @@ export default function SenderProgressBar() {
           {isTransferCompleted ? (
             <TextShimmer>Transfer Completed</TextShimmer>
           ) : isTransferring ? (
-            `${formatFileSize(offset)} / ${formatFileSize(fileSize)}`
+            `${formatFileSize(receivedBytes)} / ${formatFileSize(fileMetadata.size)}`
           ) : (
-            <TextShimmer>Click to start the transfer</TextShimmer>
+            <TextShimmer>Waiting for the sender</TextShimmer>
           )}
         </span>
         <span>{receiverProgress}%</span>
