@@ -1,10 +1,21 @@
+// External Libraries
 import { motion } from "motion/react";
 
+// Props interface for TransferConnectionStatus component
 interface WebSocketStatusProps {
   readyState: number;
 }
 
-export default function TransferConnectionStatus({ readyState }: WebSocketStatusProps) {
+/**
+ * TransferConnectionStatus component displays the current status of a WebSocket connection.
+ * It uses motion for animations and provides visual feedback based on the WebSocket readyState.
+ *
+ * @param {WebSocketStatusProps} props - Component props containing the WebSocket readyState.
+ * @returns JSX.Element - A span element showing the WebSocket connection status.
+ */
+export default function TransferConnectionStatus({
+  readyState,
+}: WebSocketStatusProps) {
   let statusText = "";
   let statusColor = "";
 

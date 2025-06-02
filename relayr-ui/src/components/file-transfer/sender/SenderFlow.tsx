@@ -1,12 +1,20 @@
+// React
 import { useEffect, useState } from "react";
 
+// External Libraries
 import useMeasure from "react-use-measure";
 
-import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
+// Motion-Primitives UI Components
 import InitialTransitionLoader from "@/components/motion-primitives/initial-transition-loader";
+import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
+
+// Animations
 import { transitionPanelTransition } from "@/lib/animations";
+
+// State Management (Store)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 
+// Step Components
 import {
   Step1_FileSelector,
   Step2_FileSelected,
@@ -16,9 +24,16 @@ import {
   Step6_TransferCompleted,
 } from "./steps";
 
+/**
+ * SenderFlow Component
+ * This component manages the flow of file sending steps, transitioning between different states
+ * based on the file selection and transfer status.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function SenderFlow() {
+  // Retrieve file and connection/transfer status from the store
   const file = useFileSenderStore((state) => state.file);
-
   const { senderId, recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
@@ -29,11 +44,16 @@ export default function SenderFlow() {
     (state) => state.transferStatus,
   );
 
+  // State to manage the current step in the flow and the direction of transition
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
+
+  // Dynamic measurement hook to get the bounds (height) of the container for smooth transitions
   const [ref, bounds] = useMeasure();
 
+  // useEffect hook to determine the current step based on connection and transfer status
   useEffect(() => {
+    // Function to determine the appropriate step based on the current status
     function determineStep() {
       // Step 1: Initial state, no file selected and no transfer connection yet
       if (
@@ -106,6 +126,8 @@ export default function SenderFlow() {
     }
 
     const newStep = determineStep();
+
+    // If the new step is different from the current step, update the state and direction
     if (newStep !== currentStep) {
       setDirection(newStep > currentStep ? 1 : -1);
       setCurrentStep(newStep);
@@ -120,18 +142,19 @@ export default function SenderFlow() {
     currentStep,
   ]);
 
+  // Array containing the components for each step, mapped to the current step
   const FLOW_COMPONENTS = [
-    <InitialTransitionLoader key="step0" />,
-    <Step1_FileSelector key="step1" />,
-    <Step2_FileSelected key="step2" />,
-    <Step3_WaitingForRecipient key="step3" />,
-    <Step4_ReadyToSend key="step4" />,
-    <Step5_Sending key="step5" />,
-    <Step6_TransferCompleted key="step6" />,
+    <InitialTransitionLoader key="step0" />, // Initial loading state before file selection
+    <Step1_FileSelector key="step1" />, // Step 1: File selection
+    <Step2_FileSelected key="step2" />, // Step 2: File selected, but transfer not yet started
+    <Step3_WaitingForRecipient key="step3" />, // Step 3: Waiting for recipient to connect
+    <Step4_ReadyToSend key="step4" />, // Step 4: Ready to send the file
+    <Step5_Sending key="step5" />, // Step 5: Sending file
+    <Step6_TransferCompleted key="step6" />, // Step 6: Transfer completed
   ];
 
-  // Fallback (should never happen ideally)
   return (
+    // TransitionPanel component to manage transitions between steps
     <TransitionPanel
       activeIndex={currentStep}
       variants={{

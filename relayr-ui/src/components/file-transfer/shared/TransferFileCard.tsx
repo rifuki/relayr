@@ -1,3 +1,4 @@
+// External Libraries
 import {
   ArchiveIcon,
   FileAudioIcon,
@@ -7,19 +8,33 @@ import {
   ImageIcon,
 } from "lucide-react";
 
+// Utility functions for classnames and file size formatting
 import { cn, formatFileSize } from "@/lib/utils";
+
+// Types
 import { FileMetadata } from "@/types/file";
 
+// Props interface for TransferFileCard component
 interface FileCardProps {
   fileMetadata: FileMetadata;
   className?: string;
 }
 
+/**
+ * TransferFileCard component displays a card with file metadata including name, type, and size.
+ * It uses icons to represent different file types and formats the file size into a human-readable string.
+ *
+ * @param {FileCardProps} props - Component props containing file metadata and optional className.
+ * @return JSX.Element - A card UI element displaying file information.
+ */
 export default function TransferFileCard({
   fileMetadata,
   className,
 }: FileCardProps) {
+  // Extract the general file type (e.g., image, video, audio) from MIME type
   const fileType = fileMetadata.type.split("/")[0];
+
+  // Format the file size into a readable string (e.g., "1.2 MB")
   const fileSize = formatFileSize(fileMetadata.size);
 
   return (
@@ -53,6 +68,7 @@ export default function TransferFileCard({
   );
 }
 
+// Return the appropriate icon component based on the file type
 function getFileIcon(type: string) {
   switch (type) {
     case "image":
@@ -70,6 +86,7 @@ function getFileIcon(type: string) {
   }
 }
 
+// Return a human-readable label for the file type based on MIME type
 function getFileTypeLabel(mimeType: string) {
   const parts = mimeType.split("/");
   if (parts.length !== 2) return "unknown";
@@ -79,14 +96,14 @@ function getFileTypeLabel(mimeType: string) {
 
   switch (type) {
     case "image":
-      return subtype.toUpperCase();
     case "video":
-      return subtype.toUpperCase();
     case "audio":
-      return subtype.toUpperCase();
     case "text":
+      // Capitalize first letter of subtype
       return `${subtype.charAt(0).toUpperCase()}${subtype.slice(1)}`;
+
     case "application":
+      // Special cases for common application subtypes
       if (subtype === "pdf") return "PDF";
       if (
         subtype.includes("zip") ||
@@ -100,6 +117,7 @@ function getFileTypeLabel(mimeType: string) {
       if (subtype.includes("presentation") || subtype.includes("powerpoint"))
         return "Presentation";
       return `${subtype.charAt(0).toUpperCase()}${subtype.slice(1)}`;
+
     default:
       return "File";
   }

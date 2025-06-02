@@ -1,8 +1,16 @@
+// External Libraries
+import { LinkIcon } from "lucide-react";
 import { motion } from "motion/react";
 
+// Internal Components
 import CardState from "./CardState";
-import { LinkIcon } from "lucide-react";
 
+/**
+ * MissingSenderId component displays an error state when the sender ID is missing.
+ * It shows a link icon and a message indicating that the transfer link is invalid.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function MissingSenderId() {
   return (
     <CardState>

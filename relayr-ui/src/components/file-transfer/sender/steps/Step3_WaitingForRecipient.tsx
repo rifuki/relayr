@@ -1,22 +1,32 @@
+// External Libraries
 import { ClockIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
 import { Badge } from "@components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
+
+// Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
+import { TransferFileCard, TransferHeader } from "../../shared";
+
+// Animation Variants
+import {
+  fileListItemVariants,
+  fileListWrapperVariants,
+} from "@/lib/animations";
+
+// State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
   useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
-import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
-import { TransferFileCard, TransferHeader } from "../../shared";
 
-// Clock animation for waiting state
+// Motion Animation
 const clockAnimation = {
   rotate: [0, 360],
   transition: {
@@ -26,6 +36,13 @@ const clockAnimation = {
   },
 };
 
+/**
+ * Step3_WaitingForRecipient component represents the third step in the file sending process.
+ * It displays a header, a clock icon indicating waiting status, and the file metadata.
+ * The component allows the sender to stop sharing the transfer link if needed.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function Step3_WaitingForRecipient() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(

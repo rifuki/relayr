@@ -1,8 +1,18 @@
+// External Libraries
 import { motion } from "motion/react";
 
+// Internal Components
 import CardState from "./CardState";
+
+// Motion-Primitives UI Components
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
+/**
+ * FileMetaLoading component displays a loading state for file metadata retrieval.
+ * It shows a loading message while fetching file information from the sender.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function FileMetaLoading() {
   return (
     <CardState>

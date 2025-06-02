@@ -1,26 +1,46 @@
+// External Libraries
 import { CloudUploadIcon } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
+import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
+
+// Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import { Badge } from "@/components/ui/badge";
-import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-  useSenderWebSocketHandlers,
-} from "@/stores/useFileSenderStore";
-import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
 import {
   SenderTransferProgress,
   TransferFileCard,
   TransferHeader,
 } from "../../shared";
 
+// Animation Variants
+import {
+  fileListItemVariants,
+  fileListWrapperVariants,
+} from "@/lib/animations";
+
+// State Management (Store)
+import {
+  useFileSenderActions,
+  useFileSenderStore,
+  useSenderWebSocketHandlers,
+} from "@/stores/useFileSenderStore";
+
+// Types
+import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
+
+/**
+ * Step5_Sending component represents the fifth step in the file sending process.
+ * It displays a header, a cloud upload icon, recipient ID, shareable link input,
+ * and file metadata. It also shows the transfer progress and allows the sender to
+ * cancel the transfer.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function Step5_Sending() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(

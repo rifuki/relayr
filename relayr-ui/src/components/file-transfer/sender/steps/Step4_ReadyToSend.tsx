@@ -1,31 +1,54 @@
+// React
 import { useEffect } from "react";
 
+// External Libraries
 import { motion, useAnimation } from "motion/react";
 import { HardDriveUpload } from "lucide-react";
 
+// ShadCN UI Components
 import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
+
+// Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import { CHUNK_SIZE } from "@/lib/constants";
-import {
-  CancelSenderReadyRequest,
-  RestartTransferRequest,
-} from "@/types/webSocketMessages";
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-  useSenderWebSocketHandlers,
-} from "@/stores/useFileSenderStore";
-import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
 import {
   SenderTransferProgress,
   TransferFileCard,
   TransferHeader,
 } from "../../shared";
 
+// Animation Variants
+import {
+  fileListItemVariants,
+  fileListWrapperVariants,
+} from "@/lib/animations";
+
+// Constants
+import { CHUNK_SIZE } from "@/lib/constants";
+
+// State Management (Store)
+import {
+  useFileSenderActions,
+  useFileSenderStore,
+  useSenderWebSocketHandlers,
+} from "@/stores/useFileSenderStore";
+
+// Types
+import {
+  CancelSenderReadyRequest,
+  RestartTransferRequest,
+} from "@/types/webSocketMessages";
+
+/**
+ * Step4_ReadyToSend component represents the fourth step in the file sending process.
+ * It displays a header, a hard drive upload icon, recipient ID, shareable link input,
+ * and file metadata.
+ * It allows the sender to start the file transfer or cancel the setup.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function Step4_ReadyToSend() {
   const controls = useAnimation();
 

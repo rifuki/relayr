@@ -1,10 +1,25 @@
+// External Libraries
 import { motion } from "motion/react";
 
-import { fileListItemVariants, ANIMATION_DURATIONS } from "@/lib/animations";
-import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
-import { formatFileSize } from "@/lib/utils";
+// Motion-Primitives UI Components
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
+// Constants and variants for animation durations and motion variants
+import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
+
+// Utilities
+import { formatFileSize } from "@/lib/utils";
+
+// State Management (Store)
+import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+
+/**
+ * ReceiverTransferProgress component displays the progress of a file transfer
+ * from the receiver's perspective. It shows the amount of data received,
+ * total file size, and the percentage of transfer completion.
+ *
+ * @returns JSX.Element - A UI element showing transfer progress with animations.
+ */
 export default function ReceiverTransferProgress() {
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
 

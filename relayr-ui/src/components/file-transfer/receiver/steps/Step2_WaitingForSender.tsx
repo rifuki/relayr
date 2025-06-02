@@ -1,24 +1,37 @@
+// External Libraries
 import { ClockIcon } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
+import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import { Badge } from "@/components/ui/badge";
-import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
-import {
-  useFileReceiverActions,
-  useFileReceiverStore,
-} from "@/stores/useFileReceiverStore";
-import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
+
+// Internal Components
 import {
   ReceiverTransferProgress,
   TransferFileCard,
   TransferHeader,
 } from "../../shared";
 
+// Animations Variants
+import {
+  fileListItemVariants,
+  fileListWrapperVariants,
+} from "@/lib/animations";
+
+// State Management (Store)
+import {
+  useFileReceiverActions,
+  useFileReceiverStore,
+} from "@/stores/useFileReceiverStore";
+
+// Types
+import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
+
+// Motion Animation
 const clockAnimation = {
   rotate: [0, 360],
   transition: {
@@ -28,11 +41,18 @@ const clockAnimation = {
   },
 };
 
+/**
+ * Step2_WaitingForSender component represents the second step in the file receiving process.
+ * It displays a header, a clock icon indicating waiting status, and the file metadata.
+ * The component allows the recipient to cancel the waiting state if needed.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function Step2_WaitingForSender() {
-  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { sendJsonMessage, getWebSocket } = useFileReceiverStore(
     (state) => state.webSocketHandlers,
   );

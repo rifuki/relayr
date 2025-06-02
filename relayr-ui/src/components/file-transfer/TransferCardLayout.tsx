@@ -2,8 +2,10 @@
 import { ReactNode } from "react";
 
 // External Libraries
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN UI Components
 import { motion } from "motion/react";
+
+// ShadCN UI Components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Custom UI Components
 import { ReadyState } from "react-use-websocket";
@@ -32,15 +34,24 @@ const MotionCardTitle = motion.create(CardTitle);
 //     },
 //   },
 // };
-//
+
+// Props interface for TransferCardLayout component
 interface TransferCardLayoutProps {
-  readyState: ReadyState;
-  errorMessage: string | null;
-  idLabel: string;
-  connectionId: string | null;
-  children: ReactNode;
+  readyState: ReadyState; // WebSocket ready state for connection status display
+  errorMessage: string | null; // Error message to show alert if present
+  idLabel: string; // Label for the connection ID display (e.g., "Receiver", "Sender")
+  connectionId: string | null; // Unique connection ID to display in UI
+  children: ReactNode; // Child components/content to render inside the card
 }
 
+/**
+ * TransferCardLayout component renders a card layout for file transfer operations.
+ * It displays the connection status, any error messages, and the connection ID.
+ * The card contains a header with the connection status and a content area for children components.
+ *
+ * @param {TransferCardLayoutProps} props - Component props containing WebSocket state, error message, IDs, and children.
+ * @returns JSX.Element - A card UI element with connection status and content area.
+ */
 export default function TransferCardLayout({
   readyState,
   errorMessage,

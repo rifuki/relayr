@@ -1,12 +1,22 @@
+// External Libraries
+import { FileXIcon } from "lucide-react";
 import { motion } from "motion/react";
 
+// Internal Components
 import CardState from "./CardState";
-import { FileXIcon } from "lucide-react";
 
+// Props interface for FileMetaError component
 interface FileMetaErrorProps {
   message?: string;
 }
 
+/**
+ * FileMetaError component displays an error state for file metadata retrieval.
+ * It shows an error icon and a message indicating the issue with the transfer link.
+ *
+ * @param {FileMetaErrorProps} props - The properties for the component.
+ * @returns JSX.Element The rendered component.
+ */
 export default function FileMetaError({ message }: FileMetaErrorProps) {
   return (
     <CardState>

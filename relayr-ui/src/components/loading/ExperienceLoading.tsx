@@ -1,6 +1,12 @@
 // External Library
 import { Loader2Icon } from "lucide-react";
 
+/**
+ * ExperienceLoading Component
+ * Displays a loading state with an animated icon and text.
+ *
+ * @returns JSX.Element The loading component.
+ */
 export default function ExperienceLoading() {
   return (
     <div className="flex flex-col items-center justify-center h-112 gap-4 -mt-12">

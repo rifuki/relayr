@@ -1,14 +1,32 @@
+// React
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 
+// External Libraries
 import { FileIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
 import { Button } from "@/components/ui/button";
+
+// Motion-Primitives UI Components
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
-import { useFileSenderActions } from "@/stores/useFileSenderStore";
+
+// Internal Components
 import { TransferHeader } from "../../shared";
 
+// Utilities
+import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
+
+// State Management (Store)
+import { useFileSenderActions } from "@/stores/useFileSenderStore";
+
+/**
+ * Step1_FileSelector component allows users to select a file to send.
+ * It provides drag-and-drop functionality, file selection via input,
+ * and displays loading progress while the file is being processed.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function Step1_FileSelector() {
   const actions = useFileSenderActions();
 

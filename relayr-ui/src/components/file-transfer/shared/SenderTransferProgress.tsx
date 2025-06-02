@@ -1,15 +1,35 @@
+// External Libraries
 import { motion } from "motion/react";
 
-import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
-import { formatFileSize } from "@/lib/utils";
-import { useFileSenderStore } from "@/stores/useFileSenderStore";
+// Motion-Primitives UI Components
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
+// Constants and variants for animation durations and motion variants
+import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
+
+// Utilities
+import { formatFileSize } from "@/lib/utils";
+
+// State Management (Store)
+import { useFileSenderStore } from "@/stores/useFileSenderStore";
+
+/**
+ * TransferSenderProgress component displays the progress of a file transfer.
+ * It shows the current offset, total file size, and receiver's progress percentage.
+ * The component uses motion for animations and provides visual feedback during transfer.
+ *
+ * @returns JSX.Element - A UI element showing transfer progress with animations.
+ */
 export default function TransferSenderProgress() {
+  // Retrieve total file size from store
   const { size: fileSize } = useFileSenderStore((state) => state.fileMetadata!);
+
+  // Retrieve current offset, transfer status flags
   const { offset, isTransferring, isTransferCompleted } = useFileSenderStore(
     (state) => state.transferStatus,
   );
+
+  // Retrieve receiver progress percentage
   const { receiver: receiverProgress } = useFileSenderStore(
     (state) => state.transferProgress,
   );
@@ -26,6 +46,7 @@ export default function TransferSenderProgress() {
             <TextShimmer>Click to start the transfer</TextShimmer>
           )}
         </span>
+        {/* Show receiver progress in percentage */}
         <span>{receiverProgress}%</span>
       </div>
 

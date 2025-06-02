@@ -1,19 +1,38 @@
+// External Libraries
 import { CloudLightningIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import { MotionButton } from "@/components/motion-primitives/motion-button";
+// ShadCN UI Components
 import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
+import { MotionButton } from "@/components/motion-primitives/motion-button";
+
+// Internal Components
+import { TransferFileCard, TransferHeader } from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+
+// Constants
 import { WS_RELAY_API_URL } from "@/lib/constants";
+
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
-import { TransferFileCard, TransferHeader } from "../../shared";
 
+/**
+ * Step1_ReadyToReceive component represents the first step in the file receiving process.
+ * It displays a header, an icon, and a button to connect to the sender's server.
+ * The component uses motion for animations and ShadCN UI components for styling.
+ *
+ * @returns JSX.Element The rendered component.
+ */
 export default function Step1_ReadyToReceive() {
   const initId = useFileReceiverStore((state) => state.initId);
   const { senderId } = useFileReceiverStore(

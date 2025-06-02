@@ -24,6 +24,12 @@ import MissingSenderId from "@/components/file-transfer/receiver/states/MissingS
 import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
 
+/**
+ * ReceivePageContent Component
+ * Handles the file receiving process by fetching metadata and managing the connection.
+ *
+ * @returns JSX.Element The content for the receive page.
+ */
 export default function ReceivePageContent() {
   const senderId = useSearchParams().get("id");
   const connectionId = useInitId("receiver");
