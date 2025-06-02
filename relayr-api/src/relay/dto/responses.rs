@@ -129,9 +129,9 @@ pub struct FileChunkResponseDto {
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
+    pub uploaded_size: u64,
     pub chunk_index: u32,
     pub chunk_data_size: u32,
-    pub uploaded_size: u64,
     pub sender_transfer_progress: u8,
     pub timestamp: i64,
 }
@@ -143,9 +143,9 @@ impl FileChunkResponseDto {
         file_name: &str,
         total_size: u64,
         total_chunks: u16,
+        uploaded_size: u64,
         chunk_index: u32,
         chunk_data_size: u32,
-        uploaded_size: u64,
         sender_transfer_progress: u8,
     ) -> Self {
         Self {
@@ -155,9 +155,9 @@ impl FileChunkResponseDto {
             file_name: file_name.to_owned(),
             total_size,
             total_chunks,
+            uploaded_size,
             chunk_index,
             chunk_data_size,
-            uploaded_size,
             sender_transfer_progress,
             timestamp: Utc::now().timestamp(),
         }
@@ -175,9 +175,9 @@ pub struct FileTransferAckResponseDto {
     pub status: String,
     pub file_name: String,
     pub total_chunks: u16,
+    pub uploaded_size: u64,
     pub chunk_index: u32,
     pub chunk_data_size: u32,
-    pub uploaded_size: u64,
     pub recipient_transfer_progress: u8,
     pub timestamp: i64,
 }
@@ -189,9 +189,9 @@ impl FileTransferAckResponseDto {
         status: &str,
         file_name: &str,
         total_chunks: u16,
+        uploaded_size: u64,
         chunk_index: u32,
         chunk_data_size: u32,
-        uploaded_size: u64,
         recipient_transfer_progress: u8,
     ) -> Self {
         Self {
@@ -201,9 +201,9 @@ impl FileTransferAckResponseDto {
             status: status.to_owned(),
             file_name: file_name.to_owned(),
             total_chunks,
+            uploaded_size,
             chunk_index,
             chunk_data_size,
-            uploaded_size,
             recipient_transfer_progress,
             timestamp: Utc::now().timestamp(),
         }
@@ -220,8 +220,8 @@ pub struct FileEndResponseDto {
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
-    pub last_chunk_index: u32,
     pub uploaded_size: u64,
+    pub last_chunk_index: u32,
     pub timestamp: i64,
 }
 impl FileEndResponseDto {
@@ -229,8 +229,8 @@ impl FileEndResponseDto {
         file_name: &str,
         total_size: u64,
         total_chunks: u16,
-        last_chunk_index: u32,
         uploaded_size: u64,
+        last_chunk_index: u32,
     ) -> Self {
         Self {
             success: true,
@@ -238,8 +238,8 @@ impl FileEndResponseDto {
             file_name: file_name.to_owned(),
             total_size,
             total_chunks,
-            last_chunk_index,
             uploaded_size,
+            last_chunk_index,
             timestamp: Utc::now().timestamp(),
         }
     }

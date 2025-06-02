@@ -173,9 +173,9 @@ pub async fn handle_incoming_payload(
                         &payload.file_name,
                         payload.total_size,
                         payload.total_chunks,
+                        payload.uploaded_size,
                         payload.chunk_index,
                         payload.chunk_data_size,
-                        payload.uploaded_size,
                         payload.sender_transfer_progress,
                     )
                     .to_ws_msg();
@@ -205,9 +205,9 @@ pub async fn handle_incoming_payload(
                     &payload.status,
                     &payload.file_name,
                     payload.total_chunks,
+                    payload.uploaded_size,
                     payload.chunk_index,
                     payload.chunk_data_size,
-                    payload.uploaded_size,
                     payload.recipient_transfer_progress,
                 )
                 .to_ws_msg();
@@ -231,8 +231,8 @@ pub async fn handle_incoming_payload(
                         &payload.file_name,
                         payload.total_size,
                         payload.total_chunks,
-                        payload.last_chunk_index,
                         payload.uploaded_size,
+                        payload.last_chunk_index,
                     )
                     .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);

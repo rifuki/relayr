@@ -9,31 +9,31 @@ import {
 // ====================================================
 
 // Receiver Requests
-export interface RecipientReadyPayload {
+export interface RecipientReadyRequest {
   type: "recipientReady";
   senderId: string;
   recipientId?: string;
 }
 
-export interface CancelRecipientReadyPayload {
+export interface CancelRecipientReadyRequest {
   type: "cancelRecipientReady";
   senderId: string;
   recipientId?: string;
 }
 
-export interface FileTransferAckPayload {
+export interface FileTransferAckRequest {
   type: "fileTransferAck";
   senderId: string;
   status: fileTransferAckStatus;
   fileName: string;
   totalChunks: number;
+  uploadedSize: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
   recipientTransferProgress: number;
 }
 
-export interface CancelRecipientTransferPayload {
+export interface CancelRecipientTransferRequest {
   type: "cancelRecipientTransfer";
   senderId: string;
   recipientId?: string;
@@ -64,9 +64,9 @@ export interface FileChunkResponse {
   fileName: string;
   totalSize: number;
   totalChunks: number;
+  uploadedSize: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
   senderTransferProgress: number;
   timestamp: number;
 }
@@ -77,8 +77,8 @@ export interface FileEndResponse {
   fileName: string;
   totalSize: number;
   totalChunks: number;
-  lastChunkIndex: number;
   uploadedSize: number;
+  lastChunkIndex: number;
   timestamp: number;
 }
 

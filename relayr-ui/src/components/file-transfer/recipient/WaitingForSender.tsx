@@ -15,7 +15,7 @@ import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
-import { CancelRecipientReadyPayload } from "@/types/webSocketMessages";
+import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
 
 const clockAnimation = {
   rotate: [0, 360],
@@ -42,7 +42,7 @@ export default function WaitingForSender() {
     sendJsonMessage({
       type: "cancelRecipientReady",
       senderId,
-    } satisfies CancelRecipientReadyPayload);
+    } satisfies CancelRecipientReadyRequest);
 
     const ws = getWebSocket?.();
     if (!ws) {

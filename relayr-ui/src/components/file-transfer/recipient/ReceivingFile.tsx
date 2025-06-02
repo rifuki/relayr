@@ -16,7 +16,7 @@ import {
   useFileReceiverStore,
   useReceiverWebSocketHandlers,
 } from "@/stores/useFileReceiverStore";
-import { CancelRecipientTransferPayload } from "@/types/webSocketMessages";
+import { CancelRecipientTransferRequest } from "@/types/webSocketMessages";
 
 export default function ReceivingFile() {
   const { senderId } = useFileReceiverStore(
@@ -32,7 +32,7 @@ export default function ReceivingFile() {
     sendJsonMessage({
       type: "cancelRecipientTransfer",
       senderId,
-    } satisfies CancelRecipientTransferPayload);
+    } satisfies CancelRecipientTransferRequest);
     actions.setTransferStatus({ isTransferCanceled: true });
     actions.setErrorMessage("You canceled the transfer");
   };

@@ -77,9 +77,9 @@ pub struct FileChunkPayload {
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
+    pub uploaded_size: u64,
     pub chunk_index: u32,
     pub chunk_data_size: u32,
-    pub uploaded_size: u64,
     pub sender_transfer_progress: u8,
 }
 
@@ -91,8 +91,8 @@ pub struct FileTransferAckPayload {
     pub status: String,
     pub file_name: String,
     pub total_chunks: u16,
-    pub chunk_index: u32,
     pub uploaded_size: u64,
+    pub chunk_index: u32,
     pub chunk_data_size: u32,
     pub recipient_transfer_progress: u8,
 }
@@ -104,8 +104,8 @@ pub struct FileEndPayload {
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
-    pub last_chunk_index: u32,
     pub uploaded_size: u64,
+    pub last_chunk_index: u32,
 }
 
 #[derive(Deserialize)]

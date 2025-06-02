@@ -28,9 +28,9 @@ export interface FileChunkRequest {
   fileName: string;
   totalSize: number;
   totalChunks: number;
+  uploadedSize: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
   senderTransferProgress: number;
 }
 
@@ -40,8 +40,8 @@ export interface FileEndRequest {
   fileName: string;
   totalSize: number;
   totalChunks: number;
-  lastChunkIndex: number;
   uploadedSize: number;
+  lastChunkIndex: number;
 }
 
 export interface CancelSenderTransferRequest {
@@ -82,9 +82,9 @@ export interface FileTransferAckResponse {
   status: fileTransferAckStatus;
   fileName: string;
   totalChunks: number;
+  uploadedSize: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
   recipientTransferProgress: number;
   timestamp: number;
 }

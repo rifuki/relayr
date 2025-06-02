@@ -23,8 +23,8 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
       fileName: file.name,
       totalSize: file.size,
       totalChunks,
-      lastChunkIndex: chunkIndex,
       uploadedSize: offset,
+      lastChunkIndex: chunkIndex,
     } satisfies FileEndRequest);
 
     set({

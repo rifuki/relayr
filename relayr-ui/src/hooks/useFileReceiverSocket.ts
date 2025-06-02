@@ -7,14 +7,14 @@ import {
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
 import {
-  CancelRecipientReadyPayload,
-  CancelRecipientTransferPayload,
+  CancelRecipientReadyRequest,
+  CancelRecipientTransferRequest,
   CancelSenderReadyResponse,
   CancelSenderTransferResponse,
   FileChunkResponse,
   FileEndResponse,
-  FileTransferAckPayload,
-  RecipientReadyPayload,
+  FileTransferAckRequest,
+  RecipientReadyRequest,
   RegisterResponse,
   RestartTransferResponse,
   SenderAckResponse,
@@ -88,11 +88,11 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         status: "acknowledged",
         fileName: fileMetadata.name,
         totalChunks,
+        uploadedSize,
         chunkIndex,
         chunkDataSize,
-        uploadedSize,
         recipientTransferProgress: receiverTransferProgress,
-      } satisfies FileTransferAckPayload);
+      } satisfies FileTransferAckRequest);
     } catch (error: unknown) {
       console.error("Failed to read blob as ArrayBuffer:" + error);
     }
@@ -156,7 +156,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     sendJsonMessage({
       type: "recipientReady",
       senderId,
-    } satisfies RecipientReadyPayload);
+    } satisfies RecipientReadyRequest);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -239,11 +239,11 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         status: "error",
         fileName: fileMetadata.name,
         totalChunks,
+        uploadedSize,
         chunkIndex,
         chunkDataSize,
-        uploadedSize,
         recipientTransferProgress: receiverTransferProgress,
-      } satisfies FileTransferAckPayload);
+      } satisfies FileTransferAckRequest);
 
       actions.setTransferStatus({
         isTransferError: true,
@@ -259,11 +259,11 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
       status: "completed",
       fileName: fileMetadata.name,
       totalChunks,
+      uploadedSize,
       chunkIndex,
       chunkDataSize,
-      uploadedSize,
       recipientTransferProgress: receiverTransferProgress,
-    } satisfies FileTransferAckPayload);
+    } satisfies FileTransferAckRequest);
 
     actions.finalizeTransfer();
   };
@@ -318,12 +318,12 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         sendJsonMessage({
           type: "cancelRecipientTransfer",
           senderId,
-        } satisfies CancelRecipientTransferPayload);
+        } satisfies CancelRecipientTransferRequest);
       }
       sendJsonMessage({
         type: "cancelRecipientReady",
         senderId,
-      } satisfies CancelRecipientReadyPayload);
+      } satisfies CancelRecipientReadyRequest);
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
 
