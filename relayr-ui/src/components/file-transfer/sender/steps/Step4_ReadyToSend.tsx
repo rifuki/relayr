@@ -85,7 +85,7 @@ export default function Step4_ReadyToSend() {
   const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
-  const { isTransferError } = useFileSenderStore(
+  const { isTransferring, isTransferError } = useFileSenderStore(
     (state) => state.transferStatus,
   );
   const { sendJsonMessage } = useSenderWebSocketHandlers();
@@ -103,6 +103,7 @@ export default function Step4_ReadyToSend() {
 
     actions.setErrorMessage(null);
     actions.setTransferStatus({
+      isTransferring: true,
       isTransferCanceled: false,
       isTransferError: false,
     });
@@ -118,7 +119,8 @@ export default function Step4_ReadyToSend() {
     sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
-    actions.setTransferConnection({ recipientId: null });
+    actions.setTransferConnection({ recipientId });
+    actions.clearTransferState();
     actions.setErrorMessage(null);
   };
 
@@ -162,7 +164,10 @@ export default function Step4_ReadyToSend() {
         className="w-full flex flex-col space-y-3 mt-2"
       >
         {isTransferError ? (
-          <MotionButton onClick={handleRestartTransfer}>
+          <MotionButton
+            onClick={handleRestartTransfer}
+            disabled={isTransferring}
+          >
             Restart Transfer
           </MotionButton>
         ) : (
@@ -171,6 +176,7 @@ export default function Step4_ReadyToSend() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleSendFile}
+            disabled={isTransferring}
           >
             Start Transfer
           </MotionButton>
