@@ -1,6 +1,6 @@
 import {
   AckStatus,
-  fileTransferAckStatus,
+  FileTransferAckStatus,
   SenderAckRequestType,
 } from "./shared";
 
@@ -9,6 +9,8 @@ import {
 // ====================================================
 
 // Sender Requests
+
+// Request for file metadata from the sender
 export interface FileMetaRequest {
   type: "fileMeta";
   senderId?: string;
@@ -17,38 +19,43 @@ export interface FileMetaRequest {
   mimeType: string;
 }
 
+// Request to cancel the sender's readiness
 export interface CancelSenderReadyRequest {
   type: "cancelSenderReady";
   senderId?: string;
 }
 
+// Request for a chunk of the file to be transferred
 export interface FileChunkRequest {
   type: "fileChunk";
   senderId?: string;
   fileName: string;
   totalSize: number;
   totalChunks: number;
+  uploadedSize: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
   senderTransferProgress: number;
 }
 
+// Request to mark the file transfer as completed
 export interface FileEndRequest {
   type: "fileEnd";
   senderId?: string;
   fileName: string;
   totalSize: number;
   totalChunks: number;
-  lastChunkIndex: number;
   uploadedSize: number;
+  lastChunkIndex: number;
 }
 
+// Request to cancel an ongoing sender transfer
 export interface CancelSenderTransferRequest {
   type: "cancelSenderTransfer";
   senderId?: string;
 }
 
+// Acknowledgment request from the sender
 export interface SenderAckRequest {
   type: "senderAck";
   requestType: SenderAckRequestType;
@@ -57,11 +64,14 @@ export interface SenderAckRequest {
   message?: string;
 }
 
+// Request to restart the file transfer
 export interface RestartTransferRequest {
   type: "restartTransfer";
 }
 
 // Sender Responses
+
+// Response to confirm the recipient is ready to receive the file
 export interface RecipientReadyResponse {
   success: true;
   type: "recipientReady";
@@ -69,6 +79,7 @@ export interface RecipientReadyResponse {
   timestamp: number;
 }
 
+// Response to cancel recipient readiness
 export interface CancelRecipientReadyResponse {
   success: true;
   type: "cancelRecipientReady";
@@ -76,19 +87,21 @@ export interface CancelRecipientReadyResponse {
   timestamp: number;
 }
 
+// Acknowledgment response for file transfer
 export interface FileTransferAckResponse {
   success: true;
   type: "fileTransferAck";
-  status: fileTransferAckStatus;
+  status: FileTransferAckStatus;
   fileName: string;
   totalChunks: number;
+  uploadedSize: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
   recipientTransferProgress: number;
   timestamp: number;
 }
 
+// Response to cancel the recipient's transfer
 export interface CancelRecipientTransferResponse {
   success: true;
   type: "cancelRecipientTransfer";

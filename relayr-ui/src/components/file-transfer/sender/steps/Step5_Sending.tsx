@@ -1,25 +1,47 @@
+// External Libraries
 import { CloudUploadIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
+// ShadCN UI Components
+import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import SenderProgressBar from "@/components/SenderProgressBar";
+
+// Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import TransferHeader from "@/components/TransferHeader";
-import { Badge } from "@/components/ui/badge";
+import {
+  SenderTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+
+// State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
   useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
+
+// Types
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
 
-export default function TransferInProgress() {
+/**
+ * Step5_Sending component represents the fifth step in the file sending process.
+ * It displays a header, a cloud upload icon, recipient ID, shareable link input,
+ * and file metadata. It also shows the transfer progress and allows the sender to
+ * cancel the transfer.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step5_Sending() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
@@ -74,10 +96,10 @@ export default function TransferInProgress() {
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
         <ShareableLinkInput text={transferShareLink} className="mt-2" />
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <SenderProgressBar />
+      <SenderTransferProgress />
 
       <motion.div
         variants={fileListItemVariants}

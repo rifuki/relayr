@@ -1,21 +1,32 @@
+// React
 import { useState } from "react";
 
+// External Libraries
 import { CheckCircle2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
-import TransferHeader from "@/components/TransferHeader";
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import { WS_RELAY_API_URL } from "@/lib/constants";
+
+// Internal Components
+import { TransferFileCard, TransferHeader } from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+
+// Constants
+import { WS_RELAY_API_URL } from "@/lib/constants";
+
+// State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
 
+// Motion Animation
 const checkmarkVariants = {
   hidden: { scale: 0, opacity: 0 },
   visible: {
@@ -29,7 +40,15 @@ const checkmarkVariants = {
   },
 };
 
-export default function SelectedFile() {
+/**
+ * Step2_FileSelected component represents the second step in the file sending process.
+ * It displays the selected file's metadata, a button to generate a transfer link,
+ * and a button to remove the selected file.
+ * The component uses motion for animations and ShadCN UI components for styling.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step2_FileSelected() {
   const initId = useFileSenderStore((state) => state.initId);
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -76,7 +95,7 @@ export default function SelectedFile() {
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <FileCard fileMetadata={fileMetadata} />
+          <TransferFileCard fileMetadata={fileMetadata} />
         </motion.div>
       </motion.div>
 

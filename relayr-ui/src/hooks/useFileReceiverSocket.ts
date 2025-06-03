@@ -1,32 +1,48 @@
+// React
 import { useEffect } from "react";
 
+// External Libraries
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
+
+// WebSocket Message Types
 import {
-  CancelRecipientReadyPayload,
-  CancelRecipientTransferPayload,
+  CancelRecipientReadyRequest,
+  CancelRecipientTransferRequest,
   CancelSenderReadyResponse,
   CancelSenderTransferResponse,
   FileChunkResponse,
   FileEndResponse,
-  FileTransferAckPayload,
-  RecipientReadyPayload,
+  FileTransferAckRequest,
+  RecipientReadyRequest,
   RegisterResponse,
   RestartTransferResponse,
   SenderAckResponse,
   WebSocketReceiverTextMessageResponse,
 } from "@/types/webSocketMessages";
 
+/**
+ * Custom hook to manage the WebSocket connection for file receiving.
+ * It handles processing incoming messages, managing transfer status, and sending acknowledgments.
+ *
+ * @return {Object} - Contains the WebSocket ready state.
+ */
 export function UseFileReceiverSocket(): { readyState: ReadyState } {
+  // Extracting necessary values from the store
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const webSocketUrl = useFileReceiverStore((state) => state.webSocketUrl);
-  const { senderId, isConnected } = useFileReceiverStore(
+  const { senderId, isConnected, recipientId } = useFileReceiverStore(
     (state) =>
-      state.transferConnection as { senderId: string; isConnected: boolean },
+      state.transferConnection as {
+        senderId: string;
+        isConnected: boolean;
+        recipientId: string;
+      },
   );
   const { totalChunks } = useFileReceiverStore(
     (state) => state.fileTransferInfo,
@@ -43,6 +59,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
   );
   const actions = useFileReceiverActions();
 
+  // Setting up WebSocket connection
   const { readyState, sendJsonMessage, getWebSocket } = useWebSocket(
     webSocketUrl,
     {
@@ -66,6 +83,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     },
   );
 
+  // Handle incoming Blob data from WebSocket
   const processWebSocketBlobMessage = async (blobData: Blob) => {
     const { isTransferCanceled } =
       useFileReceiverStore.getState().transferStatus;
@@ -88,16 +106,17 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         status: "acknowledged",
         fileName: fileMetadata.name,
         totalChunks,
+        uploadedSize,
         chunkIndex,
         chunkDataSize,
-        uploadedSize,
         recipientTransferProgress: receiverTransferProgress,
-      } satisfies FileTransferAckPayload);
+      } satisfies FileTransferAckRequest);
     } catch (error: unknown) {
       console.error("Failed to read blob as ArrayBuffer:" + error);
     }
   };
 
+  // Handle incoming text WebSocket messages
   const processWebSocketTextMessage = (
     wsMsg: WebSocketReceiverTextMessageResponse,
   ) => {
@@ -121,6 +140,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
       return;
     }
 
+    // Process specific WebSocket message types
     switch (wsMsg.type) {
       case "register":
         processRegisterMessage(wsMsg);
@@ -149,6 +169,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Process incoming 'register' WebSocket message
   const processRegisterMessage = (msg: RegisterResponse) => {
     actions.setErrorMessage(null);
     actions.setTransferConnection({ recipientId: msg.connId });
@@ -156,11 +177,12 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     sendJsonMessage({
       type: "recipientReady",
       senderId,
-    } satisfies RecipientReadyPayload);
+    } satisfies RecipientReadyRequest);
   };
 
+  // Process incoming 'cancelSenderReady' message
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const processCancelSenderReadyMessage = (_msg: CancelSenderReadyResponse) => {
+  const processCancelSenderReadyMessage = (msg: CancelSenderReadyResponse) => {
     const errMsg = "The sender has canceled the connection";
     getWebSocket()?.close(1000, errMsg);
     actions.setErrorMessage(errMsg);
@@ -171,6 +193,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     });
   };
 
+  // Process incoming 'senderAck' message
   const processSenderAckMessage = (msg: SenderAckResponse) => {
     switch (msg.requestType) {
       case "recipientReady":
@@ -182,6 +205,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Process incoming 'fileChunk' message
   const processFileChunkMessage = (msg: FileChunkResponse) => {
     const { isTransferCanceled } =
       useFileReceiverStore.getState().transferStatus;
@@ -213,6 +237,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.setTransferProgress({ sender: msg.senderTransferProgress });
   };
 
+  // Process incoming 'fileEnd' message
   const processFileEndMessage = (msg: FileEndResponse) => {
     const { isTransferCanceled } =
       useFileReceiverStore.getState().transferStatus;
@@ -229,21 +254,22 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         uploadedSizeFromSender: msg.uploadedSize,
         receivedBytesFromClient: receivedBytes,
       });
+      actions.setErrorMessage(
+        "Mismatch in file transfer data. Transfer may be corrupted.",
+      );
+
       sendJsonMessage({
         type: "fileTransferAck",
         senderId,
         status: "error",
         fileName: fileMetadata.name,
         totalChunks,
+        uploadedSize,
         chunkIndex,
         chunkDataSize,
-        uploadedSize,
         recipientTransferProgress: receiverTransferProgress,
-      } satisfies FileTransferAckPayload);
+      } satisfies FileTransferAckRequest);
 
-      actions.setErrorMessage(
-        "Mismatch in file transfer data. Transfer may be corrupted.",
-      );
       actions.setTransferStatus({
         isTransferError: true,
         isTransferring: false,
@@ -258,17 +284,29 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
       status: "completed",
       fileName: fileMetadata.name,
       totalChunks,
+      uploadedSize,
       chunkIndex,
       chunkDataSize,
-      uploadedSize,
       recipientTransferProgress: receiverTransferProgress,
-    } satisfies FileTransferAckPayload);
+    } satisfies FileTransferAckRequest);
 
+    // Finalize the file transfer by reconstructing the file from received chunks,
+    // validating its integrity, and updating the transfer state accordingly.
     actions.finalizeTransfer();
+
+    // Close the WebSocket connection gracefully after transfer completion
+    const ws = getWebSocket();
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.close(
+        1000,
+        `Receiver [${recipientId}]: Transfer completed, closing WebSocket connection.`,
+      );
+    }
   };
 
+  // Process incoming 'restartTransfer' message
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const processRestartTransferMessage = (_msg: RestartTransferResponse) => {
+  const processRestartTransferMessage = (msg: RestartTransferResponse) => {
     actions.setErrorMessage(null);
     actions.setTransferStatus({
       isTransferCanceled: false,
@@ -278,6 +316,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.setErrorMessage("Sender restarted the transfer.");
   };
 
+  // Process incoming 'cancelSenderTransfer' message
   const processCancelSenderTransferMessage = (
     msg: CancelSenderTransferResponse,
   ) => {
@@ -286,10 +325,12 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     actions.setErrorMessage(errorMsg);
   };
 
+  // WebSocket onClose handler
   const processWebSocketOnClose = (close: CloseEvent) => {
     console.info("❌ Disconnected", close.code);
 
     actions.setWebSocketUrl(null);
+    actions.setTransferConnection({ isConnected: false, recipientId: null });
 
     if (close.code === 1000) return;
     else if (close.code === 1006) {
@@ -299,6 +340,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
+  // Set WebSocket handlers in the store
   useEffect(() => {
     actions.setWebSocketHandlers({
       sendJsonMessage,
@@ -306,6 +348,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     });
   }, [sendJsonMessage, getWebSocket, actions]);
 
+  // Handle beforeunload event to cancel transfer if necessary
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       const canSend = readyState === WebSocket.OPEN && senderId && isConnected;
@@ -317,12 +360,12 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
         sendJsonMessage({
           type: "cancelRecipientTransfer",
           senderId,
-        } satisfies CancelRecipientTransferPayload);
+        } satisfies CancelRecipientTransferRequest);
       }
       sendJsonMessage({
         type: "cancelRecipientReady",
         senderId,
-      } satisfies CancelRecipientReadyPayload);
+      } satisfies CancelRecipientReadyRequest);
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
 

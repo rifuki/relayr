@@ -1,30 +1,55 @@
+// React
 import { useEffect } from "react";
 
+// External Libraries
 import { motion, useAnimation } from "motion/react";
 import { HardDriveUpload } from "lucide-react";
 
+// ShadCN UI Components
 import { Badge } from "@/components/ui/badge";
-import FileCard from "@/components/FileCard";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import SenderProgressBar from "@/components/SenderProgressBar";
-import TransferHeader from "@/components/TransferHeader";
+
+// Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import { CHUNK_SIZE } from "@/lib/constants";
 import {
-  CancelSenderReadyRequest,
-  RestartTransferRequest,
-} from "@/types/webSocketMessages";
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-  useSenderWebSocketHandlers,
-} from "@/stores/useFileSenderStore";
+  SenderTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
 
-export default function ReadyToTransfer() {
+// Constants
+import { CHUNK_SIZE } from "@/lib/constants";
+
+// State Management (Store)
+import {
+  useFileSenderActions,
+  useFileSenderStore,
+  useSenderWebSocketHandlers,
+} from "@/stores/useFileSenderStore";
+
+// Types
+import {
+  CancelSenderReadyRequest,
+  RestartTransferRequest,
+} from "@/types/webSocketMessages";
+
+/**
+ * Step4_ReadyToSend component represents the fourth step in the file sending process.
+ * It displays a header, a hard drive upload icon, recipient ID, shareable link input,
+ * and file metadata.
+ * It allows the sender to start the file transfer or cancel the setup.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step4_ReadyToSend() {
   const controls = useAnimation();
 
   const handleMouseEnter = () => {
@@ -60,7 +85,7 @@ export default function ReadyToTransfer() {
   const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
-  const { isTransferError } = useFileSenderStore(
+  const { isTransferring, isTransferError } = useFileSenderStore(
     (state) => state.transferStatus,
   );
   const { sendJsonMessage } = useSenderWebSocketHandlers();
@@ -78,6 +103,7 @@ export default function ReadyToTransfer() {
 
     actions.setErrorMessage(null);
     actions.setTransferStatus({
+      isTransferring: true,
       isTransferCanceled: false,
       isTransferError: false,
     });
@@ -93,7 +119,8 @@ export default function ReadyToTransfer() {
     sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
-    actions.setTransferConnection({ recipientId: null });
+    actions.setTransferConnection({ recipientId });
+    actions.clearTransferState();
     actions.setErrorMessage(null);
   };
 
@@ -127,17 +154,20 @@ export default function ReadyToTransfer() {
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
         <ShareableLinkInput text={transferShareLink} className="mt-2" />
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <SenderProgressBar />
+      <SenderTransferProgress />
 
       <motion.div
         variants={fileListItemVariants}
         className="w-full flex flex-col space-y-3 mt-2"
       >
         {isTransferError ? (
-          <MotionButton onClick={handleRestartTransfer}>
+          <MotionButton
+            onClick={handleRestartTransfer}
+            disabled={isTransferring}
+          >
             Restart Transfer
           </MotionButton>
         ) : (
@@ -146,6 +176,7 @@ export default function ReadyToTransfer() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleSendFile}
+            disabled={isTransferring}
           >
             Start Transfer
           </MotionButton>

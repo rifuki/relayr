@@ -1,22 +1,34 @@
+// External Libraries
 import { FileCheckIcon, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import TransferHeader from "@/components/TransferHeader";
-import FileCard from "@/components/FileCard";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
-import SenderProgressBar from "@/components/SenderProgressBar";
+
+// Internal Components
+import {
+  SenderTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+
+// State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
   useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 
+// Motion Animation
 const burstAnimation = {
   scale: [1, 2, 0],
   opacity: [1, 0.8, 0],
@@ -25,7 +37,6 @@ const burstAnimation = {
     ease: "easeOut",
   },
 };
-
 const successAnimation = {
   scale: [0, 1.5, 1],
   opacity: [0, 1],
@@ -36,25 +47,31 @@ const successAnimation = {
   },
 };
 
-export default function SenderTransferCompleted() {
+/**
+ * Step6_TransferCompleted component represents the final step in the file sending process.
+ * It displays a success message, recipient ID, file metadata, and a shareable link.
+ * The sender can reset the transfer to send another file.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step6_TransferCompleted() {
   const { senderId, recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const transferShareLink = useFileSenderStore(
-    (state) => state.transferShareLink,
-  );
-  const actions = useFileSenderActions();
   const { getWebSocket } = useSenderWebSocketHandlers();
+  const actions = useFileSenderActions();
 
-  if (!fileMetadata || !transferShareLink) return;
+  if (!fileMetadata) {
+    actions.setErrorMessage("Something went wrong. Please try again.");
+    return null;
+  }
 
   const handleResetTransfer = () => {
     const ws = getWebSocket?.();
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       actions.setErrorMessage("WebSocket is not available.");
     } else {
-      actions.setWebSocketUrl(null);
       ws.close(
         1000,
         `Sender: ${senderId} success reset transfer, closing WebSocket connection.`,
@@ -104,11 +121,9 @@ export default function SenderTransferCompleted() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
 
-        <SenderProgressBar />
-
-        <Input value={transferShareLink} className="w-full" readOnly disabled />
+        <SenderTransferProgress />
       </motion.div>
 
       <motion.div

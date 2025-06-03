@@ -1,15 +1,27 @@
-import { motion } from "motion/react";
-import { Alert, AlertDescription } from "./ui/alert";
+// External Libraries
 import { AlertCircleIcon } from "lucide-react";
+import { motion } from "motion/react";
 
+// ShadCN UI Components
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Motion Components
+const MotionAlert = motion.create(Alert);
+const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
+
+// Props interface for TransferAlertError component
 interface AlertErrorProps {
   message: string;
 }
 
-const MotionAlert = motion.create(Alert);
-const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
-
-export default function AlertError({ message }: AlertErrorProps) {
+/**
+ * TransferAlertError component displays an error alert with a message.
+ * It uses motion for animations and provides visual feedback for errors.
+ *
+ * @param {AlertErrorProps} props - Component props containing the error message.
+ * @returns JSX.Element - An alert UI element with animated error message.
+ */
+export default function TransferAlertError({ message }: AlertErrorProps) {
   return (
     <MotionAlert
       variant="destructive"

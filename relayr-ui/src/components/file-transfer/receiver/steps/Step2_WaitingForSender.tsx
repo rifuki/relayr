@@ -1,22 +1,37 @@
+// External Libraries
 import { ClockIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
+// ShadCN UI Components
+import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import ReceiverProgressBar from "@/components/ReceiverProgressBar";
-import TransferHeader from "@/components/TransferHeader";
-import { Badge } from "@/components/ui/badge";
+
+// Internal Components
+import {
+  ReceiverTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
+
+// Animations Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
-import { CancelRecipientReadyPayload } from "@/types/webSocketMessages";
 
+// Types
+import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
+
+// Motion Animation
 const clockAnimation = {
   rotate: [0, 360],
   transition: {
@@ -26,11 +41,18 @@ const clockAnimation = {
   },
 };
 
-export default function WaitingForSender() {
-  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
+/**
+ * Step2_WaitingForSender component represents the second step in the file receiving process.
+ * It displays a header, a clock icon indicating waiting status, and the file metadata.
+ * The component allows the recipient to cancel the waiting state if needed.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step2_WaitingForSender() {
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { sendJsonMessage, getWebSocket } = useFileReceiverStore(
     (state) => state.webSocketHandlers,
   );
@@ -42,7 +64,7 @@ export default function WaitingForSender() {
     sendJsonMessage({
       type: "cancelRecipientReady",
       senderId,
-    } satisfies CancelRecipientReadyPayload);
+    } satisfies CancelRecipientReadyRequest);
 
     const ws = getWebSocket?.();
     if (!ws) {
@@ -81,10 +103,10 @@ export default function WaitingForSender() {
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
 
-        <FileCard fileMetadata={fileMetadata} className="mt-2" />
+        <TransferFileCard fileMetadata={fileMetadata} className="mt-2" />
       </motion.div>
 
-      <ReceiverProgressBar />
+      <ReceiverTransferProgress />
 
       <motion.div className="w-full flex flex-col space-y-3 mt-2">
         <TextShimmer className="text-center" duration={1}>

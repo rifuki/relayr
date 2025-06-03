@@ -1,12 +1,24 @@
+// React
 import { Suspense } from "react";
 
-import { LoaderIcon } from "lucide-react";
+// Custom Components
+import ExperienceLoading from "@/components/loading/ExperienceLoading";
 
+// Internal Components
 import ReceivePageContent from "./ReceivePageContent";
 
-export default function ReceiverPageContent() {
+/**
+ * File Transfer Page for the Seceiver
+ * This component serves as the main entry point for the file receiver page,
+ * wrapping the ReceivePageContent in a Suspense boundary
+ * to handle loading states.
+ *
+ * @returns JSX.Element The receiver page content wrapped in a Suspense boundary.
+ *
+ */
+export default function ReceiverPage() {
   return (
-    <Suspense fallback={<LoaderIcon className="h-15 w-15 animate-spin" />}>
+    <Suspense fallback={<ExperienceLoading />}>
       <ReceivePageContent />
     </Suspense>
   );

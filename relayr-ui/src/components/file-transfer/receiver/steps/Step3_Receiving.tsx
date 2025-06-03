@@ -1,28 +1,50 @@
+// External Libraries
 import { CloudDownload } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
+// ShadCN UI Components
+import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import ReceiverProgressBar from "@/components/ReceiverProgressBar";
-import TransferHeader from "@/components/TransferHeader";
-import { Badge } from "@/components/ui/badge";
+
+// Internal Components
+import {
+  ReceiverTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
+
+// Animation Variants
 import {
   fileListWrapperVariants,
   fileListItemVariants,
 } from "@/lib/animations";
+
+// State Management (Store)
 import {
   useFileReceiverActions,
   useFileReceiverStore,
   useReceiverWebSocketHandlers,
 } from "@/stores/useFileReceiverStore";
-import { CancelRecipientTransferPayload } from "@/types/webSocketMessages";
 
-export default function ReceivingFile() {
+// Types
+import { CancelRecipientTransferRequest } from "@/types/webSocketMessages";
+
+/**
+ * Step3_Receiving component represents the third step in the file receiving process.
+ * It displays the current status of the file transfer, including the sender ID,
+ * the file metadata, and a button to cancel the transfer.
+ * It uses motion for animations and ShadCN UI components for styling.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step3_Receiving() {
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
-  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { sendJsonMessage } = useReceiverWebSocketHandlers();
   const actions = useFileReceiverActions();
 
@@ -32,7 +54,7 @@ export default function ReceivingFile() {
     sendJsonMessage({
       type: "cancelRecipientTransfer",
       senderId,
-    } satisfies CancelRecipientTransferPayload);
+    } satisfies CancelRecipientTransferRequest);
     actions.setTransferStatus({ isTransferCanceled: true });
     actions.setErrorMessage("You canceled the transfer");
   };
@@ -67,10 +89,10 @@ export default function ReceivingFile() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
-        <FileCard fileMetadata={fileMetadata} className="mt-2" />
+        <TransferFileCard fileMetadata={fileMetadata} className="mt-2" />
       </motion.div>
 
-      <ReceiverProgressBar />
+      <ReceiverTransferProgress />
 
       <motion.div className="w-full flex flex-col space-y-3 mt-2">
         <TextShimmer className="text-center" duration={1}>

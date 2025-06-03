@@ -1,25 +1,32 @@
-import { useState } from "react";
-
+// External Libraries
 import { ClockIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
 import { Badge } from "@components/ui/badge";
-import FileCard from "@/components/FileCard";
+
+// Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-import TransferHeader from "@/components/TransferHeader";
+
+// Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-  useSenderWebSocketHandlers,
-} from "@/stores/useFileSenderStore";
+import { TransferFileCard, TransferHeader } from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
 
-// Clock animation for waiting state
+// State Management (Store)
+import {
+  useFileSenderActions,
+  useFileSenderStore,
+  useSenderWebSocketHandlers,
+} from "@/stores/useFileSenderStore";
+
+// Motion Animation
 const clockAnimation = {
   rotate: [0, 360],
   transition: {
@@ -29,40 +36,34 @@ const clockAnimation = {
   },
 };
 
-export default function WaitingForRecipient() {
+/**
+ * Step3_WaitingForRecipient component represents the third step in the file sending process.
+ * It displays a header, a clock icon indicating waiting status, and the file metadata.
+ * The component allows the sender to stop sharing the transfer link if needed.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step3_WaitingForRecipient() {
+  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
-  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const { senderId } = useFileSenderStore((state) => state.transferConnection);
-
   const { getWebSocket } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
-  const [isLoading, setIsLoading] = useState(false);
+  if (!fileMetadata || !transferShareLink) return;
 
   const handleStopSharing = () => {
-    if (isLoading) return;
-
-    setIsLoading(true);
+    actions.setErrorMessage(null);
 
     const ws = getWebSocket?.();
     if (!ws) {
       actions.setErrorMessage("WebSocket is not available.");
-      setIsLoading(false);
       return;
     }
 
     ws.close(1000, "Sender canceled the transfer link");
-
-    if (!transferShareLink || senderId) {
-      actions.setErrorMessage("Transfer stopped, all data reset.");
-    }
-
-    setIsLoading(false);
   };
-
-  if (!fileMetadata || !transferShareLink) return;
 
   return (
     <motion.div
@@ -94,7 +95,7 @@ export default function WaitingForRecipient() {
 
         <ShareableLinkInput text={transferShareLink} className="mt-2" />
 
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
       <motion.div
@@ -104,11 +105,7 @@ export default function WaitingForRecipient() {
         <TextShimmer className="text-center mb-7" duration={1}>
           ⏳ Waiting for the recipient to connect...
         </TextShimmer>
-        <MotionButton
-          onClick={handleStopSharing}
-          disabled={isLoading}
-          variant="destructive"
-        >
+        <MotionButton onClick={handleStopSharing} variant="destructive">
           Stop Sharing
         </MotionButton>
       </motion.div>

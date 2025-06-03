@@ -1,17 +1,30 @@
+// External Libraries
 import { FileCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-import FileCard from "@/components/FileCard";
-import { MotionButton } from "@/components/motion-primitives/motion-button";
-import ReceiverProgressBar from "@/components/ReceiverProgressBar";
-import TransferHeader from "@/components/TransferHeader";
+// ShadCN UI Components
 import { Badge } from "@/components/ui/badge";
+
+// Motion-Primitives UI Components
+import { MotionButton } from "@/components/motion-primitives/motion-button";
+
+// Internal Components
+import {
+  ReceiverTransferProgress,
+  TransferFileCard,
+  TransferHeader,
+} from "../../shared";
+
+// Animation Variants
 import {
   fileListItemVariants,
   fileListWrapperVariants,
 } from "@/lib/animations";
+
+// State Management (Store)
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 
+// Motion Animation
 const burstAnimation = {
   scale: [1, 2, 0],
   opacity: [1, 0.8, 0],
@@ -20,7 +33,6 @@ const burstAnimation = {
     ease: "easeOut",
   },
 };
-
 const successAnimation = {
   scale: [0, 1.5, 1],
   opacity: [0, 1],
@@ -30,14 +42,21 @@ const successAnimation = {
   },
 };
 
-export default function ReceiverTransferCompleted() {
+/**
+ * Step4_TransferCompleted component represents the final step in the file receiving process.
+ * It displays a success message, sender ID, file metadata, and a button to download the received file.
+ * The component uses motion for animations and ShadCN UI components for styling.
+ *
+ * @returns JSX.Element The rendered component.
+ */
+export default function Step4_TransferCompleted() {
+  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
-  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const fileUrl = useFileReceiverStore((state) => state.fileUrl);
 
-  if (!senderId || !fileMetadata || !fileUrl) return;
+  if (!fileMetadata || !senderId || !fileUrl) return;
 
   const handleDownloadFile = () => {
     const a = document.createElement("a");
@@ -85,10 +104,10 @@ export default function ReceiverTransferCompleted() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
-        <FileCard fileMetadata={fileMetadata} />
+        <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <ReceiverProgressBar />
+      <ReceiverTransferProgress />
 
       <motion.div
         onClick={handleDownloadFile}
