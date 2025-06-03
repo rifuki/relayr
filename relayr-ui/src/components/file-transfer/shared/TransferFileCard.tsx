@@ -41,7 +41,8 @@ export default function TransferFileCard({
     <div
       className={cn(
         "w-full p-4 rounded-lg border",
-        "border-border bg-card",
+        "hover:bg-primary/10 dark:bg-input/30 hover:dark:bg-secondary/10 transition-colors",
+        "cursor-pointer",
         className,
       )}
     >

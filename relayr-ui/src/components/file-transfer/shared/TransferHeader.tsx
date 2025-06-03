@@ -26,8 +26,8 @@ export default function TransferHeader({
       className="text-center space-y-2"
       variants={fileListItemVariants}
     >
-      <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="text-sm text-muted-foreground">{description}</p>
+      <h1 className="text-3xl font-bold">{title}</h1>
+      <p className="text-muted-foreground">{description}</p>
     </motion.div>
   );
 }

@@ -119,7 +119,7 @@ export default function Step4_ReadyToSend() {
     sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
-    actions.setTransferConnection({ recipientId });
+    actions.setTransferConnection({ recipientId: null });
     actions.clearTransferState();
     actions.setErrorMessage(null);
   };

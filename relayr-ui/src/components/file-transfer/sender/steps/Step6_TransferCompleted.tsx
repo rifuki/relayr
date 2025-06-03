@@ -25,7 +25,6 @@ import {
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 
 // Motion Animation
@@ -55,32 +54,16 @@ const successAnimation = {
  * @returns JSX.Element The rendered component.
  */
 export default function Step6_TransferCompleted() {
-  const { senderId, recipientId } = useFileSenderStore(
+  const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const { getWebSocket } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
-  if (!fileMetadata) {
-    actions.setErrorMessage("Something went wrong. Please try again.");
-    return null;
-  }
+  if (!fileMetadata) return null;
 
   const handleResetTransfer = () => {
-    const ws = getWebSocket?.();
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      actions.setErrorMessage("WebSocket is not available.");
-    } else {
-      ws.close(
-        1000,
-        `Sender: ${senderId} success reset transfer, closing WebSocket connection.`,
-      );
-    }
     actions.setFile(null);
-    actions.setWebSocketUrl(null);
-    actions.setTransferShareLink(null);
-    actions.setTransferConnection({ senderId: null, recipientId: null });
     actions.clearTransferState();
   };
 

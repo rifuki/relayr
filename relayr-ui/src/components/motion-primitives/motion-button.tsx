@@ -20,7 +20,7 @@ export const MotionButton = forwardRef<HTMLButtonElement, MotionButtonProps>(
     return (
       <MotionButtonBase
         ref={ref}
-        className={`hover:cursor-pointer ${className || ""}`}
+        className={`hover:cursor-pointer py-5 ${className || ""}`}
         whileHover={whileHover}
         whileTap={whileTap}
         {...props}

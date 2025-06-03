@@ -29,12 +29,17 @@ export default function ShareableLinkInput({
   const inputId = useId();
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full space-y-1 ${className}`}>
       <Label htmlFor={inputId} className="text-xs text-muted-foreground">
         Link for recipient
       </Label>
       <div className="w-full flex gap-2">
-        <Input id={inputId} value={text} className="w-full" readOnly />
+        <Input
+          id={inputId}
+          value={text}
+          className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-default"
+          readOnly
+        />
         <CopyButton text={text} />
       </div>
     </div>

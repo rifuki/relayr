@@ -50,10 +50,12 @@ export default function Step1_FileSelector() {
       }
     };
     reader.onload = () => {
-      setIsFileLoading(false);
       setProgress(100);
       actions.setErrorMessage(null);
       actions.setFile(file);
+      setTimeout(() => {
+        setIsFileLoading(false);
+      }, 1000);
     };
     reader.onerror = () => {
       setIsFileLoading(false);
@@ -190,7 +192,7 @@ export default function Step1_FileSelector() {
           {isFileLoading ? (
             <Loader2Icon className="animate-spin text-primary" />
           ) : (
-            <FileIcon className="h-10 w-10" />
+            <FileIcon className="h-8 w-8" />
           )}
         </motion.div>
 
@@ -228,7 +230,7 @@ export default function Step1_FileSelector() {
               )
             }
             disabled={isFileLoading}
-            className="w-full my-2 cursor-pointer"
+            className="w-full my-2 py-5 cursor-pointer"
           >
             {isFileLoading ? (
               <TextShimmer duration={1}>{`${progress}%`}</TextShimmer>

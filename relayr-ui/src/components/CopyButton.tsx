@@ -31,8 +31,20 @@ export default function CopyButton({ text }: CopyButtonProps) {
   // Handler for copy button click
   const handleCopy = async () => {
     const result = await copyToClipboard(text);
-    if (result) toast.success("Copied to clipboard");
-    else toast.error("Failed to copy the share link.");
+    if (result)
+      toast.success("Copied to clipboard", {
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+    else
+      toast.error("Failed to copy the share link.", {
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
 
     setIsCopied(result);
 
@@ -42,6 +54,7 @@ export default function CopyButton({ text }: CopyButtonProps) {
 
   return (
     <Button
+      className="cursor-pointer transition-colors hover:bg-secondary/50"
       onClick={handleCopy}
       size="icon"
       variant="secondary"

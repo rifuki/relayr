@@ -61,13 +61,13 @@ export default function TransferCardLayout({
 }: TransferCardLayoutProps) {
   return (
     <>
-      <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden">
+      <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none">
         <CardHeader>
           <MotionCardTitle>
             <TransferConnectionStatus readyState={readyState} />
           </MotionCardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col space-y-5">
+        <CardContent className="flex flex-col space-y-5 my-5">
           {errorMessage && <TransferAlertError message={errorMessage} />}
           {children}
         </CardContent>

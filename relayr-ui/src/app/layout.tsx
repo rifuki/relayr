@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 // External Libraries
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 // Providers
 import ThemeProvider from "@/providers/ThemeProvider";
