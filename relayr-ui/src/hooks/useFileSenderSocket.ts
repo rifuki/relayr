@@ -122,7 +122,7 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
     } satisfies FileMetaRequest);
 
     actions.setTransferShareLink(
-      `${window.location.origin}/receive?id=${msg.connId}`,
+      `${window.location.origin}/transfer/receive?id=${msg.connId}`,
     );
     actions.setIsLoading(false);
   };

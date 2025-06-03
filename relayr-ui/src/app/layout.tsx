@@ -48,9 +48,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black p-4">
-              {children}
-            </main>
+            {children}
           </ThemeProvider>
         </TanStackProvider>
         <Toaster /> {/* Toaster component for notifications */}
