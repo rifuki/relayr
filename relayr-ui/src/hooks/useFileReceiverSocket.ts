@@ -36,9 +36,13 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
   // Extracting necessary values from the store
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const webSocketUrl = useFileReceiverStore((state) => state.webSocketUrl);
-  const { senderId, isConnected } = useFileReceiverStore(
+  const { senderId, isConnected, recipientId } = useFileReceiverStore(
     (state) =>
-      state.transferConnection as { senderId: string; isConnected: boolean },
+      state.transferConnection as {
+        senderId: string;
+        isConnected: boolean;
+        recipientId: string;
+      },
   );
   const { totalChunks } = useFileReceiverStore(
     (state) => state.fileTransferInfo,
@@ -286,7 +290,18 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
       recipientTransferProgress: receiverTransferProgress,
     } satisfies FileTransferAckRequest);
 
+    // Finalize the file transfer by reconstructing the file from received chunks,
+    // validating its integrity, and updating the transfer state accordingly.
     actions.finalizeTransfer();
+
+    // Close the WebSocket connection gracefully after transfer completion
+    const ws = getWebSocket();
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.close(
+        1000,
+        `Receiver [${recipientId}]: Transfer completed, closing WebSocket connection.`,
+      );
+    }
   };
 
   // Process incoming 'restartTransfer' message
@@ -315,6 +330,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     console.info("❌ Disconnected", close.code);
 
     actions.setWebSocketUrl(null);
+    actions.setTransferConnection({ isConnected: false, recipientId: null });
 
     if (close.code === 1000) return;
     else if (close.code === 1006) {

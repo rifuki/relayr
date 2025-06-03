@@ -52,11 +52,12 @@ export default function ReceiverFlow() {
       "000": 1, // Initial state
       "100": 2, // Connected, ready to receive
       "110": 3, // Transferring
-      "101": 4, // Transfer completed
+      "001": 4, // Transfer completed
     };
 
     // Generate the stateKey based on boolean values (converted to numbers) of states
     const stateKey = `${+isConnected}${+isTransferring}${+isTransferCompleted}`;
+
     // Retrieve the new step from stepMap, default to 0 if not found or unexpected state
     const newStep = stepMap[stateKey] || 0;
 

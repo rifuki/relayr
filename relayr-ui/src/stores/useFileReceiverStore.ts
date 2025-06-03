@@ -240,7 +240,10 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
           isTransferCanceled: false,
           isTransferCompleted: true,
         },
+        receivedChunkData: [],
       });
+
+      console.info("File successfully reconstructed. URL:", newFileUrl);
     },
   },
 }));

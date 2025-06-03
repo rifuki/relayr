@@ -73,7 +73,6 @@ export default function Step6_TransferCompleted() {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       actions.setErrorMessage("WebSocket is not available.");
     } else {
-      actions.setWebSocketUrl(null);
       ws.close(
         1000,
         `Sender: ${senderId} success reset transfer, closing WebSocket connection.`,

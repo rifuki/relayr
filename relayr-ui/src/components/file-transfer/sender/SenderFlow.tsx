@@ -34,7 +34,7 @@ import {
 export default function SenderFlow() {
   // Retrieve file and connection/transfer status from the store
   const file = useFileSenderStore((state) => state.file);
-  const { senderId, recipientId } = useFileSenderStore(
+  const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
   const transferShareLink = useFileSenderStore(
@@ -57,7 +57,7 @@ export default function SenderFlow() {
     const stepMap: { [key: string]: number } = {
       "00000": 1, // Initial state, no file selected and no transfer connection yet
       "10000": 2, // File selected, but transfer connection not established yet
-      "11000": 3, // File selected, sender connection or share link available, but recipient not connected yet
+      "11000": 3, // File selected, sender connection and share link available, but recipient not connected yet
       "11100": 4, // Recipient connected, ready to start transfer
       "11110": 5, // Transfer in progress
       "11101": 6, // Transfer completed
@@ -74,6 +74,7 @@ export default function SenderFlow() {
       .map(Boolean) // Converts each value to a boolean (true/false)
       .map(Number) // Converts boolean values to numbers (1 or 0)
       .join(""); // Join all the number values into a single string
+
     // Retrieve the new step from stepMap, default to 0 if not found or unexpected state
     const newStep = stepMap[stepKey] || 0;
 
@@ -84,7 +85,6 @@ export default function SenderFlow() {
     }
   }, [
     file,
-    senderId,
     transferShareLink,
     recipientId,
     isTransferring,
