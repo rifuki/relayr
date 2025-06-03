@@ -6,6 +6,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
 
+// Custom Components
+import Header from "@/components/Header";
+
 // Providers
 import ThemeProvider from "@/providers/ThemeProvider";
 import TanStackProvider from "@/providers/TanStackProvider";
@@ -48,7 +51,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-zinc-900">
+              <Header />
+              <main className="flex-1">{children}</main>
+            </div>
           </ThemeProvider>
         </TanStackProvider>
         <Toaster /> {/* Toaster component for notifications */}
