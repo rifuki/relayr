@@ -35,7 +35,7 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const webSocketUrl = useFileSenderStore((state) => state.webSocketUrl);
-  const { recipientId } = useFileSenderStore(
+  const { recipientId, senderId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
   const { offset, chunkIndex, chunkDataSize, isTransferring } =
@@ -199,6 +199,15 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
         isTransferCanceled: false,
         isTransferCompleted: true,
       });
+
+      // Close the WebSocket connection gracefully after transfer completion
+      const ws = getWebSocket();
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close(
+          1000,
+          `Sender [${senderId}]: Transfer completed, closing WebSocket connection.`,
+        );
+      }
     } else if (ack.status === "error") {
       actions.setTransferStatus({
         isTransferring: false,
@@ -235,7 +244,7 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
     actions.setWebSocketUrl(null);
     actions.setTransferShareLink(null);
     actions.setTransferConnection({ senderId: null, recipientId: null });
-    actions.clearTransferState();
+
     if (close.code === 1000) return;
     else if (close.code === 1006) {
       actions.setErrorMessage("Lost connection to the server");

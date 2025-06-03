@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 
 // ShadCN UI Components
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 
 // Motion-Primitives UI Components
 import { MotionButton } from "@/components/motion-primitives/motion-button";
@@ -60,13 +59,13 @@ export default function Step6_TransferCompleted() {
     (state) => state.transferConnection,
   );
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
-  const transferShareLink = useFileSenderStore(
-    (state) => state.transferShareLink,
-  );
-  const actions = useFileSenderActions();
   const { getWebSocket } = useSenderWebSocketHandlers();
+  const actions = useFileSenderActions();
 
-  if (!fileMetadata || !transferShareLink) return;
+  if (!fileMetadata) {
+    actions.setErrorMessage("Something went wrong. Please try again.");
+    return null;
+  }
 
   const handleResetTransfer = () => {
     const ws = getWebSocket?.();
@@ -125,8 +124,6 @@ export default function Step6_TransferCompleted() {
         <TransferFileCard fileMetadata={fileMetadata} />
 
         <SenderTransferProgress />
-
-        <Input value={transferShareLink} className="w-full" readOnly disabled />
       </motion.div>
 
       <motion.div
