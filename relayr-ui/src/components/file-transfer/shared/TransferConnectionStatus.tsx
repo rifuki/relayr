@@ -20,6 +20,10 @@ export default function TransferConnectionStatus({
   let statusColor = "";
 
   switch (readyState) {
+    case -1:
+      statusText = "Not connected";
+      statusColor = "text-gray-500";
+      break;
     case 0:
       statusText = "Connecting...";
       statusColor = "text-yellow-500";
