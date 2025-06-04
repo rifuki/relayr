@@ -7,11 +7,12 @@ interface TransferLayoutProps {
 }
 
 /**
- * TransferLayout component provides a full-width layout for file transfer operations.
- * It centers its children vertically and horizontally within the viewport.
+ * TransferLayout component
+ * This component serves as a layout wrapper for transfer-related pages,
+ * providing a consistent structure for displaying transfer content.
  *
- * @param {TransferLayoutProps} props - Component props containing children elements.
- * @returns JSX.Element - A div that serves as a layout container for transfer operations.
+ * @param {TransferLayoutProps} props - The properties for the TransferLayout component.
+ * @return JSX.Element - The rendered TransferLayout component.
  */
 export default function TransferLayout({ children }: TransferLayoutProps) {
   return (
