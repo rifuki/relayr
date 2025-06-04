@@ -35,23 +35,20 @@ import { TransferAlertError, TransferConnectionStatus } from "./shared";
 interface TransferCardLayoutProps {
   readyState: ReadyState; // WebSocket ready state for connection status display
   errorMessage: string | null; // Error message to show alert if present
-  idLabel: string; // Label for the connection ID display (e.g., "Receiver", "Sender")
   connectionId: string | null; // Unique connection ID to display in UI
   children: ReactNode; // Child components/content to render inside the card
 }
 
 /**
- * TransferCardLayout component renders a card layout for file transfer operations.
- * It displays the connection status, any error messages, and the connection ID.
- * The card contains a header with the connection status and a content area for children components.
+ * TransferCardLayout Component
+ * A layout component for file transfer operations, displaying connection status and error messages.
  *
- * @param {TransferCardLayoutProps} props - Component props containing WebSocket state, error message, IDs, and children.
- * @returns JSX.Element - A card UI element with connection status and content area.
+ * @param {TransferCardLayoutProps} props - The properties for the component.
+ * @returns JSX.Element The rendered component.
  */
 export default function TransferCardLayout({
   readyState,
   errorMessage,
-  idLabel,
   connectionId,
   children,
 }: TransferCardLayoutProps) {
@@ -63,16 +60,15 @@ export default function TransferCardLayout({
           {children}
         </CardContent>
 
-        <CardFooter className="mx-auto">
+        <CardFooter className="mx-auto flex flex-col">
           <TransferConnectionStatus readyState={readyState} />
+          {readyState === ReadyState.OPEN && connectionId && (
+            <div className="text-sm text-muted-foreground mt-2">
+              ID: <strong>{connectionId}</strong>
+            </div>
+          )}
         </CardFooter>
       </Card>
-
-      {connectionId && (
-        <div className="fixed bottom-5 right-5 dark:text-white">
-          <strong>{idLabel} ID: </strong> {connectionId}
-        </div>
-      )}
     </>
   );
 }

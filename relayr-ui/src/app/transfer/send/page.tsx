@@ -31,7 +31,6 @@ export default function SenderPage() {
     <TransferCardLayout
       readyState={webSocketReadyState}
       errorMessage={errorMessage}
-      idLabel="Sender"
       connectionId={connectionId}
     >
       <SenderFlow />

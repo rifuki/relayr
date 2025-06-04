@@ -44,7 +44,7 @@ export default function Home() {
           </Link>
           <Link href="/transfer/receive">
             <Button
-              className="w-full sm:w-auto rounded-lg p-6 font-semibold bg-transparent hover:bg-black/5 dark:bg-black cursor-pointer"
+              className="w-full sm:w-auto rounded-lg p-6 font-semibold bg-transparent hover:bg-black/5 dark:bg-background/50 cursor-pointer"
               size="lg"
               variant="outline"
             >

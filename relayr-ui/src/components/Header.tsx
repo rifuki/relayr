@@ -57,7 +57,6 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
       : -1;
 
   const handleTooltipToggle = () => setTooltipOpen((open) => !open);
-  console.log(isSenderUploading, isReceiverDownloading);
 
   return (
     <header className="border-b bg-background/5 backdrop-blur">

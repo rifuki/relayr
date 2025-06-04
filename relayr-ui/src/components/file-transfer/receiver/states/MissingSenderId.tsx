@@ -52,14 +52,14 @@ export default function MissingSenderId() {
   };
 
   return (
-    <CardState className="space-y-7 p-5">
+    <CardState className="space-y-7 p-5 text-center">
       {/* Title and Information Icon */}
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-full bg-neutral-100 dark:bg-neutral-800 p-4 shadow-md mb-2">
           <InfoIcon className="h-8 w-8 text-neutral-800 dark:text-neutral-400" />
         </div>
-        <h1 className="text-xl font-bold text-center">Enter Sender ID</h1>
-        <p className="text-center text-muted-foreground max-w-xs">
+        <h1 className="text-xl font-bold">Enter Sender ID</h1>
+        <p className="text-muted-foreground max-w-xs">
           You need a Sender ID to receive files. Ask the sender to generate a
           link.
         </p>
@@ -70,7 +70,7 @@ export default function MissingSenderId() {
       <form onSubmit={handleSubmit} className="w-full space-y-5">
         {/* Input field for entering sender ID or link */}
         <Input
-          className="w-full py-5 rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
+          className="w-full py-5 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
           placeholder="Sender ID or full link"
           value={input}
           onChange={(e) => {
@@ -82,22 +82,32 @@ export default function MissingSenderId() {
         {/* Input field for entering sender ID or link End */}
 
         {/* Display error message if any */}
-        {error && (
-          <div className="text-red-500 text-sm text-center">{error}</div>
-        )}
+        {error && <div className="text-red-500 text-sm">{error}</div>}
         {/* Display error message if any End*/}
 
         {/* Submit button */}
         <Button
           type="submit"
-          className="w-full rounded text-white bg-neutral-900 hover:bg-neutral-700 font-semibold transition cursor-pointer"
+          className="w-full font-semibold transition cursor-pointer"
           variant="default"
           size="lg"
         >
           Continue
         </Button>
         {/* Submit button end */}
+
+        {/* Button to go back to the previous page */}
+        <Button
+          type="button"
+          className="cursor-pointer"
+          variant="link"
+          onClick={() => router.back()}
+        >
+          Go Back
+        </Button>
+        {/* Button to go back to the previous page */}
       </form>
+
       {/* Form to submit sender ID End */}
     </CardState>
   );

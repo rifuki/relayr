@@ -62,7 +62,6 @@ export default function ReceivePageContent() {
     <TransferCardLayout
       readyState={webSocketReadyState}
       errorMessage={errorMessage}
-      idLabel="Receiver"
       connectionId={connectionId}
     >
       <ReceiverFlow />
