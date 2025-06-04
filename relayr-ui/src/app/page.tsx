@@ -55,7 +55,7 @@ export default function Home() {
         {/* Action Buttons End */}
 
         {/* Features Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12 mt-8 cursor-default">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12 sm:mt-8 cursor-default">
           <div className="p-6 rounded-lg shadow-sm bg-background/50 space-y-4">
             <div className="w-11 h-11 rounded-lg bg-secondary/90 flex items-center justify-center">
               <CloudLightningIcon className="w-5 h-5" />

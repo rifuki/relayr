@@ -60,7 +60,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
 
   return (
     <header className="border-b bg-background/5 backdrop-blur">
-      <div className="container mx-auto flex h-14 items-center justify-between px-6 sm:px-8 lg:px-10 max-w-screen-xl">
+      <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-8 lg:px-10 max-w-screen-xl">
         <div className="flex items-center space-x-6">
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-xl font-bold tracking-tight text-primary">
@@ -115,22 +115,18 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
                   size="icon"
                   asChild
                 >
-                  <span>
-                    <DotIcon
-                      size={16 * 4}
-                      className={`
-                    ${
+                  <DotIcon
+                    size={16 * 4}
+                    className={`${
                       webSocketReadyState === 1
-                        ? "text-green-500"
+                        ? "text-green-500 hover:text-green-500"
                         : webSocketReadyState === 0
-                          ? "text-yellow-500"
+                          ? "text-yellow-500 hover:text-yellow-500"
                           : webSocketReadyState === 2
-                            ? "text-orange-500"
-                            : "text-red-500"
-                    } animate-pulse
-                  `}
-                    />
-                  </span>
+                            ? "text-orange-500 hover:text-orange-500"
+                            : "text-primary hover:text-primary"
+                    } animate-pulse`}
+                  />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -141,8 +137,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
                     {webSocketReadyState === 1 && "Connected"}
                     {webSocketReadyState === 2 && "Closing"}
                     {webSocketReadyState === 3 && "Disconnected"}
-                    {![0, 1, 2, 3].includes(webSocketReadyState) &&
-                      "Unknown status"}
+                    {![0, 1, 2, 3].includes(webSocketReadyState) && "Unknown"}
                   </span>
                 </p>
               </TooltipContent>
