@@ -34,8 +34,10 @@ export default function Step1_FileSelector() {
   const [isFileLoading, setIsFileLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [, setIsAnimationComplete] = useState(false);
+  const [isWrapperHovered, setIsWrapperHovered] = useState(false);
 
+  // Handles file selection (via input)
   const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files?.length === 0) return;
 
@@ -51,10 +53,10 @@ export default function Step1_FileSelector() {
     };
     reader.onload = () => {
       setProgress(100);
-      actions.setErrorMessage(null);
-      actions.setFile(file);
+      actions.setErrorMessage(null); // Clear any previous error
+      actions.setFile(file); // Set the file to the store
       setTimeout(() => {
-        setIsFileLoading(false);
+        setIsFileLoading(false); // avoid flicker after file is loaded to step 2 animation
       }, 1000);
     };
     reader.onerror = () => {
@@ -62,9 +64,10 @@ export default function Step1_FileSelector() {
       actions.setErrorMessage("File read error");
       console.error("File read error", reader.error);
     };
-    reader.readAsArrayBuffer(e.target.files[0]);
+    reader.readAsArrayBuffer(e.target.files[0]); // Start reading file
   };
 
+  // Handle file drop event (drag-and-drop)
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
@@ -93,29 +96,32 @@ export default function Step1_FileSelector() {
       return;
     }
 
-    actions.setErrorMessage(null);
-    actions.setFile(droppedFile);
+    actions.setErrorMessage(null); // Clear any previous error
+    actions.setFile(droppedFile); // Set the dropped file to store
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(true);
+    setIsDragging(true); // Set dragging state to true
+    setIsWrapperHovered(false); // Make sure wrapper hover is false
   };
 
   const handleDragEnter = () => {
-    setIsDragging(true);
+    setIsDragging(true); // Set dragging state to true on entering
   };
 
   const handleDragLeave = () => {
-    setIsDragging(false);
+    setIsDragging(false); // Set dragging state to false when leaving
+    setIsWrapperHovered(false); // Make sure wrapper hover is false
   };
 
+  // Handle animation completion after a delay
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimationComplete(true);
-    }, 500);
+    }, 500); // Delay animation completion by 500ms
 
-    return () => clearTimeout(timer);
+    return () => clearTimeout(timer); // Clean up the timer
   }, []);
 
   return (
@@ -132,22 +138,22 @@ export default function Step1_FileSelector() {
       </motion.div>
 
       <motion.div
-        className={`w-full p-20 border-4 border-dashed ${isDragging ? "border-primary" : "border-border/80"} ${isDragging ? "bg-secondary/70" : "hover:bg-secondary/50"} flex flex-col justify-center items-center space-y-5 ${!isFileLoading && "cursor-pointer"}`}
+        className={`w-full p-20 border-4 border-dashed ${isDragging ? "border-primary bg-secondary/70" : "border-border/80 hover:bg-secondary/50"} gap-5 flex flex-col justify-center items-center ${isFileLoading ? "cursor-none" : "cursor-pointer"}`}
         onClick={() => !isFileLoading && fileInputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        initial={{ opacity: 0, scale: 0.5 }}
+        onHoverStart={() => setIsWrapperHovered(true)}
+        onHoverEnd={() => setIsWrapperHovered(false)}
+        initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{
           type: "spring",
           stiffness: 300,
           damping: 30,
-          delay: 0.2,
+          delay: 0.5,
         }}
-        whileHover={isAnimationComplete ? { scale: isDragging ? 1 : 1.03 } : {}}
-        whileTap={!isFileLoading ? { scale: 0.88 } : {}}
         style={{ minWidth: "300px" }}
       >
         <input
@@ -160,34 +166,31 @@ export default function Step1_FileSelector() {
 
         <motion.div
           className="w-16 h-16 mx-auto rounded-xl bg-secondary/80 flex items-center justify-center"
-          animate={
-            isFileLoading
-              ? { rotate: 360 }
-              : {
-                  scale: isDragging ? 1.2 : 1,
-                  rotate: isDragging ? [0, -10, -10, -10, 0] : 0,
-                }
-          }
-          transition={
-            isFileLoading
-              ? { repeat: Infinity, duration: 1, ease: "linear" }
-              : {
-                  scale: { type: "spring", stiffness: 300, damping: 25 },
-                  rotate: { duration: 0.5, ease: "easeInOut" },
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  repeatDelay: 1,
-                }
-          }
-          whileHover={
-            isAnimationComplete && !isFileLoading
-              ? {
-                  scale: isDragging ? 1.2 : 1.5,
-                  rotate: isDragging ? [0, 0, 0, 0] : [0, 5, -5, 0],
-                }
-              : {}
-          }
+          animate={{
+            scale: isFileLoading
+              ? 1
+              : isDragging
+                ? 1.2
+                : isWrapperHovered
+                  ? 1.3
+                  : 1,
+            rotate: isFileLoading
+              ? 360
+              : isDragging
+                ? [0, -20, -20, -20, 0]
+                : isWrapperHovered
+                  ? [0, 20, -20, 0]
+                  : 0,
+          }}
+          transition={{
+            duration: isFileLoading ? 1 : 1.5,
+            ease: isFileLoading ? "linear" : undefined,
+            scale: { type: "spring", stiffness: 300, damping: 25 },
+            rotate: { duration: 0.5, ease: "easeInOut" },
+            repeat: Infinity,
+            repeatType: "reverse",
+            repeatDelay: 1,
+          }}
         >
           {isFileLoading ? (
             <Loader2Icon className="animate-spin text-primary" />
@@ -198,7 +201,7 @@ export default function Step1_FileSelector() {
 
         <motion.div
           className="text-center"
-          animate={{ y: isDragging ? -5 : 0 }}
+          animate={{ y: isDragging ? 15 : isWrapperHovered ? 10 : 0 }}
           transition={{ type: "spring", stiffness: 500 }}
         >
           <p className="text-base font-medium">
@@ -209,7 +212,7 @@ export default function Step1_FileSelector() {
                 : "Drag and drop your file here"}
           </p>
           <p className="text-sm text-muted-foreground">
-            {isDragging ? "" : "or click to browse"}
+            {isDragging ? "\u00A0" : "or click to browse"}
           </p>
         </motion.div>
       </motion.div>
