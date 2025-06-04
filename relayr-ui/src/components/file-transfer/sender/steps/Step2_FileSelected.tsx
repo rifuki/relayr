@@ -84,7 +84,7 @@ export default function Step2_FileSelected() {
 
       <motion.div className="relative w-full" variants={fileListItemVariants}>
         <motion.div
-          className="absolute -right-2 -top-2 z-1 bg-white dark:bg-zinc-800 rounded-full"
+          className="absolute -right-2 -top-2 z-1 bg-white dark:bg-neutral-800 rounded-full"
           variants={checkmarkVariants}
           initial="hidden"
           animate="visible"
