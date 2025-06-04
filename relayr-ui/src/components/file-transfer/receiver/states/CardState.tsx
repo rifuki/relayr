@@ -19,7 +19,7 @@ interface CardStateProps {
  */
 export default function CardState({ children }: CardStateProps) {
   return (
-    <Card className="w-screen max-w-sm sm:max-w-md">
+    <Card className="w-screen max-w-sm sm:max-w-md bg-opacity border-none shadow-none">
       <CardContent className="flex flex-col items-center justify-center space-y-5 min-h-[300px]">
         {children}
       </CardContent>
