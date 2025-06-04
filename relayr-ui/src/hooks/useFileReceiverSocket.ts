@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 
 // External Libraries
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 
 // State Management (Store)
 import {
@@ -26,13 +26,7 @@ import {
   WebSocketReceiverTextMessageResponse,
 } from "@/types/webSocketMessages";
 
-/**
- * Custom hook to manage the WebSocket connection for file receiving.
- * It handles processing incoming messages, managing transfer status, and sending acknowledgments.
- *
- * @return {Object} - Contains the WebSocket ready state.
- */
-export function UseFileReceiverSocket(): { readyState: ReadyState } {
+export function useFileReceiverSocket() {
   // Extracting necessary values from the store
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const webSocketUrl = useFileReceiverStore((state) => state.webSocketUrl);
@@ -82,6 +76,19 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
       },
     },
   );
+
+  // Sync readyState to store
+  useEffect(() => {
+    actions.setWebSocketReadyState(readyState);
+  }, [readyState, actions]);
+
+  // Sync WebSocket handlers to store
+  useEffect(() => {
+    actions.setWebSocketHandlers({
+      sendJsonMessage,
+      getWebSocket,
+    });
+  }, [sendJsonMessage, getWebSocket, actions]);
 
   // Handle incoming Blob data from WebSocket
   const processWebSocketBlobMessage = async (blobData: Blob) => {
@@ -182,7 +189,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
 
   // Process incoming 'cancelSenderReady' message
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const processCancelSenderReadyMessage = (msg: CancelSenderReadyResponse) => {
+  const processCancelSenderReadyMessage = (_msg: CancelSenderReadyResponse) => {
     const errMsg = "The sender has canceled the connection";
     getWebSocket()?.close(1000, errMsg);
     actions.setErrorMessage(errMsg);
@@ -306,7 +313,7 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
 
   // Process incoming 'restartTransfer' message
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const processRestartTransferMessage = (msg: RestartTransferResponse) => {
+  const processRestartTransferMessage = (_msg: RestartTransferResponse) => {
     actions.setErrorMessage(null);
     actions.setTransferStatus({
       isTransferCanceled: false,
@@ -340,14 +347,6 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
     }
   };
 
-  // Set WebSocket handlers in the store
-  useEffect(() => {
-    actions.setWebSocketHandlers({
-      sendJsonMessage,
-      getWebSocket,
-    });
-  }, [sendJsonMessage, getWebSocket, actions]);
-
   // Handle beforeunload event to cancel transfer if necessary
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
@@ -371,6 +370,4 @@ export function UseFileReceiverSocket(): { readyState: ReadyState } {
 
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isTransferring, readyState, isConnected, sendJsonMessage, senderId]);
-
-  return { readyState };
 }

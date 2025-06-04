@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 
 // External Libraries
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 
 // State Management (Store)
 import {
@@ -24,13 +24,7 @@ import {
   CancelSenderTransferRequest,
 } from "@/types/webSocketMessages";
 
-/**
- * Custom hook to manage the WebSocket connection for file sending.
- * It handles sending file metadata, managing transfer status, and processing incoming messages.
- *
- * @return {Object} - Contains the WebSocket ready state.
- */
-export function useFileSenderSocket(): { readyState: ReadyState } {
+export function useFileSenderSocket() {
   // Extracting necessary values from the store
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -62,6 +56,22 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
         actions.setErrorMessage("WebSocket error occurred");
       },
     });
+
+  // Sync readyState to store
+  useEffect(() => {
+    actions.setWebSocketReadyState(readyState);
+  }, [readyState, actions]);
+
+  // Sync WebSocket handlers to store
+  useEffect(() => {
+    if (sendJsonMessage && sendMessage) {
+      actions.setWebSocketHandlers({
+        sendJsonMessage: sendJsonMessage,
+        sendMessage: sendMessage,
+        getWebSocket: getWebSocket,
+      });
+    }
+  }, [sendJsonMessage, sendMessage, getWebSocket, actions]);
 
   // Handle incoming text WebSocket messages
   const processWebSocketTextMessage = (
@@ -253,17 +263,6 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
     }
   };
 
-  // Set WebSocket handlers in the store
-  useEffect(() => {
-    if (sendJsonMessage && sendMessage) {
-      actions.setWebSocketHandlers({
-        sendJsonMessage: sendJsonMessage,
-        sendMessage: sendMessage,
-        getWebSocket: getWebSocket,
-      });
-    }
-  }, [sendJsonMessage, sendMessage, getWebSocket, actions]);
-
   // Handle beforeunload event to cancel transfer if necessary
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
@@ -284,6 +283,4 @@ export function useFileSenderSocket(): { readyState: ReadyState } {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [readyState, sendJsonMessage, isTransferring, recipientId]);
-
-  return { readyState };
 }

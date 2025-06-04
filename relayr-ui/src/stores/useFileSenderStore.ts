@@ -48,6 +48,7 @@ interface FileSenderActions {
   setTransferConnection: (connection: Partial<TransferConnection>) => void;
   setErrorMessage: (message: string | null) => void;
   setWebSocketUrl: (wsUrl: string | null) => void;
+  setWebSocketReadyState: (readyState: number) => void;
   setWebSocketHandlers: (webSocketHandlers: Partial<WebSocketHandlers>) => void;
   setIsLoading: (isLoading: boolean) => void;
   setTransferShareLink: (link: string | null) => void;
@@ -66,6 +67,7 @@ export interface FileSenderState {
   transferConnection: TransferConnection;
   errorMessage: string | null;
   webSocketUrl: string | null;
+  webSocketReadyState: number;
   webSocketHandlers: WebSocketHandlers;
   isLoading: boolean;
   transferShareLink: string | null;
@@ -86,6 +88,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   },
   errorMessage: null,
   webSocketUrl: null,
+  webSocketReadyState: -1,
   webSocketHandlers: {
     sendJsonMessage: undefined,
     sendMessage: undefined,
@@ -132,6 +135,8 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
       set({
         webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
       }),
+    setWebSocketReadyState: (readyState) =>
+      set({ webSocketReadyState: readyState }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setTransferShareLink: (link) => set({ transferShareLink: link }),
     setFileTransferInfo: (fileTransferInfo) => {

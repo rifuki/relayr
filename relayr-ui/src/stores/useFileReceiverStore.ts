@@ -48,6 +48,7 @@ interface FileReceiverActions {
   setFileMetadata: (fileMetadata: FileMetadata) => void;
   setErrorMessage: (errorMessage: string | null) => void;
   setWebSocketUrl: (webSocketUrl: string | null) => void;
+  setWebSocketReadyState: (readyState: number) => void;
   setWebSocketHandlers: (webSocketHandlers: Partial<WebSocketHandlers>) => void;
   setFileTransferInfo: (fileTransferInfo: Partial<FileTransferInfo>) => void;
   setTransferStatus: (transferStatus: Partial<TransferStatus>) => void;
@@ -64,6 +65,7 @@ interface FileReceiverState {
   fileMetadata: FileMetadata | null;
   errorMessage: string | null;
   webSocketUrl: string | null;
+  webSocketReadyState: number;
   webSocketHandlers: WebSocketHandlers;
   fileTransferInfo: FileTransferInfo;
   transferStatus: TransferStatus;
@@ -84,6 +86,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   fileMetadata: null,
   errorMessage: null,
   webSocketUrl: null,
+  webSocketReadyState: -1,
   webSocketHandlers: {
     sendJsonMessage: undefined,
     getWebSocket: undefined,
@@ -121,6 +124,8 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
     setFileMetadata: (fileMetadata) => set({ fileMetadata }),
     setErrorMessage: (errorMessage) => set({ errorMessage }),
     setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
+    setWebSocketReadyState: (readyState) =>
+      set({ webSocketReadyState: readyState }),
     setWebSocketHandlers: (webSocketHandlers) =>
       set({
         webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },

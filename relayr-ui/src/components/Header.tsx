@@ -12,7 +12,6 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 import { DotIcon } from "lucide-react";
-import { Card } from "./ui/card";
 
 // Props interface for Header component
 interface HeaderProps {

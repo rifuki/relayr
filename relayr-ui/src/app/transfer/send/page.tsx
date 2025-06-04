@@ -19,13 +19,17 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
  * @returns JSX.Element The sender's file transfer page component.
  */
 export default function SenderPage() {
-  const { readyState } = useFileSenderSocket();
+  useFileSenderSocket();
+
+  const webSocketReadyState = useFileSenderStore(
+    (state) => state.webSocketReadyState,
+  );
   const errorMessage = useFileSenderStore((state) => state.errorMessage);
   const connectionId = useInitId("sender");
 
   return (
     <TransferCardLayout
-      readyState={readyState}
+      readyState={webSocketReadyState}
       errorMessage={errorMessage}
       idLabel="Sender"
       connectionId={connectionId}

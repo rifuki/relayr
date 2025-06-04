@@ -9,7 +9,7 @@ import ReceiverFlow from "@/components/file-transfer/receiver/ReceiverFlow";
 import TransferCardLayout from "@/components/file-transfer/TransferCardLayout";
 
 // Hooks
-import { UseFileReceiverSocket } from "@/hooks/useFileReceiverSocket";
+import { useFileReceiverSocket } from "@/hooks/useFileReceiverSocket";
 import { useInitId } from "@/hooks/useInitId";
 import { useRelayFileMetadata } from "@/hooks/query/useRelay";
 
@@ -34,7 +34,10 @@ export default function ReceivePageContent() {
   const senderId = useSearchParams().get("id");
   const connectionId = useInitId("receiver");
 
-  const { readyState } = UseFileReceiverSocket();
+  useFileReceiverSocket();
+  const webSocketReadyState = useFileReceiverStore(
+    (state) => state.webSocketReadyState,
+  );
   const errorMessage = useFileReceiverStore((state) => state.errorMessage);
   const actions = useFileReceiverActions();
 
@@ -57,7 +60,7 @@ export default function ReceivePageContent() {
 
   return (
     <TransferCardLayout
-      readyState={readyState}
+      readyState={webSocketReadyState}
       errorMessage={errorMessage}
       idLabel="Receiver"
       connectionId={connectionId}
