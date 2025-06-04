@@ -2,10 +2,14 @@
 import { ReactNode } from "react";
 
 // ShadCN UI Components
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+
+// Utility function for conditional class names
+import { cn } from "@/lib/utils";
 
 // Props interface for CardState component
 interface CardStateProps {
+  className?: string;
   children: ReactNode;
 }
 
@@ -17,12 +21,16 @@ interface CardStateProps {
  * @param {CardStateProps} props - The properties for the CardState component.
  * @returns JSX.Element The rendered CardState component.
  */
-export default function CardState({ children }: CardStateProps) {
+export default function CardState({ className, children }: CardStateProps) {
   return (
-    <Card className="w-screen max-w-sm sm:max-w-md bg-opacity border-none shadow-none">
-      <CardContent className="flex flex-col items-center justify-center space-y-5 min-h-[300px]">
-        {children}
-      </CardContent>
+    <Card
+      className={cn(
+        "w-full max-w-sm bg-opacity border-none shadow-none flex flex-col items-center justify-center space-y-5 gap-0",
+        className,
+      )}
+      style={{ minHeight: "300px" }}
+    >
+      {children}
     </Card>
   );
 }
