@@ -10,11 +10,8 @@ import { MotionButton } from "@/components/motion-primitives/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
 // Internal Components
-import {
-  ReceiverTransferProgress,
-  TransferFileCard,
-  TransferHeader,
-} from "../../shared";
+import { ReceiverTransferProgress } from "../components";
+import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animations Variants
 import {

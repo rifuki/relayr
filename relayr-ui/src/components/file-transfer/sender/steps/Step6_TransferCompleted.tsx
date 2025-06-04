@@ -9,11 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { MotionButton } from "@/components/motion-primitives/motion-button";
 
 // Internal Components
-import {
-  SenderTransferProgress,
-  TransferFileCard,
-  TransferHeader,
-} from "../../shared";
+import { SenderTransferProgress } from "../components";
+import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animation Variants
 import {

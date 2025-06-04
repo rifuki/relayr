@@ -13,11 +13,8 @@ import { MotionButton } from "@/components/motion-primitives/motion-button";
 
 // Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import {
-  SenderTransferProgress,
-  TransferFileCard,
-  TransferHeader,
-} from "../../shared";
+import { SenderTransferProgress } from "../components";
+import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animation Variants
 import {
