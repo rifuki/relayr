@@ -6,7 +6,7 @@ import { create } from "zustand";
 import { FileMetadata } from "@/types/file";
 
 // Helper Functions
-import { sendNextChunk as sendNextChunkHelper } from "@/lib/sendNextChunk";
+import { sendNextChunk as sendNextChunkHelper } from "@/lib/send-next-chunk";
 
 // Interfaces for Transfer Connection, File Transfer Info, Transfer Status, and Progress
 interface TransferConnection {

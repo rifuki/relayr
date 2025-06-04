@@ -128,14 +128,20 @@ export function useFileReceiverSocket() {
     wsMsg: WebSocketReceiverTextMessageResponse,
   ) => {
     if (!wsMsg.success) {
-      if (
+      const shouldClose =
         wsMsg.message
-          .toLowerCase()
-          .includes("sender is already connected to recipient")
-      ) {
+          ?.toLowerCase()
+          .includes("sender is already connected to recipient") ||
+        wsMsg.message === "Please ask the sender to generate new link";
+
+      if (shouldClose) {
         const ws = getWebSocket?.();
         if (ws && ws.readyState === WebSocket.OPEN) {
-          const errorMsg = "Sender already connected to another recipent.";
+          const errorMsg = wsMsg.message
+            ?.toLowerCase()
+            .includes("sender is already connected to recipient")
+            ? "Sender already connected to another recipent."
+            : wsMsg.message;
           actions.setErrorMessage(errorMsg);
           ws.close(1000, errorMsg);
 
