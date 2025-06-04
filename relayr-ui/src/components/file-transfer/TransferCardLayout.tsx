@@ -1,18 +1,14 @@
 // React
 import { ReactNode } from "react";
 
-// External Libraries
-import { motion } from "motion/react";
-
 // ShadCN UI Components
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 // Custom UI Components
 import { ReadyState } from "react-use-websocket";
 import { TransferAlertError, TransferConnectionStatus } from "./shared";
 
 // Motion Components
-const MotionCardTitle = motion.create(CardTitle);
 // const MotionCard = motion.create(Card);
 
 // Motion Variants for Animations
@@ -62,15 +58,14 @@ export default function TransferCardLayout({
   return (
     <>
       <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none">
-        <CardHeader>
-          <MotionCardTitle>
-            <TransferConnectionStatus readyState={readyState} />
-          </MotionCardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col space-y-5 my-5">
+        <CardContent className="flex flex-col space-y-5">
           {errorMessage && <TransferAlertError message={errorMessage} />}
           {children}
         </CardContent>
+
+        <CardFooter className="mx-auto">
+          <TransferConnectionStatus readyState={readyState} />
+        </CardFooter>
       </Card>
 
       {connectionId && (
