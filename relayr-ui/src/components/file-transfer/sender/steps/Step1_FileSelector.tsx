@@ -15,7 +15,8 @@ import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 import { TransferHeader } from "../../shared";
 
 // Utilities
-import { handlePrepareDummyFile, isFolderLike } from "@/lib/utils";
+import { handlePrepareDummyFile } from "@/utils/download";
+import { isFolderLike } from "@/utils/file";
 
 // State Management (Store)
 import { useFileSenderActions } from "@/stores/useFileSenderStore";

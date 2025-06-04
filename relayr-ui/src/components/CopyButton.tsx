@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 
 // Utilities
-import { copyToClipboard } from "@/lib/utils";
+import { copyToClipboard } from "@/utils/clipboard";
 
 // Props interface for CopyButton component
 interface CopyButtonProps {

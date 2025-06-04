@@ -4,9 +4,11 @@ import { FileSenderState } from "@/stores/useFileSenderStore";
 // Types
 import { FileChunkRequest, FileEndRequest } from "@/types/webSocketMessages";
 
-// Constants and Helper Functions
+// Constants
 import { CHUNK_SIZE } from "./constants";
-import { readFileAsArrayBuffer } from "./utils";
+
+// Utilities
+import { readFileAsArrayBuffer } from "@/utils/file";
 
 // Props for the sendNextChunk function
 interface SendNextChunkProps {

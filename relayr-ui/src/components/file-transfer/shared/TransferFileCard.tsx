@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 
 // Utility functions for classnames and file size formatting
-import { cn, formatFileSize } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { formatFileSize } from "@/utils/file";
 
 // Types
 import { FileMetadata } from "@/types/file";

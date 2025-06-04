@@ -8,7 +8,7 @@ import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
 
 // Utilities
-import { formatFileSize } from "@/lib/utils";
+import { formatFileSize } from "@/utils/file";
 
 // State Management (Store)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
