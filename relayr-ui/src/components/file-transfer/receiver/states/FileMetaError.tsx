@@ -55,27 +55,13 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <h1 className="text-3xl font-extrabold text-red-600 dark:text-red-400 tracking-tight">
-          {message === "Network Error" ? "Network Error" : "Invalid Link"}
+        <h1 className="text-2xl font-bold text-red-600">
+          Oops! Something went wrong
         </h1>
         <p className="text-base text-muted-foreground">
-          {message === "Network Error" ? (
-            <>
-              There was a network error while retrieving the transfer link.
-              <br />
-              <span className="text-red-500 font-medium">
-                Please try again later.
-              </span>
-            </>
-          ) : (
-            <>
-              The transfer link you used is invalid or expired.
-              <br />
-              <span className="text-red-500 font-medium">
-                Please request a new link from the sender.
-              </span>
-            </>
-          )}
+          {message === "Network Error"
+            ? "We couldn't connect to the sender. Please check your connection and try again."
+            : "This transfer link is invalid or has expired. Please request a new link from the sender."}
         </p>
         <button
           className="mt-2 px-5 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold shadow transition"
