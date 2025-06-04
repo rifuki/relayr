@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 // External Libraries
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -57,9 +58,16 @@ export default function RootLayout({
             </div>
           </ThemeProvider>
         </TanStackProvider>
-        <Toaster /> {/* Toaster component for notifications */}
-        <SpeedInsights />
-        {/* Vercel Speed Insights for performance monitoring */}
+        <Toaster />
+        {/* Sonner for toast notifications */}
+        {process.env.NODE_ENV !== "development" && (
+          <>
+            <Analytics />
+            {/* Vercel Analytics for tracking user interactions */}
+            <SpeedInsights />
+            {/* Vercel Speed Insights for performance monitoring */}
+          </>
+        )}
       </body>
     </html>
   );
