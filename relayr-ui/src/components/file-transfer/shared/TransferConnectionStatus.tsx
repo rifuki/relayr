@@ -43,14 +43,14 @@ export default function TransferConnectionStatus({
   }
 
   return (
-    <>
+    <div className="space-x-1">
       <motion.span
-        className={`font-medium ${statusColor}`}
+        className={`font-medium`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        Websocket status:{" "}
+        Websocket status:
       </motion.span>
       <motion.span
         className={`font-bold ${statusColor}`}
@@ -60,6 +60,6 @@ export default function TransferConnectionStatus({
       >
         {statusText}
       </motion.span>
-    </>
+    </div>
   );
 }
