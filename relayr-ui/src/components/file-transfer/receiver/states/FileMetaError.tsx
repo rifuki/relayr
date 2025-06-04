@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { UnlinkIcon } from "lucide-react";
 import { motion } from "motion/react";
 
+// ShadCN UI Components
+import { Button } from "@/components/ui/button";
+
 // Internal Components
 import CardState from "./CardState";
 
@@ -25,17 +28,21 @@ interface FileMetaErrorProps {
 export default function FileMetaError({ message }: FileMetaErrorProps) {
   const router = useRouter();
 
+  // Function to handle button click for retry or redirection
   const handleButtonClick = () => {
     // Reload the page to retry fetching the transfer link
     if (message === "Network Error") {
+      // If the error is network-related, reload the page to retry fetching the transfer link
       window.location.reload();
     } else {
+      // Otherwise, redirect the user to the 'receive' page
       router.push("/transfer/receive");
     }
   };
 
   return (
     <CardState>
+      {/* Error icon and animation */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -49,8 +56,11 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
           </span>
         </span>
       </motion.div>
+      {/* Error icon and animation end */}
+
+      {/* Error message and button */}
       <motion.div
-        className="text-center space-y-3"
+        className="text-center space-y-5"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
@@ -63,13 +73,20 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
             ? "We couldn't connect to the sender. Please check your connection and try again."
             : "This transfer link is invalid or has expired. Please request a new link from the sender."}
         </p>
-        <button
-          className="mt-2 px-5 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold shadow transition"
+
+        {/* Button to retry or navigate */}
+        <Button
+          className="mt-2 rounded-sm bg-red-500 hover:bg-red-600 text-white font-semibold shadow transition cursor-pointer"
+          size="lg"
           onClick={handleButtonClick}
         >
+          {/* Button text based on the error message */}
           {message === "Network Error" ? "Reload Page" : "Go to Receive Page"}
-        </button>
+        </Button>
+
+        {/* Button to retry or navigate end */}
       </motion.div>
+      {/* Error message and button end */}
     </CardState>
   );
 }
