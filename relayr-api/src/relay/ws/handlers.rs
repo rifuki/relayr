@@ -88,7 +88,9 @@ pub async fn handle_incoming_payload(
                     state
                         .create_active_connection(&payload.sender_id, &recipient_id)
                         .await;
-                    let success_msg = RecipientReadyResponseDto::new(&recipient_id).to_ws_msg();
+                    let success_msg =
+                        RecipientReadyResponseDto::new(&recipient_id, &payload.sender_id)
+                            .to_ws_msg();
                     send_or_break!(sender_tx, success_msg, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(&format!(
@@ -109,7 +111,8 @@ pub async fn handle_incoming_payload(
                     if let Some(sender_tx) = state.get_user_tx(&payload.sender_id).await {
                         state.remove_active_connection(&payload.sender_id).await;
                         let success_msg =
-                            CancelRecipientReadyResponseDto::new(&recipient_id).to_ws_msg();
+                            CancelRecipientReadyResponseDto::new(&recipient_id, &payload.sender_id)
+                                .to_ws_msg();
                         send_or_break!(sender_tx, success_msg, stop_flag);
                     } else {
                         let err_msg = ErrorMessage::new(&format!(
@@ -143,7 +146,9 @@ pub async fn handle_incoming_payload(
             if let Some(current_recipient) = connected_recipient {
                 state.remove_active_connection(&sender_id).await;
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                    let success_msg = CancelSenderReadyResponseDto::new(&sender_id).to_ws_msg();
+                    let success_msg =
+                        CancelSenderReadyResponseDto::new(&sender_id, &current_recipient)
+                            .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(&format!(
@@ -170,6 +175,7 @@ pub async fn handle_incoming_payload(
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
                     let success_msg = FileChunkResponseDto::new(
                         &sender_id,
+                        &current_recipient,
                         &payload.file_name,
                         payload.total_size,
                         payload.total_chunks,
@@ -202,6 +208,7 @@ pub async fn handle_incoming_payload(
             if let Some(sender_tx) = state.get_user_tx(&payload.sender_id).await {
                 let success_msg = FileTransferAckResponseDto::new(
                     &recipient_id,
+                    &payload.sender_id,
                     &payload.status,
                     &payload.file_name,
                     payload.total_chunks,
@@ -228,6 +235,8 @@ pub async fn handle_incoming_payload(
             if let Some(current_recipient) = connected_recipient {
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
                     let success_msg = FileEndResponseDto::new(
+                        &sender_id,
+                        &current_recipient,
                         &payload.file_name,
                         payload.total_size,
                         payload.total_chunks,
@@ -259,7 +268,9 @@ pub async fn handle_incoming_payload(
 
             if let Some(current_recipient) = connected_recipient {
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                    let success_msg = CancelSenderTransferResponseDto::new(&sender_id).to_ws_msg();
+                    let success_msg =
+                        CancelSenderTransferResponseDto::new(&sender_id, &current_recipient)
+                            .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(&format!(
@@ -285,8 +296,11 @@ pub async fn handle_incoming_payload(
             if let Some(current_recipient) = connected_recipient {
                 if current_recipient == recipient_id {
                     if let Some(sender_tx) = state.get_user_tx(&payload.sender_id).await {
-                        let success_msg =
-                            CancelRecipientTransferResponseDto::new(&recipient_id).to_ws_msg();
+                        let success_msg = CancelRecipientTransferResponseDto::new(
+                            &recipient_id,
+                            &payload.sender_id,
+                        )
+                        .to_ws_msg();
                         send_or_break!(sender_tx, success_msg, stop_flag);
                     } else {
                         let err_msg = ErrorMessage::new(&format!(
@@ -317,8 +331,12 @@ pub async fn handle_incoming_payload(
             let sender_id = payload.sender_id.unwrap_or(base_conn_id.to_owned());
 
             if let Some(recipient_tx) = state.get_user_tx(&payload.recipient_id).await {
-                let success_msg =
-                    SenderAckResponseDto::new(&payload.request_type, &sender_id).to_ws_msg();
+                let success_msg = SenderAckResponseDto::new(
+                    &payload.request_type,
+                    &sender_id,
+                    &payload.recipient_id,
+                )
+                .to_ws_msg();
                 send_or_break!(recipient_tx, success_msg, stop_flag);
             } else {
                 let err_msg = ErrorMessage::new(&format!(
@@ -338,7 +356,8 @@ pub async fn handle_incoming_payload(
 
             if let Some(current_recipient) = connected_recipient {
                 if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                    let response_message = RestartTransferResponseDto::new(&sender_id).to_ws_msg();
+                    let response_message =
+                        RestartTransferResponseDto::new(&sender_id, &current_recipient).to_ws_msg();
                     send_or_break!(recipient_tx, response_message, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(&format!(

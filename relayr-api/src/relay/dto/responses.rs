@@ -38,14 +38,16 @@ pub struct RecipientReadyResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub recipient_id: String,
+    pub sender_id: String,
     pub timestamp: i64,
 }
 impl RecipientReadyResponseDto {
-    pub fn new(recipient_id: &str) -> Self {
+    pub fn new(recipient_id: &str, sender_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "recipientReady".to_string(),
             recipient_id: recipient_id.to_owned(),
+            sender_id: sender_id.to_owned(),
             timestamp: Utc::now().timestamp(),
         }
     }
@@ -84,14 +86,16 @@ pub struct CancelRecipientReadyResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub recipient_id: String,
+    pub sender_id: String,
     pub timestamp: i64,
 }
 impl CancelRecipientReadyResponseDto {
-    pub fn new(recipient_id: &str) -> Self {
+    pub fn new(recipient_id: &str, sender_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "cancelRecipientReady".to_string(),
             recipient_id: recipient_id.to_owned(),
+            sender_id: sender_id.to_owned(),
             timestamp: Utc::now().timestamp(),
         }
     }
@@ -105,14 +109,16 @@ pub struct CancelSenderReadyResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub sender_id: String,
+    pub recipient_id: String,
     pub timestamp: i64,
 }
 impl CancelSenderReadyResponseDto {
-    pub fn new(sender_id: &str) -> Self {
+    pub fn new(sender_id: &str, recipient_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "cancelSenderReady".to_string(),
             sender_id: sender_id.to_owned(),
+            recipient_id: recipient_id.to_owned(),
             timestamp: Utc::now().timestamp(),
         }
     }
@@ -126,6 +132,7 @@ pub struct FileChunkResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub sender_id: String,
+    pub recipient_id: String,
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
@@ -140,6 +147,7 @@ impl FileChunkResponseDto {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         sender_id: &str,
+        recipient_id: &str,
         file_name: &str,
         total_size: u64,
         total_chunks: u16,
@@ -152,6 +160,7 @@ impl FileChunkResponseDto {
             success: true,
             msg_type: "fileChunk".to_owned(),
             sender_id: sender_id.to_owned(),
+            recipient_id: recipient_id.to_owned(),
             file_name: file_name.to_owned(),
             total_size,
             total_chunks,
@@ -172,6 +181,7 @@ pub struct FileTransferAckResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub recipient_id: String,
+    pub sender_id: String,
     pub status: String,
     pub file_name: String,
     pub total_chunks: u16,
@@ -186,6 +196,7 @@ impl FileTransferAckResponseDto {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         recipient_id: &str,
+        sender_id: &str,
         status: &str,
         file_name: &str,
         total_chunks: u16,
@@ -198,6 +209,7 @@ impl FileTransferAckResponseDto {
             success: true,
             msg_type: "fileTransferAck".to_owned(),
             recipient_id: recipient_id.to_owned(),
+            sender_id: sender_id.to_owned(),
             status: status.to_owned(),
             file_name: file_name.to_owned(),
             total_chunks,
@@ -217,6 +229,8 @@ pub struct FileEndResponseDto {
     pub success: bool,
     #[serde(rename = "type")]
     pub msg_type: String,
+    pub sender_id: String,
+    pub recipient_id: String,
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
@@ -226,6 +240,8 @@ pub struct FileEndResponseDto {
 }
 impl FileEndResponseDto {
     pub fn new(
+        sender_id: &str,
+        recipient_id: &str,
         file_name: &str,
         total_size: u64,
         total_chunks: u16,
@@ -235,6 +251,8 @@ impl FileEndResponseDto {
         Self {
             success: true,
             msg_type: "fileEnd".to_owned(),
+            sender_id: sender_id.to_owned(),
+            recipient_id: recipient_id.to_owned(),
             file_name: file_name.to_owned(),
             total_size,
             total_chunks,
@@ -253,14 +271,16 @@ pub struct CancelSenderTransferResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub sender_id: String,
+    pub recipient_id: String,
     pub timestamp: i64,
 }
 impl CancelSenderTransferResponseDto {
-    pub fn new(sender_id: &str) -> Self {
+    pub fn new(sender_id: &str, recipient_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "cancelSenderTransfer".to_owned(),
             sender_id: sender_id.to_owned(),
+            recipient_id: recipient_id.to_owned(),
             timestamp: Utc::now().timestamp(),
         }
     }
@@ -274,14 +294,16 @@ pub struct CancelRecipientTransferResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub recipient_id: String,
+    pub sender_id: String,
     pub timestamp: i64,
 }
 impl CancelRecipientTransferResponseDto {
-    pub fn new(recipient_id: &str) -> Self {
+    pub fn new(recipient_id: &str, sender_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "cancelRecipientTransfer".to_owned(),
             recipient_id: recipient_id.to_owned(),
+            sender_id: sender_id.to_owned(),
             timestamp: Utc::now().timestamp(),
         }
     }
@@ -296,16 +318,18 @@ pub struct SenderAckResponseDto {
     pub msg_type: String,
     pub request_type: String,
     pub sender_id: String,
+    pub recipient_id: String,
     pub message: Option<String>,
     pub timestamp: i64,
 }
 impl SenderAckResponseDto {
-    pub fn new(request_type: &str, sender_id: &str) -> Self {
+    pub fn new(request_type: &str, sender_id: &str, recipient_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "senderAck".to_owned(),
             request_type: request_type.to_owned(),
             sender_id: sender_id.to_owned(),
+            recipient_id: recipient_id.to_owned(),
             message: None,
             timestamp: Utc::now().timestamp(),
         }
@@ -325,14 +349,16 @@ pub struct RestartTransferResponseDto {
     #[serde(rename = "type")]
     pub msg_type: String,
     pub sender_id: String,
+    pub recipient_id: String,
     pub timestamp: i64,
 }
 impl RestartTransferResponseDto {
-    pub fn new(sender_id: &str) -> Self {
+    pub fn new(sender_id: &str, recipient_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "restartTransfer".to_owned(),
             sender_id: sender_id.to_owned(),
+            recipient_id: recipient_id.to_owned(),
             timestamp: Utc::now().timestamp(),
         }
     }

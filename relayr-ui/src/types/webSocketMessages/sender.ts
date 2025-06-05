@@ -71,6 +71,7 @@ export interface RecipientReadyResponse {
   success: true;
   type: "recipientReady";
   recipientId: string;
+  senderId: string;
   timestamp: number;
 }
 
@@ -79,6 +80,7 @@ export interface CancelRecipientReadyResponse {
   success: true;
   type: "cancelRecipientReady";
   recipientId: string;
+  senderId: string;
   timestamp: number;
 }
 
@@ -87,6 +89,8 @@ export interface FileTransferAckResponse {
   success: true;
   type: "fileTransferAck";
   status: FileTransferAckStatus;
+  senderId: string;
+  recipientId: string;
   fileName: string;
   totalChunks: number;
   uploadedSize: number;
@@ -101,5 +105,6 @@ export interface CancelRecipientTransferResponse {
   success: true;
   type: "cancelRecipientTransfer";
   recipientId: string;
+  senderId: string;
   timestamp: number;
 }

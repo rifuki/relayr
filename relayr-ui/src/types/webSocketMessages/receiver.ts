@@ -46,17 +46,8 @@ export interface CancelRecipientTransferRequest {
 export interface CancelSenderReadyResponse {
   success: true; // Operation was successful
   type: "cancelSenderReady"; // Type of response
-  recipientId: string; // Recipient's ID
-  timestamp: number; // Timestamp of the response
-}
-
-// Response for sender acknowledgment
-export interface SenderAckResponse {
-  success: true; // Operation was successful
-  type: "senderAck"; // Type of response
-  requestType: SenderAckRequestType; // Type of acknowledgment request
   senderId: string; // ID of the sender
-  message?: string; // Optional message
+  recipientId: string;
   timestamp: number; // Timestamp of the response
 }
 
@@ -65,6 +56,7 @@ export interface FileChunkResponse {
   success: true; // Operation was successful
   type: "fileChunk"; // Type of response
   senderId: string; // ID of the sender
+  recipientId: string;
   fileName: string; // File name
   totalSize: number; // Total size of the file
   totalChunks: number; // Total number of chunks
@@ -79,6 +71,8 @@ export interface FileChunkResponse {
 export interface FileEndResponse {
   success: true; // Operation was successful
   type: "fileEnd"; // Type of response
+  senderId: string;
+  recipientId: string;
   fileName: string; // File name
   totalSize: number; // Total file size
   totalChunks: number; // Total number of chunks
@@ -87,18 +81,31 @@ export interface FileEndResponse {
   timestamp: number; // Timestamp of the response
 }
 
-// Response indicating that the file transfer needs to be restarted
-export interface RestartTransferResponse {
-  success: true; // Operation was successful
-  type: "restartTransfer"; // Type of response
-  senderId: string; // ID of the sender
-  timestamp: number; // Timestamp of the response
-}
-
 // Response indicating that the recipient's transfer has been canceled
 export interface CancelSenderTransferResponse {
   success: true;
   type: "cancelSenderTransfer";
   senderId: string;
+  recipientId: string;
   timestamp: number;
+}
+
+// Response for sender acknowledgment
+export interface SenderAckResponse {
+  success: true; // Operation was successful
+  type: "senderAck"; // Type of response
+  requestType: SenderAckRequestType; // Type of acknowledgment request
+  senderId: string; // ID of the sender
+  recipientId: string;
+  message?: string; // Optional message
+  timestamp: number; // Timestamp of the response
+}
+
+// Response indicating that the file transfer needs to be restarted
+export interface RestartTransferResponse {
+  success: true; // Operation was successful
+  type: "restartTransfer"; // Type of response
+  senderId: string; // ID of the sender
+  recipientId: string;
+  timestamp: number; // Timestamp of the response
 }
