@@ -118,28 +118,28 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
                   <DotIcon
                     size={16 * 4}
                     className={`${
-                      webSocketReadyState === 1
-                        ? "text-green-500 hover:text-green-500"
-                        : webSocketReadyState === 0
-                          ? "text-yellow-500 hover:text-yellow-500"
+                      webSocketReadyState === 0
+                        ? "text-yellow-500 hover:text-yellow-500"
+                        : webSocketReadyState === 1
+                          ? "text-green-500 hover:text-green-500"
                           : webSocketReadyState === 2
                             ? "text-orange-500 hover:text-orange-500"
-                            : "text-primary hover:text-primary"
+                            : webSocketReadyState === 3
+                              ? "text-red-500 hover:text-red-500"
+                              : "text-primary hover:text-primary"
                     } animate-pulse`}
                   />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>
-                  WebSocket Status:{" "}
-                  <span>
-                    {webSocketReadyState === 0 && "Connecting"}
-                    {webSocketReadyState === 1 && "Connected"}
-                    {webSocketReadyState === 2 && "Closing"}
-                    {webSocketReadyState === 3 && "Disconnected"}
-                    {![0, 1, 2, 3].includes(webSocketReadyState) && "Unknown"}
-                  </span>
-                </p>
+                WebSocket:{" "}
+                <span>
+                  {webSocketReadyState === 0 && "Connecting"}
+                  {webSocketReadyState === 1 && "Connected"}
+                  {webSocketReadyState === 2 && "Closing"}
+                  {webSocketReadyState === 3 && "Disconnected"}
+                  {![0, 1, 2, 3].includes(webSocketReadyState) && "Unknown"}
+                </span>
               </TooltipContent>
             </Tooltip>
           )}
