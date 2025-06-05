@@ -15,6 +15,7 @@ import {
 
 // Internal Components
 import ThemeToggle from "./ThemeToggle";
+import WebSocketStatusIndicator from "./file-transfer/commons/WebSocketStatusIndicator";
 
 // State Management (Stores)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
@@ -25,15 +26,24 @@ interface HeaderProps {
   title?: string;
 }
 
+/**
+ * Header component for the Relayr application.
+ * Displays the application title, navigation links,
+ * WebSocket status, and theme toggle.
+ *
+ * @param {HeaderProps} props - The properties for the Header component.
+ * @return JSX.Element The rendered Header component.
+ */
 export default function Header({ title = "Relayr" }: HeaderProps) {
   const pathname = usePathname();
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  // Determine which store to use based on the active page
+  // Determine whether the user is currently on the sender or receiver page
   const isSenderPage = pathname.startsWith("/transfer/send");
   const isReceiverPage = pathname.startsWith("/transfer/receive");
 
+  // Get WebSocket status and transfer state from zustand stores
   const senderWebSocketReadyState = useFileSenderStore(
     (state) => state.webSocketReadyState,
   );
@@ -47,28 +57,33 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
     (state) => state.transferStatus,
   );
 
+  // Determine which WebSocket state to show based on the current page
   const webSocketReadyState = isSenderPage
     ? senderWebSocketReadyState
     : isReceiverPage
       ? receiverWebSocketReadyState
       : -1;
 
+  // Toggle tooltip visibility
   const handleTooltipToggle = () => setTooltipOpen((open) => !open);
 
   return (
     <header className="border-b bg-background/5 backdrop-blur">
       <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-8 lg:px-10 max-w-screen-xl">
+        {/* Left side: App title and navigation */}
         <div className="flex items-center space-x-6">
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-xl font-bold tracking-tight text-primary">
               {title}
             </span>
           </Link>
-
+          {/* Navigation buttons: Send and Receive */}
           <nav className="flex items-center space-x-2">
+            {/* Show "Send" link only if receiver is not downloading */}
             {!isReceiverDownloading && (
               <Button variant="link" size="sm" asChild>
                 {isSenderUploading ? (
+                  // Prevent navigation if a transfer is in progress
                   <span
                     className="cursor-pointer"
                     onMouseDown={(e) => e.preventDefault()}
@@ -81,9 +96,11 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
               </Button>
             )}
 
+            {/* Show "Receive" link only if sender is not uploading */}
             {!isSenderUploading && (
               <Button variant="link" size="sm" asChild>
                 {isReceiverDownloading ? (
+                  // Prevent navigation if a transfer is in progress
                   <span
                     className="cursor-pointer"
                     onMouseDown={(e) => e.preventDefault()}
@@ -96,9 +113,13 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
               </Button>
             )}
           </nav>
+          {/* Navigation buttons: Send and Receive */}
         </div>
+        {/* Left side: App title and navigation end */}
 
+        {/* Right side: WebSocket status and theme toggle */}
         <div className="flex items-center space-x-5">
+          {/* Show WebSocket indicator only on transfer pages */}
           {(isSenderPage || isReceiverPage) && (
             <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
               <TooltipTrigger
@@ -111,37 +132,23 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
                   variant="outline"
                   size="icon"
                 >
-                  <span
-                    className={`w-2 h-2 rounded-full
-                   ${
-                     webSocketReadyState === 0
-                       ? "bg-yellow-500 hover:bg-yellow-500"
-                       : webSocketReadyState === 1
-                         ? "bg-green-500 hover:bg-green-500 animate-pulse"
-                         : webSocketReadyState === 2
-                           ? "bg-orange-500 hover:bg-orange-500"
-                           : webSocketReadyState === 3
-                             ? "bg-red-500 hover:bg-red-500"
-                             : "bg-primary hover:bg-primary"
-                   }`}
-                  />
+                  {/* WebSocket status icon (e.g. connected, connecting, closed) */}
+                  <WebSocketStatusIndicator readyState={webSocketReadyState} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
                 WebSocket:{" "}
-                <span>
-                  {webSocketReadyState === 0 && "Connecting"}
-                  {webSocketReadyState === 1 && "Connected"}
-                  {webSocketReadyState === 2 && "Closing"}
-                  {webSocketReadyState === 3 && "Disconnected"}
-                  {![0, 1, 2, 3].includes(webSocketReadyState) && "Unknown"}
-                </span>
+                <WebSocketStatusIndicator
+                  readyState={webSocketReadyState}
+                  showText // Show label like "Connected", "Closed", etc.
+                />
               </TooltipContent>
             </Tooltip>
           )}
-
+          {/* Toggle between light and dark theme */}
           <ThemeToggle />
         </div>
+        {/* Right side: WebSocket status and theme toggle end */}
       </div>
     </header>
   );

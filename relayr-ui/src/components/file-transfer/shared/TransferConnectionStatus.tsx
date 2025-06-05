@@ -1,5 +1,5 @@
 // External Libraries
-import { motion } from "motion/react";
+import WebSocketStatusIndicator from "../commons/WebSocketStatusIndicator";
 
 // Props interface for TransferConnectionStatus component
 interface WebSocketStatusProps {
@@ -7,59 +7,19 @@ interface WebSocketStatusProps {
 }
 
 /**
- * TransferConnectionStatus component displays the current status of a WebSocket connection.
- * It uses motion for animations and provides visual feedback based on the WebSocket readyState.
+ * TransferConnectionStatus component displays the current
+ * WebSocket connection status for file transfers.
+ * @param {WebSocketStatusProps} props - The properties for the component.
  *
- * @param {WebSocketStatusProps} props - Component props containing the WebSocket readyState.
- * @returns JSX.Element - A span element showing the WebSocket connection status.
+ * @return JSX.Element The rendered component.
  */
 export default function TransferConnectionStatus({
   readyState,
 }: WebSocketStatusProps) {
-  let statusText = "";
-  let statusColor = "";
-
-  switch (readyState) {
-    case 0:
-      statusText = "Connecting...";
-      statusColor = "text-yellow-500";
-      break;
-    case 1:
-      statusText = "Connected";
-      statusColor = "text-green-500";
-      break;
-    case 2:
-      statusText = "Closing...";
-      statusColor = "text-orange-500";
-      break;
-    case 3:
-      statusText = "Disconnected";
-      statusColor = "text-red-500";
-      break;
-    default:
-      statusText = "Unknown";
-      statusColor = "text-gray-500";
-      break;
-  }
-
   return (
-    <div className="space-x-1">
-      <motion.span
-        className={`font-medium`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
-        Websocket status:
-      </motion.span>
-      <motion.span
-        className={`font-bold ${statusColor}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
-        {statusText}
-      </motion.span>
+    <div className="space-x-1 flex items-center">
+      <span className="font-medium">Websocket status:</span>
+      <WebSocketStatusIndicator readyState={readyState} showText />
     </div>
   );
 }
