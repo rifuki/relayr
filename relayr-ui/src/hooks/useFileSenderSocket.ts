@@ -145,7 +145,6 @@ export function useFileSenderSocket() {
       type: "senderAck",
       requestType: "recipientReady",
       recipientId: msg.recipientId,
-      status: "success",
     } satisfies SenderAckRequest);
     actions.setTransferStatus({
       isTransferring: false,
@@ -176,8 +175,9 @@ export function useFileSenderSocket() {
       return;
     }
 
-    const { isTransferCanceled } = useFileSenderStore.getState().transferStatus;
-    if (isTransferCanceled) return;
+    const { isTransferCanceled, isTransferError } =
+      useFileSenderStore.getState().transferStatus;
+    if (isTransferCanceled || isTransferError) return;
 
     if (ack.status === "acknowledged") {
       if (
@@ -193,15 +193,21 @@ export function useFileSenderSocket() {
           isTransferCanceled: false,
           isTransferCompleted: false,
         });
+        sendJsonMessage({
+          type: "senderAck",
+          requestType: "uploadOutOfSync",
+          recipientId: recipientId!,
+        } satisfies SenderAckRequest);
         return;
       }
+
       actions.setTransferStatus({
         offset: offset + chunkDataSize,
         chunkIndex: chunkIndex + 1,
       });
       actions.setTransferProgress({ receiver: ack.recipientTransferProgress });
 
-      if (!isTransferCanceled) actions.sendNextChunk();
+      if (!isTransferCanceled || !isTransferError) actions.sendNextChunk();
     } else if (ack.status === "completed") {
       actions.setTransferStatus({
         isTransferring: false,

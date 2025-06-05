@@ -1,8 +1,4 @@
-import {
-  AckStatus,
-  FileTransferAckStatus,
-  SenderAckRequestType,
-} from "./shared";
+import { FileTransferAckStatus, SenderAckRequestType } from "./shared";
 
 // ====================================================
 // 🟥 Sender Section
@@ -60,7 +56,6 @@ export interface SenderAckRequest {
   type: "senderAck";
   requestType: SenderAckRequestType;
   recipientId: string;
-  status: AckStatus;
   message?: string;
 }
 

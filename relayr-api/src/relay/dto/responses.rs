@@ -296,18 +296,16 @@ pub struct SenderAckResponseDto {
     pub msg_type: String,
     pub request_type: String,
     pub sender_id: String,
-    pub status: String,
     pub message: Option<String>,
     pub timestamp: i64,
 }
 impl SenderAckResponseDto {
-    pub fn new(request_type: &str, sender_id: &str, status: &str) -> Self {
+    pub fn new(request_type: &str, sender_id: &str) -> Self {
         Self {
             success: true,
             msg_type: "senderAck".to_owned(),
             request_type: request_type.to_owned(),
             sender_id: sender_id.to_owned(),
-            status: status.to_owned(),
             message: None,
             timestamp: Utc::now().timestamp(),
         }

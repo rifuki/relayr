@@ -3,12 +3,9 @@
 // ====================================================
 
 // Acknowledgement request type for the sender (to notify when the recipient is ready)
-export type SenderAckRequestType = "recipientReady";
+export type SenderAckRequestType = "recipientReady" | "uploadOutOfSync";
 
-// Acknowledgement status for transfer operations
-export type AckStatus = "success" | "error";
-
-// Status for file transfer acknowledgment
+// Status for file transfer acknowledgment from the recipient
 export type FileTransferAckStatus = "acknowledged" | "completed" | "error";
 
 // Error response structure

@@ -212,6 +212,15 @@ export function useFileReceiverSocket() {
       case "recipientReady":
         actions.setTransferConnection({ isConnected: true });
         break;
+      case "uploadOutOfSync":
+        actions.setErrorMessage(
+          "The sender's upload is out of sync. Please ask the sender to restart the transfer.",
+        );
+        actions.setTransferStatus({
+          isTransferError: true,
+          isTransferring: false,
+        });
+        break;
       default:
         console.error("[WebSocket] Unknown ack request type received:", msg);
         break;

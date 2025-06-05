@@ -5,9 +5,10 @@ import { motion } from "motion/react";
 import { Progress } from "@/components/ui/progress";
 
 // Motion-Primitives UI Components
-import { AnimatedNumber } from "@/components/motion-primitives/animated-number";
 import { SlidingNumber } from "@/components/motion-primitives/sliding-number";
-import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
+
+// Internal Components
+import TransferStatusText from "../../commons/TransferStatusText";
 
 // Constants and variants for animation durations and motion variants
 import { fileListItemVariants } from "@/lib/animations";
@@ -32,8 +33,12 @@ export default function ReceiverTransferProgress() {
   );
 
   // Retrieve current received bytes and transfer status flags
-  const { receivedBytes, isTransferring, isTransferCompleted } =
-    useFileReceiverStore((state) => state.transferStatus);
+  const {
+    receivedBytes,
+    isTransferring,
+    isTransferError,
+    isTransferCompleted,
+  } = useFileReceiverStore((state) => state.transferStatus);
 
   // Retrieve receiver progress percentage
   const { receiver: receiverProgress } = useFileReceiverStore(
@@ -49,23 +54,16 @@ export default function ReceiverTransferProgress() {
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
       <div className="flex justify-between text-sm">
-        {isTransferCompleted ? (
-          <TextShimmer>Transfer Completed</TextShimmer>
-        ) : isTransferring ? (
-          <span>
-            <AnimatedNumber
-              springOptions={{
-                bounce: 0.25,
-                duration: 100,
-              }}
-              value={transferredValue}
-            />{" "}
-            {transferredUnit} of {totalSizeLabel}
-          </span>
-        ) : (
-          <TextShimmer>Waiting for the sender</TextShimmer>
-        )}
-
+        {/* Display the current transfer status */}
+        <TransferStatusText
+          isTransferring={isTransferring}
+          isError={isTransferError}
+          isCompleted={isTransferCompleted}
+          transferredValue={transferredValue}
+          transferredUnit={transferredUnit}
+          totalSizeLabel={totalSizeLabel}
+          idleText="Waiting for transfer to start..."
+        />
         {/* Show receiver progress in percentage */}
         <span className="inline-flex items-center">
           <SlidingNumber value={receiverProgress} />%

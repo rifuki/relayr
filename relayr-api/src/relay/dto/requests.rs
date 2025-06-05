@@ -127,7 +127,6 @@ pub struct SenderAckPayload {
     pub request_type: String,
     pub sender_id: Option<String>,
     pub recipient_id: String,
-    pub status: String,
     pub message: Option<String>,
 }
 

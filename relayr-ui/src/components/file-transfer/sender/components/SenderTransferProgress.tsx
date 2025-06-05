@@ -5,9 +5,10 @@ import { motion } from "motion/react";
 import { Progress } from "@/components/ui/progress";
 
 // Motion-Primitives UI Components
-import { AnimatedNumber } from "@/components/motion-primitives/animated-number";
 import { SlidingNumber } from "@/components/motion-primitives/sliding-number";
-import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
+
+// Internal Components
+import TransferStatusText from "../../commons/TransferStatusText";
 
 // Constants and variants for animation durations and motion variants
 import { fileListItemVariants } from "@/lib/animations";
@@ -19,20 +20,19 @@ import { formatFileSize } from "@/utils/file";
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 
 /**
- * TransferSenderProgress component displays the progress of a file transfer.
- * It shows the current offset, total file size, and receiver's progress percentage.
- * The component uses motion for animations and provides visual feedback during transfer.
+ * TransferSenderProgress component displays the progress of a file transfer
+ * from the sender's perspective, including the transferred amount, total size,
+ * and receiver's progress percentage.
  *
- * @returns JSX.Element - A UI element showing transfer progress with animations.
+ * @returns JSX.Element The rendered component.
  */
 export default function TransferSenderProgress() {
   // Retrieve total file size from store
   const { size: fileSize } = useFileSenderStore((state) => state.fileMetadata!);
 
   // Retrieve current offset, transfer status flags
-  const { offset, isTransferring, isTransferCompleted } = useFileSenderStore(
-    (state) => state.transferStatus,
-  );
+  const { offset, isTransferring, isTransferError, isTransferCompleted } =
+    useFileSenderStore((state) => state.transferStatus);
 
   // Retrieve receiver progress percentage
   const { receiver: receiverProgress } = useFileSenderStore(
@@ -48,23 +48,16 @@ export default function TransferSenderProgress() {
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
       <div className="flex justify-between text-sm">
-        {isTransferCompleted ? (
-          <TextShimmer>Transfer Completed</TextShimmer>
-        ) : isTransferring ? (
-          <span>
-            <AnimatedNumber
-              springOptions={{
-                bounce: 0.25,
-                duration: 100,
-              }}
-              value={transferredValue}
-            />{" "}
-            {transferredUnit} of {totalSizeLabel}
-          </span>
-        ) : (
-          <TextShimmer>Click to start the transfer</TextShimmer>
-        )}
-
+        {/* Display the current transfer status */}
+        <TransferStatusText
+          isTransferring={isTransferring}
+          isError={isTransferError}
+          isCompleted={isTransferCompleted}
+          transferredValue={transferredValue}
+          transferredUnit={transferredUnit}
+          totalSizeLabel={totalSizeLabel}
+          idleText="Click to start transfer"
+        />
         {/* Show receiver progress in percentage */}
         <span className="inline-flex items-center">
           <SlidingNumber value={receiverProgress} />%

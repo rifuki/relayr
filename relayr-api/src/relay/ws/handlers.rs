@@ -318,8 +318,7 @@ pub async fn handle_incoming_payload(
 
             if let Some(recipient_tx) = state.get_user_tx(&payload.recipient_id).await {
                 let success_msg =
-                    SenderAckResponseDto::new(&payload.request_type, &sender_id, &payload.status)
-                        .to_ws_msg();
+                    SenderAckResponseDto::new(&payload.request_type, &sender_id).to_ws_msg();
                 send_or_break!(recipient_tx, success_msg, stop_flag);
             } else {
                 let err_msg = ErrorMessage::new(&format!(

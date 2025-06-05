@@ -90,18 +90,17 @@ export async function sendNextChunk({ get, set }: SendNextChunkProps) {
       console.warn("Transfer canceled after reading chunk, aborting send.");
       return;
     }
+    // If there was an error in the transfer, stop sending the chunk
+    if (get().transferStatus.isTransferError) {
+      console.warn("Transfer error occurred, aborting send.");
+      return;
+    }
 
     const uploadedSize = transferStatus.offset + chunkDataSize; // Update the uploaded size based on the chunk
     const senderTransferProgress = Math.min(
       100,
       Math.floor((uploadedSize / file.size) * 100), // Calculate sender progress (percentage)
     );
-
-    const { isTransferCanceled } = get().transferStatus;
-    if (isTransferCanceled) {
-      console.warn("Transfer canceled after chunk send.");
-      return;
-    }
 
     // Send the chunk data over WebSocket
     sendJsonMessage({

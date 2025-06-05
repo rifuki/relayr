@@ -1,8 +1,4 @@
-import {
-  AckStatus,
-  FileTransferAckStatus,
-  SenderAckRequestType,
-} from "./shared";
+import { FileTransferAckStatus, SenderAckRequestType } from "./shared";
 
 // ====================================================
 // 🟩 Receiver Section
@@ -60,7 +56,6 @@ export interface SenderAckResponse {
   type: "senderAck"; // Type of response
   requestType: SenderAckRequestType; // Type of acknowledgment request
   senderId: string; // ID of the sender
-  status: AckStatus; // Acknowledgment status (success/error)
   message?: string; // Optional message
   timestamp: number; // Timestamp of the response
 }
