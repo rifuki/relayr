@@ -35,16 +35,18 @@ export default function TransferStatusText({
     return <span className="text-destructive">Error during transfer</span>;
 
   if (isTransferring)
-    <span>
-      <AnimatedNumber
-        springOptions={{
-          bounce: 0.25,
-          duration: 100,
-        }}
-        value={transferredValue}
-      />{" "}
-      {transferredUnit} of {totalSizeLabel}
-    </span>;
+    return (
+      <span>
+        <AnimatedNumber
+          springOptions={{
+            bounce: 0.25,
+            duration: 100,
+          }}
+          value={transferredValue}
+        />{" "}
+        {transferredUnit} of {totalSizeLabel}
+      </span>
+    );
 
   return <TextShimmer>{idleText}</TextShimmer>;
 }

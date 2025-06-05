@@ -10,6 +10,7 @@ import CopyButton from "./CopyButton";
 
 // Props interface for ShareableLinkInput component
 interface ShareableLinkInputProps {
+  label?: string;
   text: string;
   className?: string;
   disabled?: boolean;
@@ -23,6 +24,7 @@ interface ShareableLinkInputProps {
  * @returns JSX.Element - A labeled input with a copy button for the provided text.
  */
 export default function ShareableLinkInput({
+  label = "Link for recipient",
   text,
   className,
   disabled,
@@ -33,19 +35,20 @@ export default function ShareableLinkInput({
   return (
     <div className={`w-full space-y-1 ${className}`}>
       <Label htmlFor={inputId} className="text-xs text-muted-foreground">
-        {disabled ? (
-          <p>
-            Share link <span className="text-destructive font-bold">(disabled)</span>
-          </p>
-        ) : (
-          "Link for recipient"
-        )}
+        <p>
+          {label}{" "}
+          {disabled && (
+            <span className="text-destructive">[No longer valid]</span>
+          )}
+        </p>
       </Label>
       <div className="w-full flex gap-2">
         <Input
           id={inputId}
           value={text}
-          className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-default"
+          className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-not-allowed"
+          tabIndex={disabled ? -1 : 0}
+          onMouseDown={disabled ? (e) => e.preventDefault() : undefined}
           readOnly
         />
         <CopyButton text={text} disabled={disabled} />
