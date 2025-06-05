@@ -5,9 +5,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// External Libraries
-import { DotIcon } from "lucide-react";
-
 // ShadCN UI Components
 import { Button } from "@/components/ui/button";
 import {
@@ -110,24 +107,23 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
                 asChild
               >
                 <Button
-                  className="bg-transparent"
+                  className="bg-transparent h-8 w-8"
                   variant="outline"
                   size="icon"
-                  asChild
                 >
-                  <DotIcon
-                    size={16 * 4}
-                    className={`${
-                      webSocketReadyState === 0
-                        ? "text-yellow-500 hover:text-yellow-500"
-                        : webSocketReadyState === 1
-                          ? "text-green-500 hover:text-green-500"
-                          : webSocketReadyState === 2
-                            ? "text-orange-500 hover:text-orange-500"
-                            : webSocketReadyState === 3
-                              ? "text-red-500 hover:text-red-500"
-                              : "text-primary hover:text-primary"
-                    } animate-pulse`}
+                  <span
+                    className={`w-2 h-2 rounded-full
+                   ${
+                     webSocketReadyState === 0
+                       ? "bg-yellow-500 hover:bg-yellow-500"
+                       : webSocketReadyState === 1
+                         ? "bg-green-500 hover:bg-green-500 animate-pulse"
+                         : webSocketReadyState === 2
+                           ? "bg-orange-500 hover:bg-orange-500"
+                           : webSocketReadyState === 3
+                             ? "bg-red-500 hover:bg-red-500"
+                             : "bg-primary hover:bg-primary"
+                   }`}
                   />
                 </Button>
               </TooltipTrigger>
