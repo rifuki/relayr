@@ -1,21 +1,15 @@
 "use client";
 
 // React && Next.js
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // ShadCN UI Components
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 
 // Internal Components
 import ThemeToggle from "./ThemeToggle";
-import WebSocketStatusIndicator from "./file-transfer/commons/WebSocketStatusIndicator";
+import WebSocketStatusButton from "./file-transfer/WebSocketStatusButton";
 
 // State Management (Stores)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
@@ -36,8 +30,6 @@ interface HeaderProps {
  */
 export default function Header({ title = "Relayr" }: HeaderProps) {
   const pathname = usePathname();
-
-  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   // Determine whether the user is currently on the sender or receiver page
   const isSenderPage = pathname.startsWith("/transfer/send");
@@ -64,9 +56,6 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
       ? receiverWebSocketReadyState
       : -1;
 
-  // Toggle tooltip visibility
-  const handleTooltipToggle = () => setTooltipOpen((open) => !open);
-
   return (
     <header className="border-b bg-background/5 backdrop-blur">
       <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-8 lg:px-10 max-w-screen-xl">
@@ -79,41 +68,55 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
           </Link>
           {/* Navigation buttons: Send and Receive */}
           <nav className="flex items-center space-x-2">
-            {/* Show "Send" link only if receiver is not downloading */}
-            {!isReceiverDownloading && (
-              <Button variant="link" size="sm" asChild>
-                {isSenderUploading ? (
-                  // Prevent navigation if a transfer is in progress
-                  <span
-                    className="cursor-pointer"
-                    onMouseDown={(e) => e.preventDefault()}
+            {[
+              {
+                label: "Send",
+                href: "/transfer/send",
+                isActive: isSenderPage,
+                isDisabled: isReceiverDownloading,
+                isBusy: isSenderUploading,
+              },
+              {
+                label: "Receive",
+                href: "/transfer/receive",
+                isActive: isReceiverPage,
+                isDisabled: isSenderUploading,
+                isBusy: isReceiverDownloading,
+              },
+            ].map(
+              (nav) =>
+                !nav.isDisabled && (
+                  <Button
+                    key={nav.label}
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className={`px-3 py-1.5 rounded-md font-medium transition-colors
+                    ${
+                      nav.isActive
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                    }
+                  `}
+                    aria-current={nav.isActive ? "page" : undefined}
+                    tabIndex={nav.isBusy ? -1 : 0}
+                    disabled={nav.isBusy}
                   >
-                    Send
-                  </span>
-                ) : (
-                  <Link href="/transfer/send">Send</Link>
-                )}
-              </Button>
-            )}
-
-            {/* Show "Receive" link only if sender is not uploading */}
-            {!isSenderUploading && (
-              <Button variant="link" size="sm" asChild>
-                {isReceiverDownloading ? (
-                  // Prevent navigation if a transfer is in progress
-                  <span
-                    className="cursor-pointer"
-                    onMouseDown={(e) => e.preventDefault()}
-                  >
-                    Receive
-                  </span>
-                ) : (
-                  <Link href="/transfer/receive">Receive</Link>
-                )}
-              </Button>
+                    {nav.isBusy ? (
+                      <span
+                        className="cursor-pointer"
+                        onMouseDown={(e) => e.preventDefault()}
+                      >
+                        {nav.label}
+                      </span>
+                    ) : (
+                      <Link href={nav.href}>{nav.label}</Link>
+                    )}
+                  </Button>
+                ),
             )}
           </nav>
-          {/* Navigation buttons: Send and Receive */}
+          {/* Navigation buttons: Send and Receive end */}
         </div>
         {/* Left side: App title and navigation end */}
 
@@ -121,30 +124,9 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
         <div className="flex items-center space-x-5">
           {/* Show WebSocket indicator only on transfer pages */}
           {(isSenderPage || isReceiverPage) && (
-            <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
-              <TooltipTrigger
-                onClick={handleTooltipToggle}
-                onTouchStart={handleTooltipToggle}
-                asChild
-              >
-                <Button
-                  className="bg-transparent h-8 w-8"
-                  variant="outline"
-                  size="icon"
-                >
-                  {/* WebSocket status icon (e.g. connected, connecting, closed) */}
-                  <WebSocketStatusIndicator readyState={webSocketReadyState} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                WebSocket:{" "}
-                <WebSocketStatusIndicator
-                  readyState={webSocketReadyState}
-                  showText // Show label like "Connected", "Closed", etc.
-                />
-              </TooltipContent>
-            </Tooltip>
+            <WebSocketStatusButton readyState={webSocketReadyState} />
           )}
+
           {/* Toggle between light and dark theme */}
           <ThemeToggle />
         </div>
