@@ -41,6 +41,11 @@ interface WebSocketHandlers {
   getWebSocket: (() => WebSocketLike | null) | undefined;
 }
 
+interface LastTransferInfo {
+  recipientId: string | null;
+  transferShareLink: string | null;
+}
+
 // FileSender Actions Interface: Actions interface for modifying the store
 interface FileSenderActions {
   setInitId: (id: string) => void;
@@ -57,6 +62,7 @@ interface FileSenderActions {
   setTransferProgress: (transferProgress: Partial<TransferProgress>) => void;
   sendNextChunk: () => void;
   clearTransferState: () => void;
+  setLastTransferInfo: (lastTransferInfo: LastTransferInfo) => void;
 }
 
 // FileSender State Interface
@@ -74,6 +80,7 @@ export interface FileSenderState {
   fileTransferInfo: FileTransferInfo;
   transferStatus: TransferStatus;
   transferProgress: TransferProgress;
+  lastTransferInfo: LastTransferInfo;
   actions: FileSenderActions;
 }
 
@@ -112,6 +119,10 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
   transferProgress: {
     sender: 0,
     receiver: 0,
+  },
+  lastTransferInfo: {
+    recipientId: null,
+    transferShareLink: null,
   },
   actions: {
     setInitId: (id) => set({ initId: id }),
@@ -168,6 +179,30 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         return;
       }
 
+      // If transfer is completed, update lastTransferInfo
+      if (
+        transferStatus.isTransferCompleted &&
+        !get().transferStatus.isTransferCompleted
+      ) {
+        const { recipientId } = get().transferConnection;
+        const { transferShareLink } = get();
+
+        set({
+          transferStatus: {
+            ...get().transferStatus,
+            isTransferring: false,
+            isTransferError: false,
+            isTransferCanceled: false,
+            isTransferCompleted: true,
+          },
+          lastTransferInfo: {
+            recipientId,
+            transferShareLink,
+          },
+        });
+        return;
+      }
+
       set({
         transferStatus: {
           ...get().transferStatus,
@@ -208,6 +243,7 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           receiver: 0,
         },
       }),
+    setLastTransferInfo: (lastTransferInfo) => set({ lastTransferInfo }),
   },
 }));
 

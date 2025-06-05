@@ -12,6 +12,7 @@ import CopyButton from "./CopyButton";
 interface ShareableLinkInputProps {
   text: string;
   className?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -23,7 +24,8 @@ interface ShareableLinkInputProps {
  */
 export default function ShareableLinkInput({
   text,
-  className = "",
+  className,
+  disabled,
 }: ShareableLinkInputProps) {
   // Generate a unique ID for the input-label association
   const inputId = useId();
@@ -31,7 +33,13 @@ export default function ShareableLinkInput({
   return (
     <div className={`w-full space-y-1 ${className}`}>
       <Label htmlFor={inputId} className="text-xs text-muted-foreground">
-        Link for recipient
+        {disabled ? (
+          <p>
+            Share link <span className="text-destructive font-bold">(disabled)</span>
+          </p>
+        ) : (
+          "Link for recipient"
+        )}
       </Label>
       <div className="w-full flex gap-2">
         <Input
@@ -40,7 +48,7 @@ export default function ShareableLinkInput({
           className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-default"
           readOnly
         />
-        <CopyButton text={text} />
+        <CopyButton text={text} disabled={disabled} />
       </div>
     </div>
   );

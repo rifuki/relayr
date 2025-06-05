@@ -23,6 +23,7 @@ import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
+import ShareableLinkInput from "@/components/ShareableLinkInput";
 
 // Motion Animation
 const burstAnimation = {
@@ -51,13 +52,13 @@ const successAnimation = {
  * @returns JSX.Element The rendered component.
  */
 export default function Step6_TransferCompleted() {
-  const { recipientId } = useFileSenderStore(
-    (state) => state.transferConnection,
+  const { recipientId, transferShareLink } = useFileSenderStore(
+    (state) => state.lastTransferInfo,
   );
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const actions = useFileSenderActions();
 
-  if (!fileMetadata) return null;
+  if (!fileMetadata || !recipientId || !transferShareLink) return null;
 
   const handleResetTransfer = () => {
     actions.setFile(null);
@@ -101,6 +102,11 @@ export default function Step6_TransferCompleted() {
         variants={fileListItemVariants}
       >
         <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
+        <ShareableLinkInput
+          text={transferShareLink}
+          disabled={true}
+          className="mt-2"
+        />
         <TransferFileCard fileMetadata={fileMetadata} />
 
         <SenderTransferProgress />
