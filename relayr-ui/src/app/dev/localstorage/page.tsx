@@ -79,7 +79,7 @@ export default function ResetLocalStoragePage() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-5">
+    <div className="w-full flex flex-col items-center justify-center space-y-5 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-center">Local Storage</CardTitle>
