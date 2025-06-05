@@ -1,9 +1,3 @@
-// Animation Durations
-export const ANIMATION_DURATIONS = {
-  progress: 0.3, // Duration for progress animation
-  wave: 1.5, // Duration for wave animation
-};
-
 // Transition Settings for the Panel
 export const transitionPanelTransition = {
   x: { type: "spring", stiffness: 300, damping: 30 }, // Horizontal transition

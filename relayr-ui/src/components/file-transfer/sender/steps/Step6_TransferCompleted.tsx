@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 
 // Motion-Primitives UI Components
-import { MotionButton } from "@/components/motion-primitives/motion-button";
+import { MotionButton } from "@/components/animations/motion-button";
 
 // Internal Components
 import { SenderTransferProgress } from "../components";

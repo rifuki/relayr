@@ -6,7 +6,7 @@ import { CheckCircle2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
 // Motion-Primitives UI Components
-import { MotionButton } from "@/components/motion-primitives/motion-button";
+import { MotionButton } from "@/components/animations/motion-button";
 
 // Internal Components
 import { TransferFileCard, TransferHeader } from "../../shared";
