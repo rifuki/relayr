@@ -1,11 +1,16 @@
 // External Libraries
 import { motion } from "motion/react";
 
+// ShadCN UI Components
+import { Progress } from "@/components/ui/progress";
+
 // Motion-Primitives UI Components
+import { AnimatedNumber } from "@/components/motion-primitives/animated-number";
+import { SlidingNumber } from "@/components/motion-primitives/sliding-number";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
 // Constants and variants for animation durations and motion variants
-import { ANIMATION_DURATIONS, fileListItemVariants } from "@/lib/animations";
+import { fileListItemVariants } from "@/lib/animations";
 
 // Utilities
 import { formatFileSize } from "@/utils/file";
@@ -34,67 +39,40 @@ export default function TransferSenderProgress() {
     (state) => state.transferProgress,
   );
 
+  // Format the transferred value and total size label
+  const { value: transferredValue, unit: transferredUnit } =
+    formatFileSize(offset);
+  // Format the total file size for display
+  const totalSizeLabel = formatFileSize(fileSize).formatted;
+
   return (
     <motion.div variants={fileListItemVariants} className="w-full space-y-2">
       <div className="flex justify-between text-sm">
-        <span>
-          {isTransferCompleted ? (
-            <TextShimmer>Transfer Completed</TextShimmer>
-          ) : isTransferring ? (
-            `${formatFileSize(offset)} / ${formatFileSize(fileSize)}`
-          ) : (
-            <TextShimmer>Click to start the transfer</TextShimmer>
-          )}
-        </span>
-        {/* Show receiver progress in percentage */}
-        <span>{receiverProgress}%</span>
-      </div>
-
-      <div className="relative h-3 overflow-hidden rounded-full bg-secondary">
-        {/* Background progress bar with transition */}
-        <motion.div
-          className="h-full bg-primary"
-          style={{ width: `${receiverProgress}%` }}
-          initial={{ width: "0%" }}
-          animate={{ width: `${receiverProgress}%` }}
-          transition={{ duration: ANIMATION_DURATIONS.progress }}
-        />
-
-        {/* Wave effect overlay - only visible during transfer */}
-        {isTransferring && (
-          <div className="absolute inset-0 w-full overflow-hidden">
-            <div className="wave-effect">
-              <style jsx>{`
-                @keyframes wave {
-                  0% {
-                    transform: translateX(-100%);
-                  }
-                  50% {
-                    transform: translateX(0%);
-                  }
-                  100% {
-                    transform: translateX(100%);
-                  }
-                }
-                .wave-effect {
-                  height: 100%;
-                  width: 100%;
-                  position: absolute;
-                  top: 0;
-                  left: 0;
-                  background: linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255, 255, 255, 0.3),
-                    transparent
-                  );
-                  animation: wave ${ANIMATION_DURATIONS.wave}s linear infinite;
-                }
-              `}</style>
-            </div>
-          </div>
+        {isTransferCompleted ? (
+          <TextShimmer>Transfer Completed</TextShimmer>
+        ) : isTransferring ? (
+          <span>
+            <AnimatedNumber
+              springOptions={{
+                bounce: 0.25,
+                duration: 100,
+              }}
+              value={transferredValue}
+            />{" "}
+            {transferredUnit} of {totalSizeLabel}
+          </span>
+        ) : (
+          <TextShimmer>Click to start the transfer</TextShimmer>
         )}
+
+        {/* Show receiver progress in percentage */}
+        <span className="inline-flex items-center">
+          <SlidingNumber value={receiverProgress} />%
+        </span>
       </div>
+
+      {/* Progress bar showing receiver's progress */}
+      <Progress value={receiverProgress} />
     </motion.div>
   );
 }

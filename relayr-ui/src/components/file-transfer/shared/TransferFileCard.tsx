@@ -75,7 +75,7 @@ export default function TransferFileCard({
               {/* Separator between file type and file size */}
               <span className="mx-1">•</span>
               {/* Formatted file size */}
-              <span>{fileSize}</span>
+              <span>{fileSize.formatted}</span>
             </div>
           </div>
         </div>

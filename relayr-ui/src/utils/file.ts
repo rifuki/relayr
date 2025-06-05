@@ -7,16 +7,26 @@ export function isFolderLike(file: File): boolean {
   );
 }
 
-// Formats file size from bytes to a readable string
-export function formatFileSize(bytes: number, decimals = 2) {
-  if (bytes === 0) return "0 Bytes";
+// Formats a file size in bytes into a human-readable string with appropriate units
+export function formatFileSize(
+  bytes: number,
+  decimals = 2,
+): { value: number; unit: string; formatted: string } {
+  if (bytes === 0) return { value: 0, unit: "Bytes", formatted: "0 Bytes" };
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals; // Decimal precision
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"]; // File size units
   const i = Math.floor(Math.log(bytes) / Math.log(k)); // Determine the index of the size unit
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  const value = parseFloat((bytes / Math.pow(k, i)).toFixed(dm)); // Calculate the size in the appropriate unit
+  const unit = sizes[i]; // Get the corresponding size unit
+
+  return {
+    value,
+    unit,
+    formatted: `${value} ${unit}`, // Return formatted size string
+  };
 }
 
 // Reads a file as an ArrayBuffer in chunks
