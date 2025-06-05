@@ -17,8 +17,8 @@ import { FileMetadata } from "@/types/file";
 
 // Props interface for TransferFileCard component
 interface FileCardProps {
-  fileMetadata: FileMetadata;
   className?: string;
+  fileMetadata: FileMetadata;
 }
 
 /**
@@ -29,8 +29,8 @@ interface FileCardProps {
  * @return JSX.Element - A card UI element displaying file information.
  */
 export default function TransferFileCard({
-  fileMetadata,
   className,
+  fileMetadata,
 }: FileCardProps) {
   // Extract the general file type (e.g., image, video, audio) from MIME type
   const fileType = fileMetadata.type.split("/")[0];
@@ -47,25 +47,42 @@ export default function TransferFileCard({
         className,
       )}
     >
+      {/* Container for file icon and file details */}
       <div className="flex items-center space-x-4">
+        {/* Icon container, preventing shrinking */}
         <div className="flex-shrink-0">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             {getFileIcon(fileType)}
           </div>
+          {/* Icon container, preventing shrinking end */}
         </div>
 
+        {/* File details section */}
         <div className="flex-grow min-h-0 overflow-hidden">
-          <div className="flex flex-col">
+          <div className="flex flex-col justify-center">
+            {/* File name with truncation in case it's too long */}
             <h3 className="text-sm font-medium text-card-foreground truncate max-w-sm">
               {fileMetadata.name}
             </h3>
-            <div className="flex items-center text-xs text-muted-foreground space-x-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary/70 mr-2"></div>
-              {getFileTypeLabel(fileMetadata.type)} • {fileSize}
+
+            {/* File type and file size */}
+            <div className="flex items-center text-xs text-muted-foreground mt-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/70 mr-2" />
+              {/* File type label */}
+              <span className="truncate">
+                {getFileTypeLabel(fileMetadata.type)}
+              </span>
+              {/* Separator between file type and file size */}
+              <span className="mx-1">•</span>
+              {/* Formatted file size */}
+              <span>{fileSize}</span>
             </div>
           </div>
         </div>
       </div>
+      {/* Container for file icon and file details */}
+
+      {/* Container for file icon and file details end */}
     </div>
   );
 }
