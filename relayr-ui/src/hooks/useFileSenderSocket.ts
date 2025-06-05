@@ -196,7 +196,7 @@ export function useFileSenderSocket() {
         sendJsonMessage({
           type: "senderAck",
           requestType: "uploadOutOfSync",
-          recipientId: recipientId!,
+          recipientId: ack.recipientId,
         } satisfies SenderAckRequest);
         return;
       }
@@ -269,13 +269,11 @@ export function useFileSenderSocket() {
     }
   };
 
-  // Handle beforeunload event to cancel transfer if necessary
   useEffect(() => {
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    function handleBeforeUnload(_e: BeforeUnloadEvent) {
       const canSend = readyState === WebSocket.OPEN && recipientId;
       if (!canSend) return;
-
-      e.preventDefault();
 
       if (isTransferring) {
         sendJsonMessage({

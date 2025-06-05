@@ -362,13 +362,11 @@ export function useFileReceiverSocket() {
     }
   };
 
-  // Handle beforeunload event to cancel transfer if necessary
   useEffect(() => {
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    function handleBeforeUnload(_e: BeforeUnloadEvent) {
       const canSend = readyState === WebSocket.OPEN && senderId && isConnected;
       if (!canSend) return;
-
-      e.preventDefault();
 
       if (isTransferring) {
         sendJsonMessage({
