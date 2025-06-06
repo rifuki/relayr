@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 // Internal Components
 import CardState from "./CardState";
 
+// Custom Components
+import { MotionButton } from "@/components/animations/motion-button";
+
 /**
  * MissingSenderId component allows users to enter a sender ID or a full transfer link.
  * It extracts the sender ID from the input and navigates to the receive transfer page.
@@ -60,7 +63,7 @@ export default function MissingSenderId() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <CardState className="space-y-7 p-5 text-center">
+      <CardState className="w-full text-center">
         {/* Title and Information Icon */}
         <motion.div
           className="flex flex-col items-center gap-2"
@@ -104,27 +107,28 @@ export default function MissingSenderId() {
           {error && <div className="text-red-500 text-sm">{error}</div>}
           {/* Display error message if any End*/}
 
-          {/* Submit button */}
-          <Button
-            type="submit"
-            className="w-full font-semibold transition cursor-pointer"
-            variant="default"
-            size="lg"
-          >
-            Continue
-          </Button>
-          {/* Submit button end */}
+          <div className="space-y-2">
+            {/* Submit button */}
+            <MotionButton
+              type="submit"
+              className="w-full font-semibold transition cursor-pointer"
+              variant="default"
+            >
+              Continue
+            </MotionButton>
+            {/* Submit button end */}
 
-          {/* Button to go back to the previous page */}
-          <Button
-            type="button"
-            className="cursor-pointer"
-            variant="link"
-            onClick={() => router.back()}
-          >
-            Go Back
-          </Button>
-          {/* Button to go back to the previous page */}
+            {/* Button to go back to the landing page*/}
+            <Button
+              type="button"
+              className="cursor-pointer"
+              variant="link"
+              onClick={() => router.push("/")}
+            >
+              Go Home
+            </Button>
+            {/* Button to go back to the landing page */}
+          </div>
         </motion.form>
         {/* Form to submit sender ID End */}
       </CardState>

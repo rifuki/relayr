@@ -25,7 +25,7 @@ export default function CardState({ className, children }: CardStateProps) {
   return (
     <Card
       className={cn(
-        "w-full max-w-sm bg-opacity border-none shadow-none flex flex-col items-center justify-center space-y-5 gap-0",
+        "w-full max-w-xs bg-opacity border-none shadow-none flex flex-col items-center justify-center space-y-5 gap-0",
         className,
       )}
       style={{ minHeight: "300px" }}

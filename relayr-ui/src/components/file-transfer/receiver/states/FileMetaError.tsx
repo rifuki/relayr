@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 
 // External Libraries
-import { UnlinkIcon } from "lucide-react";
+import { ArrowLeftIcon, UnlinkIcon } from "lucide-react";
 import { motion } from "motion/react";
 
 // ShadCN UI Components
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 
 // Internal Components
 import CardState from "./CardState";
+import { MotionButton } from "@/components/animations/motion-button";
 
 // Props interface for FileMetaError component
 interface FileMetaErrorProps {
@@ -41,7 +42,7 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
   };
 
   return (
-    <CardState>
+    <CardState className="text-center">
       {/* Error icon and animation */}
       <motion.div
         initial={{ scale: 0 }}
@@ -49,42 +50,63 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
         transition={{ type: "spring", duration: 0.5 }}
         className="flex items-center justify-center mb-4"
       >
-        <span className="relative inline-flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900 p-6 shadow-lg">
-          <UnlinkIcon className="h-12 w-12 text-red-500 dark:text-red-400" />
-          <span className="absolute -top-2 -right-2 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 rounded-full px-2 py-0.5 text-xs font-semibold text-red-500 shadow">
-            !
-          </span>
+        <span className="inline-flex items-center justify-center rounded-full bg-destructive/10 p-6 shadow-lg">
+          <UnlinkIcon className="h-8 w-8 text-destructive" />
         </span>
       </motion.div>
       {/* Error icon and animation end */}
 
       {/* Error message and button */}
       <motion.div
-        className="text-center space-y-5"
+        className="space-y-5"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <h1 className="text-2xl font-bold text-red-600">
+        <h1 className="text-2xl font-bold text-destructive">
           Oops! Something went wrong
         </h1>
         <p className="text-base text-muted-foreground">
           {message === "Network Error"
             ? "We couldn't connect to the sender. Please check your connection and try again."
-            : "This transfer link is invalid or has expired. Please request a new link from the sender."}
+            : "Invalid or expired link. Please ask the sender for a new one."}
         </p>
 
-        {/* Button to retry or navigate */}
-        <Button
-          className="mt-2 rounded-sm bg-red-500 hover:bg-red-600 text-white font-semibold shadow transition cursor-pointer"
-          size="lg"
-          onClick={handleButtonClick}
+        <motion.div
+          className="flex items-center justify-center space-y-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
         >
-          {/* Button text based on the error message */}
-          {message === "Network Error" ? "Reload Page" : "Go to Receive Page"}
-        </Button>
+          {/* Button to retry or navigate */}
+          <MotionButton
+            className="mt-2 rounded-sm text-white font-semibold cursor-pointer"
+            variant="destructive"
+            onClick={handleButtonClick}
+          >
+            {/* Button text based on the error message */}
+            {message === "Network Error" ? (
+              "Reload Page"
+            ) : (
+              <span className="inline-flex items-center justify-center gap-3">
+                <ArrowLeftIcon />
+                Back
+              </span>
+            )}
+          </MotionButton>
+          {/* Button to retry or navigate end */}
 
-        {/* Button to retry or navigate end */}
+          {/* Button to go back to the landing page*/}
+          <Button
+            type="button"
+            className="cursor-pointer"
+            variant="link"
+            onClick={() => router.push("/")}
+          >
+            Go Home
+          </Button>
+          {/* Button to go back to the landing page */}
+        </motion.div>
       </motion.div>
       {/* Error message and button end */}
     </CardState>

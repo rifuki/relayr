@@ -64,13 +64,13 @@ export default function Step4_TransferCompleted() {
   const fileUrl = useFileReceiverStore((state) => state.fileUrl);
   const actions = useFileReceiverActions();
 
-  // If essential data is missing, do not render this component
-  if (!fileMetadata || !senderId || !fileUrl) return;
-
   // Save the last valid sender ID for future access (e.g., prefill)
   useEffect(() => {
     actions.setLastValidSenderId(senderId);
   }, [actions]);
+
+  // If essential data is missing, do not render this component
+  if (!fileMetadata || !senderId || !fileUrl) return;
 
   // Handler to trigger browser download for the received file
   const handleDownloadFile = () => {
