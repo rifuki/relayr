@@ -12,7 +12,10 @@ import { TransitionPanel } from "@/components/motion-primitives/transition-panel
 import { transitionPanelTransition } from "@/lib/animations";
 
 // State Management (Store)
-import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import {
+  useFileReceiverActions,
+  useFileReceiverStore,
+} from "@/stores/useFileReceiverStore";
 
 // Step Components
 import {
@@ -37,6 +40,7 @@ export default function ReceiverFlow() {
   const { isTransferring, isTransferCompleted } = useFileReceiverStore(
     (state) => state.transferStatus,
   );
+  const actions = useFileReceiverActions();
 
   // State to manage the current step in the flow and the direction of transition
   const [currentStep, setCurrentStep] = useState(0);
@@ -44,6 +48,11 @@ export default function ReceiverFlow() {
 
   // Dynamic measurement hook to get the bounds (height) of the container for smooth transitions
   const [ref, bounds] = useMeasure();
+
+  // Set isReceiverReady in store to true when ReceiverFlow is mounted, false when unmounted
+  useEffect(() => {
+    actions.setIsReceiverFlowActive(true);
+  }, [actions]);
 
   // useEffect hook to determine the current step based on connection and transfer status
   useEffect(() => {

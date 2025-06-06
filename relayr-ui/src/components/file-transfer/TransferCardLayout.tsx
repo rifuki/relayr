@@ -36,6 +36,7 @@ interface TransferCardLayoutProps {
   readyState: ReadyState; // WebSocket ready state for connection status display
   errorMessage: string | null; // Error message to show alert if present
   connectionId: string | null; // Unique connection ID to display in UI
+  showConnectionStatus?: boolean; // Optional prop to control connection status display
   children: ReactNode; // Child components/content to render inside the card
 }
 
@@ -50,6 +51,7 @@ export default function TransferCardLayout({
   readyState,
   errorMessage,
   connectionId,
+  showConnectionStatus = true,
   children,
 }: TransferCardLayoutProps) {
   return (
@@ -61,7 +63,9 @@ export default function TransferCardLayout({
         </CardContent>
 
         <CardFooter className="mx-auto flex flex-col">
-          <TransferConnectionStatus readyState={readyState} />
+          {showConnectionStatus && (
+            <TransferConnectionStatus readyState={readyState} />
+          )}
           {readyState === ReadyState.OPEN && connectionId && (
             <div className="text-sm text-muted-foreground mt-2">
               ID: <strong>{connectionId}</strong>

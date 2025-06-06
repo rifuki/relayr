@@ -56,6 +56,7 @@ interface FileReceiverActions {
   setReceivedChunkData: (receivedChunkData: ArrayBuffer) => void;
   clearTransferState: () => void;
   finalizeTransfer: () => void;
+  setIsReceiverFlowActive: (isReceiverFlowActive: boolean) => void;
 }
 
 // FileReceiver State Interface
@@ -72,6 +73,7 @@ interface FileReceiverState {
   transferProgress: TransferProgress;
   receivedChunkData: ArrayBuffer[];
   fileUrl: string | null;
+  isReceiverFlowActive: boolean;
   actions: FileReceiverActions;
 }
 
@@ -112,6 +114,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   },
   receivedChunkData: [],
   fileUrl: null,
+  isReceiverFlowActive: false,
   actions: {
     setInitId: (id) => set({ initId: id }),
     setTransferConnection: (transferConnection) =>
@@ -250,6 +253,8 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 
       console.info("File successfully reconstructed. URL:", newFileUrl);
     },
+    setIsReceiverFlowActive: (isReceiverFlowActive) =>
+      set({ isReceiverFlowActive }),
   },
 }));
 
