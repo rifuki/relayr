@@ -26,7 +26,7 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
  *
  * @returns JSX.Element The rendered component.
  */
-export default function TransferSenderProgress() {
+export default function TransferProgress() {
   // Retrieve total file size from store
   const { size: fileSize } = useFileSenderStore((state) => state.fileMetadata!);
 

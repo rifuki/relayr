@@ -20,7 +20,7 @@ import {
 // Step Components
 import {
   Step1_ReadyToReceive,
-  Step2_WaitingForSender,
+  Step2_WaitForSender,
   Step3_Receiving,
   Step4_TransferCompleted,
 } from "./steps";
@@ -81,7 +81,7 @@ export default function ReceiverFlow() {
   const FLOW_COMPONENTS = [
     <InitialTransitionLoader key="step0" />,
     <Step1_ReadyToReceive key="step1" />,
-    <Step2_WaitingForSender key="step2" />,
+    <Step2_WaitForSender key="step2" />,
     <Step3_Receiving key="step3" />,
     <Step4_TransferCompleted key="step4" />,
   ];

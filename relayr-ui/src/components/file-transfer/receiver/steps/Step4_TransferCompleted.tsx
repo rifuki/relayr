@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { MotionButton } from "@/components/animations/motion-button";
 
 // Internal Components
-import { ReceiverTransferProgress } from "../components";
+import { TransferProgress } from "../components";
 import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animation Variants
@@ -138,7 +138,7 @@ export default function Step4_TransferCompleted() {
       </motion.div>
 
       {/* Progress bar for visual indication */}
-      <ReceiverTransferProgress />
+      <TransferProgress />
 
       {/* Action buttons */}
       <motion.div

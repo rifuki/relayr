@@ -43,7 +43,7 @@ const clockAnimation = {
  *
  * @returns JSX.Element The rendered component.
  */
-export default function Step3_WaitingForRecipient() {
+export default function Step3_WaitForReceiver() {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,

@@ -18,7 +18,7 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import {
   Step1_FileSelector,
   Step2_FileSelected,
-  Step3_WaitingForRecipient,
+  Step3_WaitForReceiver,
   Step4_ReadyToSend,
   Step5_Sending,
   Step6_TransferCompleted,
@@ -97,7 +97,7 @@ export default function SenderFlow() {
     <InitialTransitionLoader key="step0" />, // Initial loading state before file selection
     <Step1_FileSelector key="step1" />, // Step 1: File selection
     <Step2_FileSelected key="step2" />, // Step 2: File selected, but transfer not yet started
-    <Step3_WaitingForRecipient key="step3" />, // Step 3: Waiting for recipient to connect
+    <Step3_WaitForReceiver key="step3" />, // Step 3: Waiting for receiver to connect
     <Step4_ReadyToSend key="step4" />, // Step 4: Ready to send the file
     <Step5_Sending key="step5" />, // Step 5: Sending file
     <Step6_TransferCompleted key="step6" />, // Step 6: Transfer completed

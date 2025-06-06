@@ -1,1 +1,1 @@
-export { default as ReceiverTransferProgress } from "./ReceiverTransferProgress";
+export { default as TransferProgress } from "./TransferProgress";

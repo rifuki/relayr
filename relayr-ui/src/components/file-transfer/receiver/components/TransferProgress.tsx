@@ -26,7 +26,7 @@ import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
  *
  * @returns JSX.Element - A UI element showing transfer progress with animations.
  */
-export default function ReceiverTransferProgress() {
+export default function TransferProgress() {
   // Retrieve total file size from store
   const { size: fileSize } = useFileReceiverStore(
     (state) => state.fileMetadata!,

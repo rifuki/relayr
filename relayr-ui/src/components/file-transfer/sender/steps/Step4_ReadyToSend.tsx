@@ -13,7 +13,7 @@ import { MotionButton } from "@/components/animations/motion-button";
 
 // Internal Components
 import ShareableLinkInput from "@/components/ShareableLinkInput";
-import { SenderTransferProgress } from "../components";
+import { TransferProgress } from "../components";
 import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animation Variants
@@ -154,7 +154,7 @@ export default function Step4_ReadyToSend() {
         <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
-      <SenderTransferProgress />
+      <TransferProgress />
 
       <motion.div
         variants={fileListItemVariants}

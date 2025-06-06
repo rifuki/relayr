@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { MotionButton } from "@/components/animations/motion-button";
 
 // Internal Components
-import { SenderTransferProgress } from "../components";
+import { TransferProgress } from "../components";
 import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animation Variants
@@ -109,7 +109,7 @@ export default function Step6_TransferCompleted() {
         />
         <TransferFileCard fileMetadata={fileMetadata} />
 
-        <SenderTransferProgress />
+        <TransferProgress />
       </motion.div>
 
       <motion.div

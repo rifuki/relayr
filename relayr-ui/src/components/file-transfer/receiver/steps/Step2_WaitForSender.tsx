@@ -10,7 +10,7 @@ import { MotionButton } from "@/components/animations/motion-button";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 
 // Internal Components
-import { ReceiverTransferProgress } from "../components";
+import { TransferProgress } from "../components";
 import { TransferFileCard, TransferHeader } from "../../shared";
 
 // Animations Variants
@@ -45,7 +45,7 @@ const clockAnimation = {
  *
  * @returns JSX.Element The rendered component.
  */
-export default function Step2_WaitingForSender() {
+export default function Step2_WaitForSender() {
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
@@ -103,7 +103,7 @@ export default function Step2_WaitingForSender() {
         <TransferFileCard fileMetadata={fileMetadata} className="mt-2" />
       </motion.div>
 
-      <ReceiverTransferProgress />
+      <TransferProgress />
 
       <motion.div className="w-full flex flex-col space-y-3 mt-2">
         <TextShimmer className="text-center" duration={1}>
