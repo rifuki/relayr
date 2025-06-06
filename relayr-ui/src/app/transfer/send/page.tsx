@@ -27,15 +27,20 @@ export default function SenderPage() {
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
+  const { isTransferCompleted } = useFileSenderStore(
+    (state) => state.transferStatus,
+  );
   const errorMessage = useFileSenderStore((state) => state.errorMessage);
   const connectionId = useInitId("sender");
+
+  const showConnectionStatus = !!transferShareLink || isTransferCompleted;
 
   return (
     <TransferCardLayout
       readyState={webSocketReadyState}
       errorMessage={errorMessage}
       connectionId={connectionId}
-      showConnectionStatus={!!transferShareLink}
+      showConnectionStatus={showConnectionStatus}
     >
       <SenderFlow />
     </TransferCardLayout>

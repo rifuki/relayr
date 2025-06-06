@@ -66,9 +66,10 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
   const receiverWebSocketReadyState = useFileReceiverStore(
     (state) => state.webSocketReadyState,
   );
-  const { isTransferring: isSenderUploading } = useFileSenderStore(
-    (state) => state.transferStatus,
-  );
+  const {
+    isTransferring: isSenderUploading,
+    isTransferCompleted: isSenderTransferCompleted,
+  } = useFileSenderStore((state) => state.transferStatus);
   const { isTransferring: isReceiverDownloading } = useFileReceiverStore(
     (state) => state.transferStatus,
   );
@@ -90,7 +91,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
   ];
 
   const showWebSocketStatus =
-    (isSenderPage && transferShareLink) ||
+    (isSenderPage && (transferShareLink || isSenderTransferCompleted)) ||
     (isReceiverPage && isReceiverFlowActive);
 
   // Determine which WebSocket state to show based on the current page

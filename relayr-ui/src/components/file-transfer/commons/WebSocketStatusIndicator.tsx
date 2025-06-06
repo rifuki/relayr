@@ -3,7 +3,7 @@ const statusMap = [
   { text: "Connecting", color: "yellow-500" },
   { text: "Connected", color: "green-500" },
   { text: "Closing", color: "orange-500" },
-  { text: "Disconnected", color: "red-500" },
+  { text: "Disconnected", color: "destructive" },
 ];
 
 // Props interface for WebSocketStatusIndicator component
@@ -26,7 +26,7 @@ export default function WebSocketStatusIndicator({
   // Get the status object based on the readyState, default to "Disconnected" if out of range
   const status = statusMap[readyState] || {
     text: "Disconnected",
-    color: "red-500",
+    color: "destructive",
   };
 
   // If showText is true, render a status label (e.g. "Connecting") with appropriate color
