@@ -91,7 +91,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
 
   return (
     <motion.header
-      className="border-b bg-background/5 backdrop-blur"
+      className={`sticky top-0 z-10 border-b  ${pathname === "/" ? "bg-background/10" : "bg-background/50 sm:bg-background/10"} backdrop-blur-md`}
       initial={{ y: -32, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 120, damping: 18 }}

@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 // Custom Components
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 // Providers
 import ThemeProvider from "@/providers/ThemeProvider";
@@ -55,6 +56,7 @@ export default function RootLayout({
             <div className="min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900">
               <Header />
               <main className="flex-1">{children}</main>
+              <Footer />
             </div>
           </ThemeProvider>
         </TanStackProvider>
