@@ -45,7 +45,7 @@ interface FileReceiverActions {
   setTransferConnection: (
     transferConnection: Partial<TransferConnection>,
   ) => void;
-  setFileMetadata: (fileMetadata: FileMetadata) => void;
+  setFileMetadata: (fileMetadata: FileMetadata | null) => void;
   setErrorMessage: (errorMessage: string | null) => void;
   setWebSocketUrl: (webSocketUrl: string | null) => void;
   setWebSocketReadyState: (readyState: number) => void;
@@ -57,6 +57,7 @@ interface FileReceiverActions {
   clearTransferState: () => void;
   finalizeTransfer: () => void;
   setIsReceiverFlowActive: (isReceiverFlowActive: boolean) => void;
+  setLastValidSenderId: (senderId: string | null) => void;
 }
 
 // FileReceiver State Interface
@@ -74,6 +75,7 @@ interface FileReceiverState {
   receivedChunkData: ArrayBuffer[];
   fileUrl: string | null;
   isReceiverFlowActive: boolean;
+  lastValidSenderId: string | null;
   actions: FileReceiverActions;
 }
 
@@ -115,6 +117,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   receivedChunkData: [],
   fileUrl: null,
   isReceiverFlowActive: false,
+  lastValidSenderId: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
     setTransferConnection: (transferConnection) =>
@@ -255,6 +258,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
     },
     setIsReceiverFlowActive: (isReceiverFlowActive) =>
       set({ isReceiverFlowActive }),
+    setLastValidSenderId: (lastValidSenderId) => set({ lastValidSenderId }),
   },
 }));
 

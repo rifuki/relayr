@@ -24,29 +24,44 @@ import MissingSenderId from "@/components/file-transfer/receiver/states/MissingS
 import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
 
-/**
- * ReceivePageContent Component
- * Handles the file receiving process by fetching metadata and managing the connection.
- *
- * @returns JSX.Element The content for the receive page.
- */
 export default function ReceivePageContent() {
-  const senderId = useSearchParams().get("id");
+  // Get the sender ID from the URL query parameters
+  const senderIdFromQuery = useSearchParams().get("id");
+  // Initialize a unique connection ID for the receiver
   const connectionId = useInitId("receiver");
 
+  // Establish and manage WebSocket connection for the receiver
   useFileReceiverSocket();
+
+  // Read state values from the store
   const webSocketReadyState = useFileReceiverStore(
     (state) => state.webSocketReadyState,
   );
   const errorMessage = useFileReceiverStore((state) => state.errorMessage);
+  const lastValidSenderId = useFileReceiverStore(
+    (state) => state.lastValidSenderId,
+  );
+  const { isTransferCompleted } = useFileReceiverStore(
+    (state) => state.transferStatus,
+  );
   const actions = useFileReceiverActions();
 
+  // Determine the sender ID to use: either from the query or the last valid one stored
+  const senderId = senderIdFromQuery || lastValidSenderId;
+
+  // Fetch file metadata from backend using the sender ID
   const {
     data,
     isLoading: isFetchingFileMeta,
     error,
   } = useRelayFileMetadata(senderId ?? "");
 
+  // Reset state to indicate the receiver flow hasn't started yet
+  useEffect(() => {
+    actions.setIsReceiverFlowActive(false);
+  }, [actions]);
+
+  // When metadata is successfully fetched, update store with metadata and connection info
   useEffect(() => {
     if (senderId && data) {
       actions.setFileMetadata(data);
@@ -54,8 +69,12 @@ export default function ReceivePageContent() {
     }
   }, [senderId, data, actions]);
 
+  // Handle invalid or missing sender ID
   if (!senderId) return <MissingSenderId />;
-  if (error) return <FileMetaError message={error.message} />;
+  // Show error state if file metadata failed to fetch
+  if (error && !isTransferCompleted)
+    return <FileMetaError message={error.message} />;
+  // Show loading state while fetching metadata
   if (isFetchingFileMeta) return <FileMetaLoading />;
 
   return (

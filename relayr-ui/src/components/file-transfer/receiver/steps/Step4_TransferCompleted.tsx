@@ -1,3 +1,7 @@
+// React and Next.js
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 // External Libraries
 import { FileCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
@@ -19,7 +23,10 @@ import {
 } from "@/lib/animations";
 
 // State Management (Store)
-import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import {
+  useFileReceiverActions,
+  useFileReceiverStore,
+} from "@/stores/useFileReceiverStore";
 
 // Motion Animation
 const burstAnimation = {
@@ -47,14 +54,25 @@ const successAnimation = {
  * @returns JSX.Element The rendered component.
  */
 export default function Step4_TransferCompleted() {
+  const router = useRouter();
+
+  // Read data from the receiver store
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
   const fileUrl = useFileReceiverStore((state) => state.fileUrl);
+  const actions = useFileReceiverActions();
 
+  // If essential data is missing, do not render this component
   if (!fileMetadata || !senderId || !fileUrl) return;
 
+  // Save the last valid sender ID for future access (e.g., prefill)
+  useEffect(() => {
+    actions.setLastValidSenderId(senderId);
+  }, [actions]);
+
+  // Handler to trigger browser download for the received file
   const handleDownloadFile = () => {
     const a = document.createElement("a");
     a.href = fileUrl;
@@ -62,6 +80,18 @@ export default function Step4_TransferCompleted() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+  // Handler to reset all relevant states and navigate to the receive page
+  const handleStartNewTransfer = () => {
+    actions.clearTransferState();
+    actions.setTransferStatus({
+      isTransferCanceled: false,
+      isTransferCompleted: false,
+    });
+    actions.setFileMetadata(null);
+    actions.setLastValidSenderId(null);
+    actions.setIsReceiverFlowActive(false);
+    router.push("/transfer/receive");
   };
 
   return (
@@ -71,11 +101,13 @@ export default function Step4_TransferCompleted() {
       initial="hidden"
       animate="show"
     >
+      {/* Section Header */}
       <TransferHeader
         title="Transfer Completed"
         description="The file has been successfully received"
       />
 
+      {/* Animated Checkmark Icon */}
       <motion.div
         className="relative flex justify-center items-center my-10 mb-15"
         variants={fileListItemVariants}
@@ -96,6 +128,7 @@ export default function Step4_TransferCompleted() {
         </motion.div>
       </motion.div>
 
+      {/* Sender ID and File Metadata */}
       <motion.div
         className="w-full flex flex-col items-center space-y-5"
         variants={fileListItemVariants}
@@ -104,15 +137,20 @@ export default function Step4_TransferCompleted() {
         <TransferFileCard fileMetadata={fileMetadata} />
       </motion.div>
 
+      {/* Progress bar for visual indication */}
       <ReceiverTransferProgress />
 
+      {/* Action buttons */}
       <motion.div
-        onClick={handleDownloadFile}
-        className="w-full flex flex-col space-y-5"
+        className="w-full flex flex-col space-y-2"
         variants={fileListItemVariants}
       >
-        <MotionButton>Download</MotionButton>
+        <MotionButton onClick={handleDownloadFile}>Download</MotionButton>
+        <MotionButton variant="link" onClick={handleStartNewTransfer}>
+          Start New Transfer
+        </MotionButton>
       </motion.div>
+      {/* Action buttons end */}
     </motion.div>
   );
 }
