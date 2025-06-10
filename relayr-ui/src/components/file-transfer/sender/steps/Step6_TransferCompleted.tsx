@@ -1,126 +1,130 @@
 // External Libraries
-import { FileCheckIcon, RefreshCw } from "lucide-react";
+import { FileCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-// ShadCN UI Components
-import { Badge } from "@/components/ui/badge";
-
-// Motion-Primitives UI Components
-import { MotionButton } from "@/components/animations/motion-button";
-
 // Internal Components
-import { TransferProgress } from "../components";
-import { TransferFileCard, TransferHeader } from "../../shared";
-
-// Animation Variants
 import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
+  StepButtonsSection,
+  StepHeaderSection,
+  StepInfoSection,
+  StepTransferProgressSection,
+} from "../../shared";
 
 // State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
-import ShareableLinkInput from "@/components/ShareableLinkInput";
 
-// Motion Animation
-const burstAnimation = {
-  scale: [1, 2, 0],
-  opacity: [1, 0.8, 0],
-  transition: {
-    duration: 1.5,
-    ease: "easeOut",
-  },
-};
-const successAnimation = {
-  scale: [0, 1.5, 1],
-  opacity: [0, 1],
-  rotate: [0, 0],
-  transition: {
-    duration: 1.5,
-    ease: "easeOut",
-  },
-};
+// Animation Variants
+import { fileListItemVariants } from "@/lib/animations";
 
-/**
- * Step6_TransferCompleted component represents the final step in the file sending process.
- * It displays a success message, recipient ID, file metadata, and a shareable link.
- * The sender can reset the transfer to send another file.
- *
- * @returns JSX.Element The rendered component.
- */
-export default function Step6_TransferCompleted() {
+// Types
+import { StepConfig as StepProps } from "../step-config";
+import StepSectionWrapper from "../../shared/StepSectionWrapper";
+
+export default function Step6_TransferCompleted(props: StepProps) {
+  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const { recipientId, transferShareLink } = useFileSenderStore(
     (state) => state.lastTransferInfo,
   );
-  const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
+  // Retrieve receiver progress percentage
+  const { receiver: receiverProgress } = useFileSenderStore(
+    (state) => state.transferProgress,
+  );
+  // Retrieve current offset, transfer status flags
+  const { offset, isTransferring, isTransferError, isTransferCompleted } =
+    useFileSenderStore((state) => state.transferStatus);
   const actions = useFileSenderActions();
 
-  if (!fileMetadata || !recipientId || !transferShareLink) return null;
+  if (
+    !fileMetadata ||
+    !recipientId ||
+    !transferShareLink ||
+    !isTransferCompleted
+  )
+    return null;
 
-  const handleResetTransfer = () => {
+  const handleStartNewTransfer = () => {
     actions.setFile(null);
     actions.clearTransferState();
   };
 
+  const buttons = [
+    {
+      ...props.buttons.startNewTransfer,
+      buttonProps: {
+        onClick: handleStartNewTransfer,
+        disabled: !isTransferCompleted,
+      },
+    },
+  ];
+
+  console.log(recipientId);
+
   return (
-    <motion.div
-      className="flex flex-col items-center space-y-5"
-      variants={fileListWrapperVariants}
-      initial="hidden"
-      animate="show"
-    >
-      <TransferHeader
-        title="Transfer Completed"
-        description="Your file has been successfully transferred"
+    <StepSectionWrapper>
+      <StepHeaderSection
+        containerClassName="w-full bg-red-500"
+        title={props.header.title}
+        description={props.header.description}
+        customIcon={
+          <motion.div
+            className="relative flex justify-center items-center"
+            variants={fileListItemVariants}
+          >
+            <motion.div
+              className="absolute inset-0 rounded-full bg-green-500"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [1, 2, 0],
+                opacity: [1, 0.8, 0],
+                transition: {
+                  duration: 1.5,
+                  ease: "easeOut",
+                },
+              }}
+            />
+            <motion.div
+              className="relative z-1"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [0, 1.5, 1],
+                opacity: [0, 1],
+                transition: {
+                  duration: 1.5,
+                  ease: "easeOut",
+                },
+              }}
+            >
+              <div className="bg-green-500 rounded-full p-4">
+                <FileCheckIcon className="h-10 w-10 text-white" />
+              </div>
+            </motion.div>
+          </motion.div>
+        }
       />
 
-      <motion.div
-        className="relative flex justify-center items-center my-10 mb-15"
-        variants={fileListItemVariants}
-      >
-        <motion.div
-          className="absolute inset-0 rounded-full bg-green-500"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={burstAnimation}
-        />
-        <motion.div
-          className="relative z-1"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={successAnimation}
-        >
-          <div className="bg-green-500 rounded-full p-4">
-            <FileCheckIcon className="h-10 w-10 text-white" />
-          </div>
-        </motion.div>
-      </motion.div>
+      <StepInfoSection
+        containerClassName="bg-green-500"
+        idLabel="Recipient"
+        idValue={recipientId}
+        fileMetadata={fileMetadata}
+        transferShareLink={transferShareLink}
+        transferShareLinkDisabled={isTransferCompleted}
+      />
 
-      <motion.div
-        className="w-full flex flex-col items-center space-y-5"
-        variants={fileListItemVariants}
-      >
-        <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
-        <ShareableLinkInput
-          text={transferShareLink}
-          disabled={true}
-          className="mt-2"
-        />
-        <TransferFileCard fileMetadata={fileMetadata} />
+      <StepTransferProgressSection
+        containerClassName="bg-yellow-500"
+        progress={receiverProgress}
+        transferredBytes={offset}
+        totalSize={fileMetadata.size}
+        isTransferring={isTransferring}
+        isTransferError={isTransferError}
+        isTransferCompleted={isTransferCompleted}
+      />
 
-        <TransferProgress />
-      </motion.div>
-
-      <motion.div
-        className="w-full flex flex-col space-y-3 mt-2"
-        variants={fileListItemVariants}
-      >
-        <MotionButton onClick={handleResetTransfer}>
-          <RefreshCw className="h-4 w-4" />
-          Send Another File
-        </MotionButton>
-      </motion.div>
-    </motion.div>
+      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+    </StepSectionWrapper>
   );
 }

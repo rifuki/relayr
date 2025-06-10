@@ -67,7 +67,7 @@ export default function Step4_TransferCompleted() {
   // Save the last valid sender ID for future access (e.g., prefill)
   useEffect(() => {
     actions.setLastValidSenderId(senderId);
-  }, [actions]);
+  }, [actions, senderId]);
 
   // If essential data is missing, do not render this component
   if (!fileMetadata || !senderId || !fileUrl) return;

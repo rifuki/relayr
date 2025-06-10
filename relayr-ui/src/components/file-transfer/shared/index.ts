@@ -1,7 +1,11 @@
-// Barrel file to re-export transfer-related components
-// Makes importing these components cleaner and more convenient elsewhere in the appexport { default as SenderTransferProgress } from "./SenderTransferProgress";
-export { default as SkeletonLoading } from "./SkeletonLoading";
-export { default as TransferAlertError } from "./TransferAlertError";
-export { default as TransferConnectionStatus } from "./TransferConnectionStatus";
+export { default as TransferErrorAlert } from "./TransferErrorAlert";
 export { default as TransferFileCard } from "./TransferFileCard";
 export { default as TransferHeader } from "./TransferHeader";
+export { default as TransferConnectionStatus } from "./TransferConnectionStatus";
+
+export { default as StepButtonsSection } from "./StepButtonsSection";
+export { default as StepHeaderSection } from "./StepHeaderSection";
+export { default as StepInfoSection } from "./StepInfoSection";
+export { default as StepNoticeSection } from "./StepNoticeSection";
+export { default as StepSectionWrapper } from "./StepSectionWrapper";
+export { default as StepTransferProgressSection } from "./StepTransferProgressSection";

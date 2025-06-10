@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 // ShadCN UI Components
 import { Card } from "@/components/ui/card";
 
-// Utility function for conditional class names
+// Tailwind Utility function for conditional class names
 import { cn } from "@/lib/utils";
 
 // Props interface for CardState component

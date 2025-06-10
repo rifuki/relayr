@@ -5,17 +5,13 @@ import { useState } from "react";
 import { CheckCircle2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
-// Motion-Primitives UI Components
-import { MotionButton } from "@/components/animations/motion-button";
-
 // Internal Components
-import { TransferFileCard, TransferHeader } from "../../shared";
-
-// Animation Variants
 import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
+  StepButtonsSection,
+  StepHeaderSection,
+  StepInfoSection,
+  StepSectionWrapper,
+} from "../../shared";
 
 // Constants
 import { WS_RELAY_API_URL } from "@/lib/constants";
@@ -26,6 +22,10 @@ import {
   useFileSenderStore,
 } from "@/stores/useFileSenderStore";
 
+// Types
+import { StepButtonConfig, type StepConfig as StepProps } from "../step-config";
+import { TransferFileCard } from "../../shared";
+
 // Motion Animation
 const checkmarkVariants = {
   hidden: { scale: 0, opacity: 0 },
@@ -34,7 +34,7 @@ const checkmarkVariants = {
     opacity: 1,
     transition: {
       duration: 0.5,
-      case: "easeOut",
+      ease: "easeOut",
       delay: 0.5,
     },
   },
@@ -48,7 +48,7 @@ const checkmarkVariants = {
  *
  * @returns JSX.Element The rendered component.
  */
-export default function Step2_FileSelected() {
+export default function Step2_FileSelected(props: StepProps) {
   const initId = useFileSenderStore((state) => state.initId);
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -57,7 +57,7 @@ export default function Step2_FileSelected() {
 
   if (!fileMetadata) return;
 
-  const handleGenerateTransferShareLink = () => {
+  const handleGenerateLink = () => {
     setIsGenerateLinkLoading(true);
     if (!file || !fileMetadata) {
       return { errorMessage: "File or file metadata is missing." };
@@ -68,51 +68,57 @@ export default function Step2_FileSelected() {
 
   const handleUnselectFile = () => {
     actions.setFile(null);
+    actions.clearTransferState();
   };
 
+  const buttons: StepButtonConfig[] = [
+    {
+      ...props.buttons.generateLink,
+      label: "Next",
+      buttonProps: {
+        onClick: handleGenerateLink,
+        disabled: isGenerateLinkLoading,
+      },
+    },
+    {
+      ...props.buttons.removeFile,
+      label: "Cancel",
+      buttonProps: { onClick: handleUnselectFile },
+    },
+  ];
+
   return (
-    <motion.div
-      className="flex flex-col items-center space-y-5"
-      variants={fileListWrapperVariants}
-      initial="hidden"
-      animate="show"
-    >
-      <TransferHeader
-        title="File Selected"
-        description="Ready to generate a transfer link "
+    <StepSectionWrapper>
+      <StepHeaderSection
+        containerClassName="bg-red-500"
+        title={props.header.title}
+        description={props.header.description}
       />
 
-      <motion.div className="relative w-full" variants={fileListItemVariants}>
-        <motion.div
-          className="absolute -right-2 -top-2 z-1 bg-white dark:bg-neutral-800 rounded-full"
-          variants={checkmarkVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <CheckCircle2Icon className="h-8 w-8 text-green-500" />
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        >
-          <TransferFileCard fileMetadata={fileMetadata} />
-        </motion.div>
-      </motion.div>
+      <StepInfoSection
+        containerClassName="bg-green-500"
+        customFileCard={
+          <div className="relative w-full">
+            <motion.div
+              className="absolute -right-2 -top-2 z-1 bg-white dark:bg-neutral-800 rounded-full"
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              variants={checkmarkVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <CheckCircle2Icon className="h-8 w-8 text-green-500" />
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <TransferFileCard fileMetadata={fileMetadata} />
+            </motion.div>
+          </div>
+        }
+      />
 
-      <motion.div
-        className="w-full flex flex-col space-y-3 mt-2"
-        variants={fileListItemVariants}
-      >
-        <MotionButton
-          onClick={() => handleGenerateTransferShareLink()}
-          disabled={isGenerateLinkLoading}
-        >
-          Generate Transfer Link
-        </MotionButton>
-        <MotionButton onClick={handleUnselectFile} variant="destructive">
-          Remove File
-        </MotionButton>
-      </motion.div>
-    </motion.div>
+      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+    </StepSectionWrapper>
   );
 }

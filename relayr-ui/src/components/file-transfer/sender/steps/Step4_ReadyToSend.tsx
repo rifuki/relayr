@@ -2,25 +2,16 @@
 import { useEffect } from "react";
 
 // External Libraries
-import { motion, useAnimation } from "motion/react";
-import { HardDriveUpload } from "lucide-react";
-
-// ShadCN UI Components
-import { Badge } from "@/components/ui/badge";
-
-// Motion-Primitives UI Components
-import { MotionButton } from "@/components/animations/motion-button";
+import { useAnimation } from "motion/react";
 
 // Internal Components
-import ShareableLinkInput from "@/components/ShareableLinkInput";
-import { TransferProgress } from "../components";
-import { TransferFileCard, TransferHeader } from "../../shared";
-
-// Animation Variants
 import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
+  StepButtonsSection,
+  StepHeaderSection,
+  StepInfoSection,
+  StepSectionWrapper,
+  StepTransferProgressSection,
+} from "../../shared";
 
 // Constants
 import { CHUNK_SIZE } from "@/lib/constants";
@@ -37,23 +28,14 @@ import {
   CancelSenderReadyRequest,
   RestartTransferRequest,
 } from "@/types/webSocketMessages";
+import { type StepConfig as StepProps } from "../step-config";
 
-/**
- * Step4_ReadyToSend component represents the fourth step in the file sending process.
- * It displays a header, a hard drive upload icon, recipient ID, shareable link input,
- * and file metadata.
- * It allows the sender to start the file transfer or cancel the setup.
- *
- * @returns JSX.Element The rendered component.
- */
-export default function Step4_ReadyToSend() {
+export default function Step4_ReadyToSend(props: StepProps) {
   const controls = useAnimation();
-
   const handleMouseEnter = () => {
     controls.stop();
     controls.start({ rotate: 0 });
   };
-
   const handleMouseLeave = () => {
     controls.start({
       rotate: [0, 5, -5, 0],
@@ -82,13 +64,24 @@ export default function Step4_ReadyToSend() {
   const { recipientId } = useFileSenderStore(
     (state) => state.transferConnection,
   );
-  const { isTransferring, isTransferError } = useFileSenderStore(
-    (state) => state.transferStatus,
+  // Retrieve receiver progress percentage
+  const { receiver: receiverProgress } = useFileSenderStore(
+    (state) => state.transferProgress,
   );
+  // Retrieve current offset, transfer status flags
+  const { offset, isTransferring, isTransferError, isTransferCompleted } =
+    useFileSenderStore((state) => state.transferStatus);
   const { sendJsonMessage } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
-  if (!file || !fileMetadata || !transferShareLink || !sendJsonMessage) return;
+  if (
+    !file ||
+    !fileMetadata ||
+    !transferShareLink ||
+    !recipientId ||
+    !sendJsonMessage
+  )
+    return;
 
   const handleSendFile = () => {
     if (!file || !recipientId) {
@@ -129,60 +122,63 @@ export default function Step4_ReadyToSend() {
     handleSendFile();
   };
 
+  const buttons = [
+    isTransferError
+      ? {
+          ...props.buttons.restartTransfer,
+          buttonProps: {
+            onClick: handleRestartTransfer,
+            disabled: isTransferring,
+          },
+        }
+      : {
+          ...props.buttons.startTransfer,
+          buttonProps: {
+            animate: controls,
+            onMouseEnter: handleMouseEnter,
+            onMouseLeave: handleMouseLeave,
+            onClick: handleSendFile,
+            disabled: isTransferring,
+          },
+        },
+    {
+      ...props.buttons.cancelTransfer,
+      label: "Cancel",
+      buttonProps: {
+        onClick: handleCancelSenderReady,
+      },
+    },
+  ];
+
   return (
-    <motion.div
-      className="flex flex-col items-center space-y-5"
-      variants={fileListWrapperVariants}
-      initial="hidden"
-      animate="show"
-    >
-      <TransferHeader
-        title="Ready to Transfer"
-        description="Recipient connected. You can now transfer the file"
+    <StepSectionWrapper>
+      <StepHeaderSection
+        containerClassName="bg-red-500"
+        title={props.header.title}
+        description={props.header.description}
+        Icon={props.Icon}
       />
 
-      <motion.div variants={fileListItemVariants}>
-        <HardDriveUpload className="h-15 w-15 my-10" />
-      </motion.div>
+      <StepInfoSection
+        containerClassName="space-y-0 bg-green-500"
+        idLabel="Recipient"
+        idValue={recipientId}
+        fileMetadata={fileMetadata}
+        transferShareLink={transferShareLink}
+      />
 
-      <motion.div
-        className="w-full flex flex-col items-center space-y-5"
-        variants={fileListItemVariants}
-      >
-        <Badge className="p-2 bg-primary/90">Recipient ID: {recipientId}</Badge>
-        <ShareableLinkInput text={transferShareLink} className="mt-2" />
-        <TransferFileCard fileMetadata={fileMetadata} />
-      </motion.div>
+      <StepTransferProgressSection
+        containerClassName="bg-yellow-500"
+        progress={receiverProgress}
+        transferredBytes={offset}
+        totalSize={fileMetadata.size}
+        isTransferring={isTransferring}
+        isTransferError={isTransferError}
+        isTransferCompleted={isTransferCompleted}
+        idleText="Click to start transfer"
+      />
 
-      <TransferProgress />
-
-      <motion.div
-        variants={fileListItemVariants}
-        className="w-full flex flex-col space-y-3 mt-2"
-      >
-        {isTransferError ? (
-          <MotionButton
-            onClick={handleRestartTransfer}
-            disabled={isTransferring}
-          >
-            Restart Transfer
-          </MotionButton>
-        ) : (
-          <MotionButton
-            animate={controls}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onClick={handleSendFile}
-            disabled={isTransferring}
-          >
-            Start Transfer
-          </MotionButton>
-        )}
-
-        <MotionButton onClick={handleCancelSenderReady} variant="destructive">
-          Cancel Transfer Setup
-        </MotionButton>
-      </motion.div>
-    </motion.div>
+      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+    </StepSectionWrapper>
   );
 }

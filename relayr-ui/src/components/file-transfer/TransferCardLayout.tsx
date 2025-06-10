@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 // Custom UI Components
 import { ReadyState } from "react-use-websocket";
-import { TransferAlertError, TransferConnectionStatus } from "./shared";
+import { TransferConnectionStatus, TransferErrorAlert } from "./shared";
 
 // Motion Components
 // const MotionCard = motion.create(Card);
@@ -56,9 +56,9 @@ export default function TransferCardLayout({
 }: TransferCardLayoutProps) {
   return (
     <>
-      <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none">
-        <CardContent className="flex flex-col space-y-5">
-          {errorMessage && <TransferAlertError message={errorMessage} />}
+      <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none gap-0">
+        <CardContent className="w-full flex flex-col">
+          {errorMessage && <TransferErrorAlert message={errorMessage} />}
           {children}
         </CardContent>
 
@@ -67,7 +67,7 @@ export default function TransferCardLayout({
             <TransferConnectionStatus readyState={readyState} />
           )}
           {readyState === ReadyState.OPEN && connectionId && (
-            <div className="text-sm text-muted-foreground mt-2">
+            <div className="text-sm text-muted-foreground mt-1">
               ID: <strong>{connectionId}</strong>
             </div>
           )}

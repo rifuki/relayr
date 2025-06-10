@@ -5,6 +5,9 @@ import { motion } from "motion/react";
 // ShadCN UI Components
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// Tailwind CSS Utility Function
+import { cn } from "@/lib/utils";
+
 // Motion Components
 const MotionAlert = motion.create(Alert);
 const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
@@ -12,6 +15,7 @@ const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
 // Props interface for TransferAlertError component
 interface AlertErrorProps {
   message: string;
+  containerClassName?: string;
 }
 
 /**
@@ -21,11 +25,14 @@ interface AlertErrorProps {
  * @param {AlertErrorProps} props - Component props containing the error message.
  * @returns JSX.Element - An alert UI element with animated error message.
  */
-export default function TransferAlertError({ message }: AlertErrorProps) {
+export default function TransferErrorAlert({
+  message,
+  containerClassName,
+}: AlertErrorProps) {
   return (
     <MotionAlert
       variant="destructive"
-      className="shadow-sm mb-5 p-3"
+      className={cn("shadow-sm", containerClassName)}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
@@ -48,7 +55,7 @@ export default function TransferAlertError({ message }: AlertErrorProps) {
         />
 
         <motion.p
-          className="text-justify flex items-center"
+          className="flex items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25, duration: 0.5 }}

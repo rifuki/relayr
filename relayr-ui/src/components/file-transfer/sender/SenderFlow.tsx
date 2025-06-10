@@ -24,6 +24,9 @@ import {
   Step6_TransferCompleted,
 } from "./steps";
 
+// Step Configurations
+import { STEP_CONFIGS } from "./";
+
 /**
  * SenderFlow Component
  * This component manages the flow of file sending steps, transitioning between different states
@@ -94,13 +97,13 @@ export default function SenderFlow() {
 
   // Array containing the components for each step, mapped to the current step
   const FLOW_COMPONENTS = [
-    <InitialTransitionLoader key="step0" />, // Initial loading state before file selection
-    <Step1_FileSelector key="step1" />, // Step 1: File selection
-    <Step2_FileSelected key="step2" />, // Step 2: File selected, but transfer not yet started
-    <Step3_WaitForReceiver key="step3" />, // Step 3: Waiting for receiver to connect
-    <Step4_ReadyToSend key="step4" />, // Step 4: Ready to send the file
-    <Step5_Sending key="step5" />, // Step 5: Sending file
-    <Step6_TransferCompleted key="step6" />, // Step 6: Transfer completed
+    InitialTransitionLoader,
+    Step1_FileSelector,
+    Step2_FileSelected,
+    Step3_WaitForReceiver,
+    Step4_ReadyToSend,
+    Step5_Sending,
+    Step6_TransferCompleted,
   ];
 
   return (
@@ -133,15 +136,19 @@ export default function SenderFlow() {
       transition={transitionPanelTransition}
       custom={direction}
     >
-      {FLOW_COMPONENTS.map((component, index) => (
-        <div
-          key={index}
-          ref={index === currentStep ? ref : undefined}
-          className="w-full"
-        >
-          {component}
-        </div>
-      ))}
+      {FLOW_COMPONENTS.map((Component, index) => {
+        const stepConfig = STEP_CONFIGS[index];
+
+        return (
+          <div
+            className="w-full"
+            key={index}
+            ref={index === currentStep ? ref : undefined}
+          >
+            <Component {...stepConfig} />
+          </div>
+        );
+      })}
     </TransitionPanel>
   );
 }

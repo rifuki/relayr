@@ -8,7 +8,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 
-// Utility functions for classnames and file size formatting
+// Tailwind Utility functions for classnames and file size formatting
 import { cn } from "@/lib/utils";
 import { formatFileSize } from "@/utils/file";
 

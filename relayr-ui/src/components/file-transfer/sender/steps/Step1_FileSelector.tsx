@@ -5,14 +5,8 @@ import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import { FileIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
-// ShadCN UI Components
-import { Button } from "@/components/ui/button";
-
-// Motion-Primitives UI Components
-import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
-
 // Internal Components
-import { TransferHeader } from "../../shared";
+import { StepButtonsSection, StepHeaderSection } from "../../shared";
 
 // Utilities
 import { handlePrepareDummyFile } from "@/utils/download";
@@ -21,14 +15,10 @@ import { isFolderLike } from "@/utils/file";
 // State Management (Store)
 import { useFileSenderActions } from "@/stores/useFileSenderStore";
 
-/**
- * Step1_FileSelector component allows users to select a file to send.
- * It provides drag-and-drop functionality, file selection via input,
- * and displays loading progress while the file is being processed.
- *
- * @returns JSX.Element The rendered component.
- */
-export default function Step1_FileSelector() {
+// Types
+import { type StepConfig as StepProps } from "../step-config";
+
+export default function Step1_FileSelector(props: StepProps) {
   const actions = useFileSenderActions();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +29,7 @@ export default function Step1_FileSelector() {
   const [isWrapperHovered, setIsWrapperHovered] = useState(false);
 
   // Handles file selection (via input)
-  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSelectFile = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files?.length === 0) return;
 
     const file = e.target.files[0];
@@ -55,9 +45,14 @@ export default function Step1_FileSelector() {
     reader.onload = () => {
       setProgress(100);
       actions.setErrorMessage(null); // Clear any previous error
-      actions.setFile(file); // Set the file to the store
+      actions.clearTransferState();
+
+      // avoid flicker
       setTimeout(() => {
-        setIsFileLoading(false); // avoid flicker after file is loaded to step 2 animation
+        setIsFileLoading(false);
+      }, 500);
+      setTimeout(() => {
+        actions.setFile(file); // Set the file to the store
       }, 1000);
     };
     reader.onerror = () => {
@@ -98,7 +93,15 @@ export default function Step1_FileSelector() {
     }
 
     actions.setErrorMessage(null); // Clear any previous error
-    actions.setFile(droppedFile); // Set the dropped file to store
+    actions.clearTransferState();
+
+    // avoid flicker
+    setTimeout(() => {
+      setIsFileLoading(false);
+    }, 500);
+    setTimeout(() => {
+      actions.setFile(droppedFile); // Set the file to the store
+    }, 1000);
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -109,6 +112,7 @@ export default function Step1_FileSelector() {
 
   const handleDragEnter = () => {
     setIsDragging(true); // Set dragging state to true on entering
+    setIsWrapperHovered(false); // Make sure wrapper hover is false
   };
 
   const handleDragLeave = () => {
@@ -125,19 +129,42 @@ export default function Step1_FileSelector() {
     return () => clearTimeout(timer); // Clean up the timer
   }, []);
 
-  return (
-    <div className="flex flex-col items-center space-y-5">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <TransferHeader
-          title="Send a File"
-          description="Select a file to share it securely via WebSocket"
-        />
-      </motion.div>
+  const handlePrepareDummyFileClick = async () => {
+    await handlePrepareDummyFile(
+      setIsFileLoading,
+      actions.setFile,
+      setProgress,
+    );
+  };
 
+  const buttons = [
+    {
+      ...props.buttons.prepareDummyFile,
+      buttonProps: {
+        onClick: handlePrepareDummyFileClick,
+        disabled: isFileLoading,
+      },
+    },
+  ];
+
+  return (
+    <div className="flex flex-col items-center">
+      {/* Render the header section with title and description  */}
+      <StepHeaderSection
+        containerClassName="w-full bg-red-500"
+        title={props.header.title}
+        description={props.header.description}
+        motionTitleDescProps={{
+          initial: { opacity: 0, y: -20 },
+          animate: { opacity: 1, y: 0 },
+          transition: {
+            delay: 0.5,
+            duration: 0.3,
+          },
+        }}
+      />
+
+      {/* Render the transfer header with icon and title */}
       <motion.div
         className={`w-full p-20 border-4 border-dashed ${isDragging ? "border-primary bg-secondary/70" : "border-border/80 hover:bg-secondary/50"} gap-5 flex flex-col justify-center items-center ${isFileLoading ? "cursor-none" : "cursor-pointer"}`}
         onClick={() => !isFileLoading && fileInputRef.current?.click()}
@@ -157,14 +184,16 @@ export default function Step1_FileSelector() {
         }}
         style={{ minWidth: "300px" }}
       >
+        {/* Hidden file input for file selection */}
         <input
           type="file"
-          onChange={handleFileSelect}
+          onChange={handleSelectFile}
           disabled={isFileLoading}
           ref={fileInputRef}
           className="hidden"
         />
 
+        {/* Render the file icon and loading spinner */}
         <motion.div
           className="w-16 h-16 mx-auto rounded-xl bg-secondary/80 flex items-center justify-center"
           animate={{
@@ -199,7 +228,9 @@ export default function Step1_FileSelector() {
             <FileIcon className="h-8 w-8" />
           )}
         </motion.div>
+        {/* Render the file icon and loading spinner end */}
 
+        {/* Render the text instructions */}
         <motion.div
           className="text-center"
           animate={{ y: isDragging ? 15 : isWrapperHovered ? 10 : 0 }}
@@ -216,34 +247,21 @@ export default function Step1_FileSelector() {
             {isDragging ? "\u00A0" : "or click to browse"}
           </p>
         </motion.div>
-      </motion.div>
 
-      {process.env.NODE_ENV === "development" && (
-        <motion.div
-          className="w-full"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <Button
-            onClick={() =>
-              handlePrepareDummyFile(
-                setIsFileLoading,
-                actions.setFile,
-                setProgress,
-              )
-            }
-            disabled={isFileLoading}
-            className="w-full my-2 py-5 cursor-pointer"
-          >
-            {isFileLoading ? (
-              <TextShimmer duration={1}>{`${progress}%`}</TextShimmer>
-            ) : (
-              <>Prepare Dummy File</>
-            )}
-          </Button>
-        </motion.div>
-      )}
+        {/* Render the text instructions end */}
+      </motion.div>
+      {/* Render the transfer header with icon and title end */}
+
+      {/* Render the buttons for file selection */}
+      <StepButtonsSection
+        buttons={buttons}
+        containerMotionProps={{
+          initial: { opacity: 0, y: 20 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.5, delay: 0.5 },
+        }}
+      />
+      {/* Render the buttons for file selection end */}
     </div>
   );
 }
