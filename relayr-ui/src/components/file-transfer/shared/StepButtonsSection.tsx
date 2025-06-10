@@ -28,7 +28,7 @@ export default function StepButtonsSection({
 }: StepButtonsSectionProps) {
   return (
     <motion.div
-      className={cn("w-full flex flex-col items-center", containerClassName)}
+      className={cn("w-full flex flex-col items-center bg-blue-500", containerClassName)}
       variants={motionVariants}
       {...containerMotionProps}
     >

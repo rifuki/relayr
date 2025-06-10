@@ -30,7 +30,7 @@ export default function StepNoticeSection({
 
   return (
     <motion.div
-      className={cn("w-full text-center", containerClassName)}
+      className={cn("w-full text-center bg-amber-500", containerClassName)}
       variants={motionVariants}
     >
       {/* Display the message with shimmer effect */}

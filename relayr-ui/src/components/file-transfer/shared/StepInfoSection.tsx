@@ -44,7 +44,7 @@ export default function StepInfoSection({
 }: StepInfoSectionProps) {
   return (
     <motion.div
-      className={cn("w-full flex flex-col items-center", containerClassName)}
+      className={cn("w-full flex flex-col items-center bg-green-500", containerClassName)}
       variants={motionVariants}
     >
       {/* Display ID Label and Value if provided */}

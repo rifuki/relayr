@@ -63,7 +63,6 @@ export default function Step6_TransferCompleted(props: StepProps) {
   return (
     <StepSectionWrapper>
       <StepHeaderSection
-        containerClassName="w-full bg-red-500"
         title={props.header.title}
         description={props.header.description}
         customIcon={
@@ -104,7 +103,6 @@ export default function Step6_TransferCompleted(props: StepProps) {
       />
 
       <StepInfoSection
-        containerClassName="bg-green-500"
         idLabel="Recipient"
         idValue={recipientId}
         fileMetadata={fileMetadata}
@@ -113,7 +111,6 @@ export default function Step6_TransferCompleted(props: StepProps) {
       />
 
       <StepTransferProgressSection
-        containerClassName="bg-yellow-500"
         progress={receiverProgress}
         transferredBytes={offset}
         totalSize={fileMetadata.size}
@@ -122,7 +119,7 @@ export default function Step6_TransferCompleted(props: StepProps) {
         isTransferCompleted={isTransferCompleted}
       />
 
-      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+      <StepButtonsSection buttons={buttons} />
     </StepSectionWrapper>
   );
 }

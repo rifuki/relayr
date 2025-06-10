@@ -153,14 +153,12 @@ export default function Step4_ReadyToSend(props: StepProps) {
   return (
     <StepSectionWrapper>
       <StepHeaderSection
-        containerClassName="bg-red-500"
         title={props.header.title}
         description={props.header.description}
         Icon={props.Icon}
       />
 
       <StepInfoSection
-        containerClassName="space-y-0 bg-green-500"
         idLabel="Recipient"
         idValue={recipientId}
         fileMetadata={fileMetadata}
@@ -168,7 +166,6 @@ export default function Step4_ReadyToSend(props: StepProps) {
       />
 
       <StepTransferProgressSection
-        containerClassName="bg-yellow-500"
         progress={receiverProgress}
         transferredBytes={offset}
         totalSize={fileMetadata.size}
@@ -178,7 +175,7 @@ export default function Step4_ReadyToSend(props: StepProps) {
         idleText="Click to start transfer"
       />
 
-      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+      <StepButtonsSection buttons={buttons} />
     </StepSectionWrapper>
   );
 }

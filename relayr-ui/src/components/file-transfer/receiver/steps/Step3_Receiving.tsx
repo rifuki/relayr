@@ -61,7 +61,6 @@ export default function Step3_Receiving(props: StepProps) {
   return (
     <StepSectionWrapper>
       <StepHeaderSection
-        containerClassName="bg-red-500"
         title={props.header.title}
         description={props.header.description}
         Icon={props.Icon}
@@ -77,14 +76,12 @@ export default function Step3_Receiving(props: StepProps) {
       />
 
       <StepInfoSection
-        containerClassName="bg-green-500"
         idLabel="Sender"
         idValue={senderId}
         fileMetadata={fileMetadata}
       />
 
       <StepTransferProgressSection
-        containerClassName="bg-yellow-500"
         progress={receiverProgress}
         transferredBytes={receivedBytes}
         totalSize={fileMetadata.size}
@@ -93,12 +90,9 @@ export default function Step3_Receiving(props: StepProps) {
         isTransferCompleted={isTransferCompleted}
       />
 
-      <StepNoticeSection
-        containerClassName="bg-amber-500"
-        message={props.notice}
-      />
+      <StepNoticeSection message={props.notice} />
 
-      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+      <StepButtonsSection buttons={buttons} />
     </StepSectionWrapper>
   );
 }

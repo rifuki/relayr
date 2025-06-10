@@ -152,7 +152,6 @@ export default function Step1_FileSelector(props: StepProps) {
     <div className="flex flex-col items-center">
       {/* Render the header section with title and description  */}
       <StepHeaderSection
-        containerClassName="w-full bg-red-500"
         title={props.header.title}
         description={props.header.description}
         motionTitleDescProps={{

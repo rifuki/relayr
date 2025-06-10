@@ -44,7 +44,10 @@ export default function StepHeaderSection({
 }: StepHeaderSectionProps) {
   return (
     <div
-      className={cn("w-full flex flex-col items-center", containerClassName)}
+      className={cn(
+        "w-full flex flex-col items-center bg-red-500",
+        containerClassName,
+      )}
     >
       {/* Header Title and Description */}
       <motion.div

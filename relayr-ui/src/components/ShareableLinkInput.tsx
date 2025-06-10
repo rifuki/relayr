@@ -7,12 +7,13 @@ import { Input } from "./ui/input";
 
 // Internal Components
 import CopyButton from "./CopyButton";
+import { cn } from "@/lib/utils";
 
 // Props interface for ShareableLinkInput component
 interface ShareableLinkInputProps {
   label?: string;
   text: string;
-  className?: string;
+  containerClassName?: string;
   disabled?: boolean;
 }
 
@@ -26,14 +27,14 @@ interface ShareableLinkInputProps {
 export default function ShareableLinkInput({
   label = "Link for recipient",
   text,
-  className,
+  containerClassName,
   disabled,
 }: ShareableLinkInputProps) {
   // Generate a unique ID for the input-label association
   const inputId = useId();
 
   return (
-    <div className={`w-full space-y-1 ${className}`}>
+    <div className={cn("w-full", containerClassName)}>
       <Label htmlFor={inputId} className="text-xs text-muted-foreground">
         <p>
           {label}{" "}

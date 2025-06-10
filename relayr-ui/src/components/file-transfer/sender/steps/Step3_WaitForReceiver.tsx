@@ -50,7 +50,6 @@ export default function Step3_WaitForReceiver(props: StepProps) {
   return (
     <StepSectionWrapper>
       <StepHeaderSection
-        containerClassName="bg-red-500"
         title={props.header.title}
         description={props.header.description}
         Icon={props.Icon}
@@ -65,17 +64,13 @@ export default function Step3_WaitForReceiver(props: StepProps) {
       />
 
       <StepInfoSection
-        containerClassName="bg-green-500"
         transferShareLink={transferShareLink}
         fileMetadata={fileMetadata}
       />
 
-      <StepNoticeSection
-        containerClassName="bg-yellow-500"
-        message={props.notice}
-      />
+      <StepNoticeSection message={props.notice} />
 
-      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+      <StepButtonsSection buttons={buttons} />
     </StepSectionWrapper>
   );
 }

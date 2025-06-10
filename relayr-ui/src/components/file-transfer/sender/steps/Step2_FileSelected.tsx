@@ -82,13 +82,11 @@ export default function Step2_FileSelected(props: StepProps) {
   return (
     <StepSectionWrapper>
       <StepHeaderSection
-        containerClassName="bg-red-500"
         title={props.header.title}
         description={props.header.description}
       />
 
       <StepInfoSection
-        containerClassName="bg-green-500"
         customFileCard={
           <div className="relative w-full">
             <motion.div
@@ -110,7 +108,7 @@ export default function Step2_FileSelected(props: StepProps) {
         }
       />
 
-      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+      <StepButtonsSection buttons={buttons} />
     </StepSectionWrapper>
   );
 }

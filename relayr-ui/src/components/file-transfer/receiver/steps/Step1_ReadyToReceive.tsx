@@ -47,20 +47,18 @@ export default function Step1_ReadyToReceive(props: StepProps) {
   return (
     <StepSectionWrapper>
       <StepHeaderSection
-        containerClassName="bg-red-500"
         title={props.header.title}
         description={props.header.description}
         Icon={props.Icon}
       />
 
       <StepInfoSection
-        containerClassName="bg-green-500"
         idLabel="Sender"
         idValue={senderId}
         fileMetadata={fileMetadata}
       />
 
-      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+      <StepButtonsSection buttons={buttons} />
     </StepSectionWrapper>
   );
 }

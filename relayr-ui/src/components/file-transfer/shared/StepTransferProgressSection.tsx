@@ -94,7 +94,7 @@ export default function StepTransferProgressSection({
 
   return (
     <motion.div
-      className={cn("w-full", containerClassName)}
+      className={cn("w-full bg-yellow-500", containerClassName)}
       variants={motionVariants}
     >
       <div className="flex justify-between text-sm">
