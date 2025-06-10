@@ -43,7 +43,7 @@ export default function StepTransferProgressSection({
   isTransferCompleted,
   idleText,
   containerClassName,
-  textShimmerDuration = 2,
+  textShimmerDuration = 5,
   motionVariants = fileListItemVariants,
 }: StepTransferProgressSectionProps) {
   // Format the transferred value and total size label

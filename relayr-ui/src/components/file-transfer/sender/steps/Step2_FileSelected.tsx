@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 
 // Internal Components
 import {
+  type StepConfig as StepProps,
   StepButtonsSection,
   StepHeaderSection,
   StepInfoSection,
@@ -23,7 +24,6 @@ import {
 } from "@/stores/useFileSenderStore";
 
 // Types
-import { StepButtonConfig, type StepConfig as StepProps } from "../step-config";
 import { TransferFileCard } from "../../shared";
 
 // Motion Animation
@@ -40,14 +40,6 @@ const checkmarkVariants = {
   },
 };
 
-/**
- * Step2_FileSelected component represents the second step in the file sending process.
- * It displays the selected file's metadata, a button to generate a transfer link,
- * and a button to remove the selected file.
- * The component uses motion for animations and ShadCN UI components for styling.
- *
- * @returns JSX.Element The rendered component.
- */
 export default function Step2_FileSelected(props: StepProps) {
   const initId = useFileSenderStore((state) => state.initId);
   const file = useFileSenderStore((state) => state.file);
@@ -71,7 +63,7 @@ export default function Step2_FileSelected(props: StepProps) {
     actions.clearTransferState();
   };
 
-  const buttons: StepButtonConfig[] = [
+  const buttons = [
     {
       ...props.buttons.generateLink,
       label: "Next",

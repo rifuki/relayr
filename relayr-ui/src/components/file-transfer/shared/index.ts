@@ -9,3 +9,5 @@ export { default as StepInfoSection } from "./StepInfoSection";
 export { default as StepNoticeSection } from "./StepNoticeSection";
 export { default as StepSectionWrapper } from "./StepSectionWrapper";
 export { default as StepTransferProgressSection } from "./StepTransferProgressSection";
+
+export * from "./step-types";

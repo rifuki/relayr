@@ -1,5 +1,6 @@
 // Internal Components
 import {
+  type StepConfig as StepProps,
   StepButtonsSection,
   StepHeaderSection,
   StepInfoSection,
@@ -13,9 +14,6 @@ import {
   useFileSenderStore,
   useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
-
-// Types
-import { type StepConfig as StepProps } from "../step-config";
 
 export default function Step3_WaitForReceiver(props: StepProps) {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { fileListItemVariants } from "@/lib/animations";
 
 // Types
-import { StepButtonConfig } from "../sender/step-config";
+import { type StepButtonConfig } from "../shared";
 
 interface StepButtonsSectionProps {
   buttons: StepButtonConfig[];

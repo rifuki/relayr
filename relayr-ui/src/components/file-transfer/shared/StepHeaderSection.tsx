@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { fileListItemVariants } from "@/lib/animations";
 
 // Types
-import { type StepIconConfig } from "../sender/step-config";
+import { type StepIconConfig } from "./";
 
 interface StepHeaderSectionProps {
   title: string; // Title text to display in header

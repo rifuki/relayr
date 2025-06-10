@@ -1,5 +1,4 @@
-import { ComponentProps } from "react";
-import { MotionButton } from "@/components/animations/motion-button";
+// External Libraries
 import {
   ClockIcon,
   CloudUploadIcon,
@@ -8,28 +7,8 @@ import {
   XIcon,
 } from "lucide-react";
 
-interface StepHeaderConfig {
-  title: string;
-  description: string;
-}
-
-export type StepIconConfig = React.ComponentType<{ className?: string }>;
-
-export interface StepButtonConfig {
-  label: string;
-  key: string;
-  className?: string;
-  variant?: "default" | "destructive" | "secondary";
-  showInDev?: boolean;
-  buttonProps?: ComponentProps<typeof MotionButton>;
-}
-
-export interface StepConfig {
-  header: StepHeaderConfig;
-  Icon: StepIconConfig;
-  notice: string;
-  buttons: { [key: string]: StepButtonConfig };
-}
+// Types
+import { StepConfig } from "../shared";
 
 export const STEP_CONFIGS: StepConfig[] = [
   // Step 0
@@ -106,7 +85,7 @@ export const STEP_CONFIGS: StepConfig[] = [
         key: "cancelTransfer",
         variant: "destructive",
       },
-      restartTranfer: { label: "Restart", key: "restartTransfer" },
+      restartTransfer: { label: "Restart", key: "restartTransfer" },
     },
   },
   // Step 5

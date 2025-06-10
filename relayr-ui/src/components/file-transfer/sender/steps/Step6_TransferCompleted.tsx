@@ -4,9 +4,11 @@ import { motion } from "motion/react";
 
 // Internal Components
 import {
+  type StepConfig as StepProps,
   StepButtonsSection,
   StepHeaderSection,
   StepInfoSection,
+  StepSectionWrapper,
   StepTransferProgressSection,
 } from "../../shared";
 
@@ -18,10 +20,6 @@ import {
 
 // Animation Variants
 import { fileListItemVariants } from "@/lib/animations";
-
-// Types
-import { StepConfig as StepProps } from "../step-config";
-import StepSectionWrapper from "../../shared/StepSectionWrapper";
 
 export default function Step6_TransferCompleted(props: StepProps) {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);

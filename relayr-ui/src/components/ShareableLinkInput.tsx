@@ -46,7 +46,7 @@ export default function ShareableLinkInput({
         <Input
           id={inputId}
           value={text}
-          className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-not-allowed"
+          className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-default"
           tabIndex={disabled ? -1 : 0}
           onMouseDown={disabled ? (e) => e.preventDefault() : undefined}
           readOnly

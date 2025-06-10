@@ -1,5 +1,6 @@
 // Internal Components
 import {
+  type StepConfig as StepProps,
   StepButtonsSection,
   StepHeaderSection,
   StepInfoSection,
@@ -17,7 +18,6 @@ import {
 
 // Types
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
-import { StepConfig as StepProps } from "../step-config";
 
 export default function Step5_Sending(props: StepProps) {
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -47,7 +47,7 @@ export default function Step5_Sending(props: StepProps) {
   )
     return;
 
-  const handleCancelSenderTransfer = () => {
+  const handleAbortTransfer = () => {
     sendJsonMessage({
       type: "cancelSenderTransfer",
     } satisfies CancelSenderTransferRequest);
@@ -59,9 +59,8 @@ export default function Step5_Sending(props: StepProps) {
   const buttons = [
     {
       ...props.buttons.abortTransfer,
-      label: "Cancel",
       buttonProps: {
-        onClick: handleCancelSenderTransfer,
+        onClick: handleAbortTransfer,
         disabled: !isTransferring,
       },
     },

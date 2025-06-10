@@ -6,6 +6,7 @@ import { useAnimation } from "motion/react";
 
 // Internal Components
 import {
+  type StepConfig as StepProps,
   StepButtonsSection,
   StepHeaderSection,
   StepInfoSection,
@@ -28,7 +29,6 @@ import {
   CancelSenderReadyRequest,
   RestartTransferRequest,
 } from "@/types/webSocketMessages";
-import { type StepConfig as StepProps } from "../step-config";
 
 export default function Step4_ReadyToSend(props: StepProps) {
   const controls = useAnimation();

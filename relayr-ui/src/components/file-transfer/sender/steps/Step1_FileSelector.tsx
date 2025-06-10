@@ -6,7 +6,11 @@ import { FileIcon, Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 
 // Internal Components
-import { StepButtonsSection, StepHeaderSection } from "../../shared";
+import {
+  type StepConfig as StepProps,
+  StepButtonsSection,
+  StepHeaderSection,
+} from "../../shared";
 
 // Utilities
 import { handlePrepareDummyFile } from "@/utils/download";
@@ -14,9 +18,6 @@ import { isFolderLike } from "@/utils/file";
 
 // State Management (Store)
 import { useFileSenderActions } from "@/stores/useFileSenderStore";
-
-// Types
-import { type StepConfig as StepProps } from "../step-config";
 
 export default function Step1_FileSelector(props: StepProps) {
   const actions = useFileSenderActions();

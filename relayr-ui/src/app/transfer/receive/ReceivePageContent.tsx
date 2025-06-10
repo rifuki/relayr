@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 // File Transfer Components
-import ReceiverFlow from "@/components/file-transfer/receiver/ReceiverFlow";
+import { ReceiverFlow } from "@/components/file-transfer/receiver";
 import TransferCardLayout from "@/components/file-transfer/TransferCardLayout";
 
 // Hooks

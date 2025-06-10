@@ -6,21 +6,18 @@ import { useRouter } from "next/navigation";
 import { FileCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
-// ShadCN UI Components
-import { Badge } from "@/components/ui/badge";
-
-// Motion-Primitives UI Components
-import { MotionButton } from "@/components/animations/motion-button";
-
 // Internal Components
-import { TransferProgress } from "../components";
-import { TransferFileCard, TransferHeader } from "../../shared";
+import {
+  type StepConfig as StepProps,
+  StepButtonsSection,
+  StepHeaderSection,
+  StepInfoSection,
+  StepSectionWrapper,
+  StepTransferProgressSection,
+} from "../../shared";
 
 // Animation Variants
-import {
-  fileListItemVariants,
-  fileListWrapperVariants,
-} from "@/lib/animations";
+import { fileListItemVariants } from "@/lib/animations";
 
 // State Management (Store)
 import {
@@ -28,32 +25,7 @@ import {
   useFileReceiverStore,
 } from "@/stores/useFileReceiverStore";
 
-// Motion Animation
-const burstAnimation = {
-  scale: [1, 2, 0],
-  opacity: [1, 0.8, 0],
-  transition: {
-    duration: 1.5,
-    ease: "easeOut",
-  },
-};
-const successAnimation = {
-  scale: [0, 1.5, 1],
-  opacity: [0, 1],
-  transition: {
-    duration: 1.5,
-    ease: "easeOut",
-  },
-};
-
-/**
- * Step4_TransferCompleted component represents the final step in the file receiving process.
- * It displays a success message, sender ID, file metadata, and a button to download the received file.
- * The component uses motion for animations and ShadCN UI components for styling.
- *
- * @returns JSX.Element The rendered component.
- */
-export default function Step4_TransferCompleted() {
+export default function Step4_TransferCompleted(props: StepProps) {
   const router = useRouter();
 
   // Read data from the receiver store
@@ -62,6 +34,17 @@ export default function Step4_TransferCompleted() {
     (state) => state.transferConnection,
   );
   const fileUrl = useFileReceiverStore((state) => state.fileUrl);
+  // Retrieve receiver progress percentage
+  const { receiver: receiverProgress } = useFileReceiverStore(
+    (state) => state.transferProgress,
+  );
+  // Retrieve current offset, transfer status flags
+  const {
+    receivedBytes,
+    isTransferring,
+    isTransferError,
+    isTransferCompleted,
+  } = useFileReceiverStore((state) => state.transferStatus);
   const actions = useFileReceiverActions();
 
   // Save the last valid sender ID for future access (e.g., prefill)
@@ -82,7 +65,7 @@ export default function Step4_TransferCompleted() {
     document.body.removeChild(a);
   };
   // Handler to reset all relevant states and navigate to the receive page
-  const handleStartNewTransfer = () => {
+  const handleReceiveAnotherFile = () => {
     actions.clearTransferState();
     actions.setTransferStatus({
       isTransferCanceled: false,
@@ -94,63 +77,83 @@ export default function Step4_TransferCompleted() {
     router.push("/transfer/receive");
   };
 
+  const buttons = [
+    {
+      ...props.buttons.downloadFile,
+      buttonProps: {
+        onClick: handleDownloadFile,
+        disabled: isTransferring || isTransferError,
+      },
+    },
+    {
+      ...props.buttons.receiveAnotherFile,
+      buttonProps: {
+        onClick: handleReceiveAnotherFile,
+      },
+    },
+  ];
+
   return (
-    <motion.div
-      className="flex flex-col items-center space-y-5"
-      variants={fileListWrapperVariants}
-      initial="hidden"
-      animate="show"
-    >
-      {/* Section Header */}
-      <TransferHeader
-        title="Transfer Completed"
-        description="The file has been successfully received"
+    <StepSectionWrapper>
+      <StepHeaderSection
+        containerClassName="bg-red-500"
+        title={props.header.title}
+        description={props.header.description}
+        customIcon={
+          <motion.div
+            className="relative flex justify-center items-center"
+            variants={fileListItemVariants}
+          >
+            <motion.div
+              className="absolute inset-0 rounded-full bg-green-500"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [1, 2, 0],
+                opacity: [1, 0.8, 0],
+                transition: {
+                  duration: 1.5,
+                  ease: "easeOut",
+                },
+              }}
+            />
+            <motion.div
+              className="relative z-1"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [0, 1.5, 1],
+                opacity: [0, 1],
+                transition: {
+                  duration: 1.5,
+                  ease: "easeOut",
+                },
+              }}
+            >
+              <div className="bg-green-500 rounded-full p-4">
+                <FileCheckIcon className="h-10 w-10 text-white" />
+              </div>
+            </motion.div>
+          </motion.div>
+        }
       />
 
-      {/* Animated Checkmark Icon */}
-      <motion.div
-        className="relative flex justify-center items-center my-10 mb-15"
-        variants={fileListItemVariants}
-      >
-        <motion.div
-          className="absolute inset-0 rounded-full bg-green-500"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={burstAnimation}
-        />
-        <motion.div
-          className="relative z-1"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={successAnimation}
-        >
-          <div className="bg-green-500 rounded-full p-4">
-            <FileCheckIcon className="h-10 w-10 text-white" />
-          </div>
-        </motion.div>
-      </motion.div>
+      <StepInfoSection
+        containerClassName="bg-green-500"
+        idLabel="Sender"
+        idValue={senderId}
+        fileMetadata={fileMetadata}
+      />
 
-      {/* Sender ID and File Metadata */}
-      <motion.div
-        className="w-full flex flex-col items-center space-y-5"
-        variants={fileListItemVariants}
-      >
-        <Badge className="p-2 bg-primary/90">Sender ID: {senderId}</Badge>
-        <TransferFileCard fileMetadata={fileMetadata} />
-      </motion.div>
+      <StepTransferProgressSection
+        containerClassName="bg-yellow-500"
+        progress={receiverProgress}
+        transferredBytes={receivedBytes}
+        totalSize={fileMetadata.size}
+        isTransferring={isTransferring}
+        isTransferError={isTransferError}
+        isTransferCompleted={isTransferCompleted}
+      />
 
-      {/* Progress bar for visual indication */}
-      <TransferProgress />
-
-      {/* Action buttons */}
-      <motion.div
-        className="w-full flex flex-col space-y-2"
-        variants={fileListItemVariants}
-      >
-        <MotionButton onClick={handleDownloadFile}>Download</MotionButton>
-        <MotionButton variant="link" onClick={handleStartNewTransfer}>
-          Start New Transfer
-        </MotionButton>
-      </motion.div>
-      {/* Action buttons end */}
-    </motion.div>
+      <StepButtonsSection containerClassName="bg-blue-500" buttons={buttons} />
+    </StepSectionWrapper>
   );
 }

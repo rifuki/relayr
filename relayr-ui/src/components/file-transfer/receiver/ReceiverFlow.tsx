@@ -25,6 +25,9 @@ import {
   Step4_TransferCompleted,
 } from "./steps";
 
+// Step Configurations
+import { STEP_CONFIGS } from "./";
+
 /**
  * ReceiverFlow Component
  * This component manages the flow of file receiving steps, transitioning between different states
@@ -79,11 +82,11 @@ export default function ReceiverFlow() {
 
   // Array containing the components for each step, mapped to the current step
   const FLOW_COMPONENTS = [
-    <InitialTransitionLoader key="step0" />,
-    <Step1_ReadyToReceive key="step1" />,
-    <Step2_WaitForSender key="step2" />,
-    <Step3_Receiving key="step3" />,
-    <Step4_TransferCompleted key="step4" />,
+    InitialTransitionLoader,
+    Step1_ReadyToReceive,
+    Step2_WaitForSender,
+    Step3_Receiving,
+    Step4_TransferCompleted,
   ];
 
   return (
@@ -116,15 +119,19 @@ export default function ReceiverFlow() {
       transition={transitionPanelTransition}
       custom={direction}
     >
-      {FLOW_COMPONENTS.map((component, index) => (
-        <div
-          className="w-full"
-          key={index}
-          ref={index === currentStep ? ref : undefined}
-        >
-          {component}
-        </div>
-      ))}
+      {FLOW_COMPONENTS.map((Component, index) => {
+        const stepConfig = STEP_CONFIGS[index];
+
+        return (
+          <div
+            className="w-full"
+            key={index}
+            ref={index === currentStep ? ref : undefined}
+          >
+            <Component {...stepConfig} />
+          </div>
+        );
+      })}
     </TransitionPanel>
   );
 }
