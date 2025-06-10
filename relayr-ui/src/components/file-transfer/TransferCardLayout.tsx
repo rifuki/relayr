@@ -3,13 +3,14 @@ import { ReactNode } from "react";
 
 // External Libraries
 import { motion } from "motion/react";
+import { ReadyState } from "react-use-websocket";
 
 // ShadCN UI Components
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 // Custom UI Components
-import { ReadyState } from "react-use-websocket";
-import { TransferConnectionStatus, TransferErrorAlert } from "./shared";
+import ErrorAlert from "./ErrorAlert";
+import WebSocketConnectionStatus from "./WebSocketConnectionStatus";
 
 // Props interface for TransferCardLayout component
 interface TransferCardLayoutProps {
@@ -30,7 +31,7 @@ export default function TransferCardLayout({
   return (
     <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none gap-5">
       <CardContent className="w-full flex flex-col gap-5">
-        {errorMessage && <TransferErrorAlert message={errorMessage} />}
+        {errorMessage && <ErrorAlert message={errorMessage} />}
         {children}
       </CardContent>
 
@@ -46,7 +47,7 @@ export default function TransferCardLayout({
           }}
         >
           {showConnectionStatus && (
-            <TransferConnectionStatus readyState={readyState} />
+            <WebSocketConnectionStatus readyState={readyState} />
           )}
           {readyState === ReadyState.OPEN && connectionId && (
             <div className="text-sm text-muted-foreground mt-1">

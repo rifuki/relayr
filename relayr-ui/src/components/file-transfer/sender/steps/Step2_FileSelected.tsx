@@ -66,7 +66,6 @@ export default function Step2_FileSelected(props: StepProps) {
   const buttons = [
     {
       ...props.buttons.generateLink,
-      label: "Next",
       buttonProps: {
         onClick: handleGenerateLink,
         disabled: isGenerateLinkLoading,

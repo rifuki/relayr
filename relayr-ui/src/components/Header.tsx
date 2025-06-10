@@ -10,8 +10,10 @@ import { motion } from "motion/react";
 // ShadCN UI Components
 import { Button } from "@/components/ui/button";
 
+// Custom Components
+import { HeaderWebSocketStatusButton } from "./file-transfer/commons";
+
 // Internal Components
-import HeaderWebSocketStatusButton from "./file-transfer/HeaderWebSocketStatusButton";
 import ThemeToggle from "./ThemeToggle";
 
 // State Management (Stores)

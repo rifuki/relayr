@@ -12,23 +12,16 @@ import { cn } from "@/lib/utils";
 const MotionAlert = motion.create(Alert);
 const MotionAlertCircleIcon = motion.create(AlertCircleIcon);
 
-// Props interface for TransferAlertError component
-interface AlertErrorProps {
+// Props interface for ErrorAlert component
+interface ErrorAlertProps {
   message: string;
   containerClassName?: string;
 }
 
-/**
- * TransferAlertError component displays an error alert with a message.
- * It uses motion for animations and provides visual feedback for errors.
- *
- * @param {AlertErrorProps} props - Component props containing the error message.
- * @returns JSX.Element - An alert UI element with animated error message.
- */
-export default function TransferErrorAlert({
+export default function ErrorAlert({
   message,
   containerClassName,
-}: AlertErrorProps) {
+}: ErrorAlertProps) {
   return (
     <MotionAlert
       variant="destructive"

@@ -6,26 +6,18 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 import { toast } from "sonner";
 
 // ShadCN UI Component
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 // Utilities
 import { copyToClipboard } from "@/utils/clipboard";
 
 // Props interface for CopyButton component
 interface CopyButtonProps {
-  text: string;
+  link: string;
   disabled?: boolean;
 }
 
-/**
- * CopyButton component renders a button that copies the given text to clipboard.
- * It provides visual feedback by toggling between copy and check icons,
- * and shows toast notifications on success or failure.
- *
- * @param {CopyButtonProps} props - Component props containing the text to copy.
- * @returns JSX.Element - A button UI element for copying text.
- */
-export default function CopyButton({ text, disabled }: CopyButtonProps) {
+export default function CopyButton({ link, disabled }: CopyButtonProps) {
   // State to track if the text has been successfully copied
   const [isCopied, setIsCopied] = useState(false);
 
@@ -33,9 +25,10 @@ export default function CopyButton({ text, disabled }: CopyButtonProps) {
   const handleCopy = async () => {
     if (disabled) return;
 
-    const result = await copyToClipboard(text);
+    const result = await copyToClipboard(link);
     if (result)
       toast.success("Copied to clipboard", {
+        duration: 1000,
         action: {
           label: "Close",
           onClick: () => {},

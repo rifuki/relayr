@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 
 // Internal Components
 import FileInfoCard from "./FileInfoCard";
-import ShareableLinkInput from "@/components/ShareableLinkInput";
+import ShareableLink from "../shareable-link";
 
 // Tailwind CSS Utility Function
 import { cn } from "@/lib/utils";
@@ -64,8 +64,8 @@ export default function StepInfoSection({
 
       {/* Transfer Share Link Input */}
       {transferShareLink && (
-        <ShareableLinkInput
-          text={transferShareLink}
+        <ShareableLink
+          link={transferShareLink}
           disabled={transferShareLinkDisabled}
         />
       )}

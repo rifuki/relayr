@@ -2,39 +2,34 @@
 import { useId } from "react";
 
 // ShadCN UI Component
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
 
 // Internal Components
 import CopyButton from "./CopyButton";
+import QrButton from "./QrButton";
+
+// Tailwind CSS utility function
 import { cn } from "@/lib/utils";
 
-// Props interface for ShareableLinkInput component
-interface ShareableLinkInputProps {
+interface ShareableLinkProps {
   label?: string;
-  text: string;
+  link: string;
   containerClassName?: string;
   disabled?: boolean;
 }
 
-/**
- * ShareableLinkInput component renders an accessible label linked to an input field
- * that displays a shareable text link along with a copy button.
- *
- * @param {ShareableLinkInputProps} props - Component props containing the shareable text and optional styling class.
- * @returns JSX.Element - A labeled input with a copy button for the provided text.
- */
-export default function ShareableLinkInput({
+export default function ShareableLink({
   label = "Link for recipient",
-  text,
+  link,
   containerClassName,
   disabled,
-}: ShareableLinkInputProps) {
+}: ShareableLinkProps) {
   // Generate a unique ID for the input-label association
   const inputId = useId();
 
   return (
-    <div className={cn("w-full space-y-1", containerClassName)}>
+    <div className={cn("w-full flex flex-col gap-1", containerClassName)}>
       <Label htmlFor={inputId} className="text-xs text-muted-foreground">
         <p>
           {label}{" "}
@@ -46,13 +41,14 @@ export default function ShareableLinkInput({
       <div className="w-full flex gap-2">
         <Input
           id={inputId}
-          value={text}
+          value={link}
           className="w-full focus-visible:ring-0 focus-visible:border-0 cursor-default"
           tabIndex={disabled ? -1 : 0}
           onMouseDown={disabled ? (e) => e.preventDefault() : undefined}
           readOnly
         />
-        <CopyButton text={text} disabled={disabled} />
+        <QrButton link={link} disabled={disabled} />
+        <CopyButton link={link} disabled={disabled} />
       </div>
     </div>
   );

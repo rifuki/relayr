@@ -2,11 +2,15 @@
 import { useState } from "react";
 
 // ShadCN UI Components
-import { Button } from "../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Internal Components
-import WebSocketStatusIndicator from "./commons/WebSocketStatusIndicator";
+import { WebSocketStatusIndicator } from "./";
 
 // Props interface for HeaderWebSocketStatusButton component
 interface HeaderWebSocketStatusButtonProps {
