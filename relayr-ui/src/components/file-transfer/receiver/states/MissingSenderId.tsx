@@ -99,7 +99,6 @@ export default function MissingSenderId() {
               setInput(e.target.value);
               setError("");
             }}
-            autoFocus
           />
           {/* Input field for entering sender ID or link End */}
 

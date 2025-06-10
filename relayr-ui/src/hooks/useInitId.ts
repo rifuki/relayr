@@ -22,13 +22,18 @@ import {
  * @return {string} - The unique ID for the user.
  */
 function generateAndStoreId(user: "sender" | "receiver"): string {
-  const storedId = localStorage.getItem(user);
-  if (!storedId) {
-    const newId = nanoid(7);
-    localStorage.setItem(user, newId);
-    return newId;
+  const isDev = process.env.NODE_ENV === "development";
+  if (isDev) {
+    const storedId = localStorage.getItem(user);
+    if (!storedId) {
+      const newId = nanoid(5);
+      localStorage.setItem(user, newId);
+      return newId;
+    }
+    return storedId;
+  } else {
+    return nanoid(5);
   }
-  return storedId;
 }
 
 /**
