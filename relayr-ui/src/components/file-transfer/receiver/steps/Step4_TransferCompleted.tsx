@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // External Libraries
-import { FileCheckIcon } from "lucide-react";
+import { CircleCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
 // Internal Components
@@ -100,7 +100,7 @@ export default function Step4_TransferCompleted(props: StepProps) {
         description={props.header.description}
         customIcon={
           <motion.div
-            className="relative flex justify-center items-center"
+            className="relative flex justify-center items-center mt-10 mb-5"
             variants={fileListItemVariants}
           >
             <motion.div
@@ -127,8 +127,8 @@ export default function Step4_TransferCompleted(props: StepProps) {
                 },
               }}
             >
-              <div className="bg-green-500 rounded-full p-4">
-                <FileCheckIcon className="h-10 w-10 text-white" />
+              <div className="bg-green-500 text-center rounded-full flex justify-center items-center p-3">
+                <CircleCheckIcon className="h-17 w-17 text-white " />
               </div>
             </motion.div>
           </motion.div>

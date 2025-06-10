@@ -10,6 +10,7 @@ import {
   type StepConfig as StepProps,
   StepButtonsSection,
   StepHeaderSection,
+  StepSectionWrapper,
 } from "../../shared";
 
 // Utilities
@@ -149,19 +150,11 @@ export default function Step1_FileSelector(props: StepProps) {
   ];
 
   return (
-    <div className="flex flex-col items-center">
+    <StepSectionWrapper variants={{}}>
       {/* Render the header section with title and description  */}
       <StepHeaderSection
         title={props.header.title}
         description={props.header.description}
-        motionTitleDescProps={{
-          initial: { opacity: 0, y: -20 },
-          animate: { opacity: 1, y: 0 },
-          transition: {
-            delay: 0.5,
-            duration: 0.3,
-          },
-        }}
       />
 
       {/* Render the transfer header with icon and title */}
@@ -174,7 +167,7 @@ export default function Step1_FileSelector(props: StepProps) {
         onDragLeave={handleDragLeave}
         onHoverStart={() => setIsWrapperHovered(true)}
         onHoverEnd={() => setIsWrapperHovered(false)}
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{
           type: "spring",
@@ -253,15 +246,8 @@ export default function Step1_FileSelector(props: StepProps) {
       {/* Render the transfer header with icon and title end */}
 
       {/* Render the buttons for file selection */}
-      <StepButtonsSection
-        buttons={buttons}
-        containerMotionProps={{
-          initial: { opacity: 0, y: 20 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.5, delay: 0.5 },
-        }}
-      />
+      <StepButtonsSection buttons={buttons} />
       {/* Render the buttons for file selection end */}
-    </div>
+    </StepSectionWrapper>
   );
 }

@@ -15,7 +15,7 @@ export interface StepButtonConfig {
   label: string;
   key: string;
   className?: string;
-  variant?: "default" | "destructive" | "secondary";
+  variant?: "default" | "destructive" | "link" | "secondary";
   showInDev?: boolean;
   buttonProps?: ComponentProps<typeof MotionButton>;
 }

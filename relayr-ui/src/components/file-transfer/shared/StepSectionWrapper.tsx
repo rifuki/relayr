@@ -27,7 +27,7 @@ export default function StepSectionWrapper({
 }: StepSectionWrapperProps) {
   return (
     <motion.div
-      className={cn("flex flex-col items-center", className)}
+      className={cn("flex flex-col items-center gap-5", className)}
       variants={variants}
       initial={initial}
       animate={animate}

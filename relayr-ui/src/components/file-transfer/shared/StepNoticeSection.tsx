@@ -23,14 +23,14 @@ export default function StepNoticeSection({
   containerClassName,
   motionVariants = fileListItemVariants,
   shimmerClassName,
-  shimmerDuration = 3,
+  shimmerDuration = 1.5,
 }: StepNoticeSection) {
   // If no message is provided, return null
   if (!message) return null;
 
   return (
     <motion.div
-      className={cn("w-full text-center bg-amber-500", containerClassName)}
+      className={cn("w-full text-center", containerClassName)}
       variants={motionVariants}
     >
       {/* Display the message with shimmer effect */}

@@ -20,7 +20,7 @@ export const STEP_CONFIGS: StepConfig[] = [
   {
     header: {
       title: "Ready to Receive",
-      description: "Connect to the server to receive the file",
+      description: "Connect to the server to begin the file transfer",
     },
     Icon: UnplugIcon,
     notice: "",
@@ -34,8 +34,9 @@ export const STEP_CONFIGS: StepConfig[] = [
   // Step 2
   {
     header: {
-      title: "Waiting for Sender",
-      description: "Waiting for the sender to connect and start the transfer",
+      title: "Awaiting Sender",
+      description:
+        "Stand by while the sender connects and prepares the transfer",
     },
     Icon: ClockIcon,
     notice: "⚠️ Waiting for sender — stay on this page",
@@ -51,7 +52,7 @@ export const STEP_CONFIGS: StepConfig[] = [
   {
     header: {
       title: "Receiving File",
-      description: "The file is being transferred. Please wait a moment",
+      description: "Transfer in progress. Please wait until it completes",
     },
     Icon: CloudDownloadIcon,
     notice: "⚠️ Transfer in progress — stay on this page",
@@ -67,7 +68,7 @@ export const STEP_CONFIGS: StepConfig[] = [
   {
     header: {
       title: "Transfer Complete",
-      description: "The file has been successfully received",
+      description: "The file has been received sucessfully",
     },
     Icon: FileCheckIcon,
     notice: "",
@@ -79,7 +80,7 @@ export const STEP_CONFIGS: StepConfig[] = [
       receiveAnotherFile: {
         label: "Receive Another File",
         key: "receiveAnotherFile",
-        variant: "destructive",
+        variant: "link",
       },
     },
   },

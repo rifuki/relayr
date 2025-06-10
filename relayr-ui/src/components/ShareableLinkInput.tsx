@@ -34,7 +34,7 @@ export default function ShareableLinkInput({
   const inputId = useId();
 
   return (
-    <div className={cn("w-full", containerClassName)}>
+    <div className={cn("w-full space-y-1", containerClassName)}>
       <Label htmlFor={inputId} className="text-xs text-muted-foreground">
         <p>
           {label}{" "}

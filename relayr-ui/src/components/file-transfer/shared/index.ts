@@ -1,6 +1,5 @@
 export { default as TransferErrorAlert } from "./TransferErrorAlert";
 export { default as TransferFileCard } from "./TransferFileCard";
-export { default as TransferHeader } from "./TransferHeader";
 export { default as TransferConnectionStatus } from "./TransferConnectionStatus";
 
 export { default as StepButtonsSection } from "./StepButtonsSection";

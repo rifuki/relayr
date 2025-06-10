@@ -22,7 +22,7 @@ export const STEP_CONFIGS: StepConfig[] = [
   {
     header: {
       title: "Select File",
-      description: "Choose a file to send",
+      description: "Pick a file you want to send",
     },
     Icon: XIcon,
     notice: "",
@@ -37,8 +37,8 @@ export const STEP_CONFIGS: StepConfig[] = [
   // Step 2
   {
     header: {
-      title: "File Selected",
-      description: "Review the selected file",
+      title: "File Ready",
+      description: "Review the details before generate link",
     },
     Icon: XIcon,
     notice: "",
@@ -57,8 +57,8 @@ export const STEP_CONFIGS: StepConfig[] = [
   // Step 3
   {
     header: {
-      title: "Waiting for Receiver",
-      description: "Share link and wait recipient to connect",
+      title: "Awaiting Receiver",
+      description: "Share link and wait for the recipient to connect",
     },
     Icon: ClockIcon,
     notice: "Waiting for receiver to connect...",
@@ -73,8 +73,8 @@ export const STEP_CONFIGS: StepConfig[] = [
   // Step 4
   {
     header: {
-      title: "Ready to Transfer",
-      description: "The recipient is connected. You can now start the transfer",
+      title: "Connection Established",
+      description: "Recipient is connected. Ready to start transfer",
     },
     Icon: UploadIcon,
     notice: "",
@@ -91,8 +91,8 @@ export const STEP_CONFIGS: StepConfig[] = [
   // Step 5
   {
     header: {
-      title: "Transfer in Progress",
-      description: "The file is being sent. Please wait...",
+      title: "Sending File",
+      description: "The file is being transferred to the recipient",
     },
     Icon: CloudUploadIcon,
     notice: "⚠️ Transfer in progress — stay on this page",
@@ -114,8 +114,9 @@ export const STEP_CONFIGS: StepConfig[] = [
     notice: "",
     buttons: {
       startNewTransfer: {
-        label: "StartNew Transfer",
+        label: "Start New Transfer",
         key: "startNewTransfer",
+        variant: "default"
       },
     },
   },

@@ -43,7 +43,7 @@ export default function StepTransferProgressSection({
   isTransferCompleted,
   idleText,
   containerClassName,
-  textShimmerDuration = 5,
+  textShimmerDuration = 2,
   motionVariants = fileListItemVariants,
 }: StepTransferProgressSectionProps) {
   // Format the transferred value and total size label
@@ -94,10 +94,13 @@ export default function StepTransferProgressSection({
 
   return (
     <motion.div
-      className={cn("w-full bg-yellow-500", containerClassName)}
+      className={cn(
+        "w-full flex flex-col items-center gap-1",
+        containerClassName,
+      )}
       variants={motionVariants}
     >
-      <div className="flex justify-between text-sm">
+      <div className="w-full flex justify-between text-sm">
         {/* Display the current transfer status */}
         {statusContent}
 
@@ -108,7 +111,7 @@ export default function StepTransferProgressSection({
       </div>
 
       {/* Progress bar showing receiver's progress */}
-      <Progress value={progress} />
+      <Progress value={progress} className="h-3 rounded-sm" />
     </motion.div>
   );
 }

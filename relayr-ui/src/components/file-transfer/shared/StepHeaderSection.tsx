@@ -44,14 +44,11 @@ export default function StepHeaderSection({
 }: StepHeaderSectionProps) {
   return (
     <div
-      className={cn(
-        "w-full flex flex-col items-center bg-red-500",
-        containerClassName,
-      )}
+      className={cn("w-full flex flex-col items-center", containerClassName)}
     >
       {/* Header Title and Description */}
       <motion.div
-        className="text-center"
+        className="text-center space-y-2"
         variants={motionVariants}
         {...motionTitleDescProps}
       >
@@ -65,11 +62,11 @@ export default function StepHeaderSection({
         ? customIcon
         : Icon && (
             <motion.div
-              className="flex flex-col justify-center"
+              className="w-full flex flex-col items-center mt-10 mb-5"
               variants={motionVariants}
               {...iconAnimation}
             >
-              <Icon className={cn("h-15 w-15", iconClassName)} />
+              <Icon className={cn("h-17 w-17", iconClassName)} />
             </motion.div>
           )}
       {/* Icon Section end */}

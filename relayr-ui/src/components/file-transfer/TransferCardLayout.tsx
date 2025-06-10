@@ -1,35 +1,15 @@
 // React
 import { ReactNode } from "react";
 
+// External Libraries
+import { motion } from "motion/react";
+
 // ShadCN UI Components
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 // Custom UI Components
 import { ReadyState } from "react-use-websocket";
 import { TransferConnectionStatus, TransferErrorAlert } from "./shared";
-
-// Motion Components
-// const MotionCard = motion.create(Card);
-
-// Motion Variants for Animations
-// const cardVariants = {
-//   hidden: {
-//     opacity: 0,
-//     y: 50,
-//     scale: 1,
-//   },
-//   visible: {
-//     opacity: 1,
-//     y: 0,
-//     scale: 1,
-//     transition: {
-//       type: "spring",
-//       stiffness: 300,
-//       damping: 30,
-//       duration: 1,
-//     },
-//   },
-// };
 
 // Props interface for TransferCardLayout component
 interface TransferCardLayoutProps {
@@ -40,13 +20,6 @@ interface TransferCardLayoutProps {
   children: ReactNode; // Child components/content to render inside the card
 }
 
-/**
- * TransferCardLayout Component
- * A layout component for file transfer operations, displaying connection status and error messages.
- *
- * @param {TransferCardLayoutProps} props - The properties for the component.
- * @returns JSX.Element The rendered component.
- */
 export default function TransferCardLayout({
   readyState,
   errorMessage,
@@ -55,14 +28,23 @@ export default function TransferCardLayout({
   children,
 }: TransferCardLayoutProps) {
   return (
-    <>
-      <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none gap-0">
-        <CardContent className="w-full flex flex-col">
-          {errorMessage && <TransferErrorAlert message={errorMessage} />}
-          {children}
-        </CardContent>
+    <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none gap-5">
+      <CardContent className="w-full flex flex-col gap-5">
+        {errorMessage && <TransferErrorAlert message={errorMessage} />}
+        {children}
+      </CardContent>
 
-        <CardFooter className="mx-auto flex flex-col">
+      <CardFooter className="mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            delay: 0.8,
+          }}
+        >
           {showConnectionStatus && (
             <TransferConnectionStatus readyState={readyState} />
           )}
@@ -71,8 +53,8 @@ export default function TransferCardLayout({
               ID: <strong>{connectionId}</strong>
             </div>
           )}
-        </CardFooter>
-      </Card>
-    </>
+        </motion.div>
+      </CardFooter>
+    </Card>
   );
 }

@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils"; // tailwind merge helper
 
 type MotionButtonProps = HTMLMotionProps<"button"> & {
-  variant?: "default" | "link" | "destructive" | "secondary";
+  variant?: "default" | "destructive" | "link" | "secondary";
   className?: string;
 };
 
