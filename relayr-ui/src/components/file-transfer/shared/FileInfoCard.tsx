@@ -16,7 +16,7 @@ import { formatFileSize } from "@/utils/file";
 import { FileMetadata } from "@/types/file";
 
 // Props interface for TransferFileCard component
-interface FileCardProps {
+interface FileInfoCardProps {
   className?: string;
   fileMetadata: FileMetadata;
 }
@@ -28,10 +28,10 @@ interface FileCardProps {
  * @param {FileCardProps} props - Component props containing file metadata and optional className.
  * @return JSX.Element - A card UI element displaying file information.
  */
-export default function TransferFileCard({
+export default function FileInfoCard({
   className,
   fileMetadata,
-}: FileCardProps) {
+}: FileInfoCardProps) {
   // Extract the general file type (e.g., image, video, audio) from MIME type
   const fileType = fileMetadata.type.split("/")[0];
 

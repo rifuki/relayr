@@ -86,7 +86,7 @@ export default function Home() {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <Button
-                  className="w-full sm:w-auto rounded-lg p-6 font-semibold bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer shadow-md"
+                  className="w-full sm:w-auto rounded-lg p-6 font-semibold bg-transparent dark:bg-backgroud/20 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer shadow-md"
                   size="lg"
                   variant="outline"
                 >
@@ -113,7 +113,7 @@ export default function Home() {
             }}
           >
             <motion.div
-              className="p-6 rounded-lg shadow-sm bg-background/60 space-y-4 hover:shadow-lg transition-shadow border border-neutral-200 dark:border-neutral-800"
+              className="p-6 rounded-lg shadow-sm bg-background/20 space-y-4 hover:shadow-lg transition-shadow border border-neutral-200 dark:border-neutral-800"
               initial={{ opacity: 0, y: 32, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{
@@ -147,7 +147,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              className="p-6 rounded-lg shadow-sm bg-background/60 space-y-4 hover:shadow-lg transition-shadow border border-neutral-200 dark:border-neutral-800"
+              className="p-6 rounded-lg shadow-sm bg-background/20 space-y-4 hover:shadow-lg transition-shadow border border-neutral-200 dark:border-neutral-800"
               initial={{ opacity: 0, y: 32, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{
@@ -182,7 +182,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              className="p-6 rounded-lg shadow-sm bg-background/60 space-y-4 hover:shadow-lg transition-shadow border border-neutral-200 dark:border-neutral-800"
+              className="p-6 rounded-lg shadow-sm bg-background/20 space-y-4 hover:shadow-lg transition-shadow border border-neutral-200 dark:border-neutral-800"
               initial={{ opacity: 0, y: 32, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{

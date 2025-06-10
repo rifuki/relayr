@@ -30,7 +30,7 @@ export default function ThemeToggle() {
 
   return (
     <Button
-      className="rounded-full hover:bg-secondary/20 cursor-pointer"
+      className="rounded-full hover:bg-primary/10 cursor-pointer"
       variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

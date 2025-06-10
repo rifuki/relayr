@@ -9,7 +9,7 @@ import { motion, Variants } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 
 // Internal Components
-import TransferFileCard from "./TransferFileCard";
+import FileInfoCard from "./FileInfoCard";
 import ShareableLinkInput from "@/components/ShareableLinkInput";
 
 // Tailwind CSS Utility Function
@@ -73,7 +73,7 @@ export default function StepInfoSection({
       {customFileCard || !fileMetadata ? (
         customFileCard
       ) : (
-        <TransferFileCard fileMetadata={fileMetadata} />
+        <FileInfoCard fileMetadata={fileMetadata} />
       )}
     </motion.div>
   );
