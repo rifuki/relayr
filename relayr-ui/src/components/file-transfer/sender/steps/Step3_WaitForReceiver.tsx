@@ -13,23 +13,28 @@ import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
 
 // State Management (Store)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
+import { UserCloseRequest } from "@/types/webSocketMessages";
 
 export default function Step3_WaitForReceiver(props: StepProps) {
   const senderWebSocket = useSenderWebSocket();
   if (!senderWebSocket) throw new Error("Sender WebSocket is not available.");
 
+  const { senderId } = useFileSenderStore((state) => state.transferConnection);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
 
-  if (!fileMetadata || !transferShareLink) return;
+  if (!fileMetadata || !senderId || !transferShareLink) return;
 
-  const handleStopSharing = () =>
-    senderWebSocket.closeConnection(
-      1000,
-      "Sender stopped sharing the transfer link",
-    );
+  const handleStopSharing = () => {
+    senderWebSocket.sendJsonMessage({
+      type: "userClose",
+      userId: senderId,
+      role: "sender",
+      reason: "Cancelled the transfer link.",
+    } satisfies UserCloseRequest);
+  };
 
   const buttons = [
     {

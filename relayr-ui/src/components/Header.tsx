@@ -65,7 +65,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
   // Get WebSocket status and transfer state from zustand stores
   const senderWebSocket = useSenderWebSocket();
   if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
-  const { readyState: senderWebSocketReadyState } = senderWebSocket;
+  const { readyState: senderWebSocketReadyState } = senderWebSocket ?? -1;
   const receiverWebSocketReadyState = useFileReceiverStore(
     (state) => state.webSocketReadyState,
   );

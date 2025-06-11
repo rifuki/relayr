@@ -7,15 +7,13 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
 // External Libraries
 import useWebSocket from "react-use-websocket";
-import {
-  WebSocketLike,
-  type WebSocketHook,
-} from "react-use-websocket/dist/lib/types";
+import { type WebSocketHook } from "react-use-websocket/dist/lib/types";
 
 // State Management
 import {
@@ -41,12 +39,10 @@ import {
  * Interface for the sender WebSocket context value.
  */
 interface SenderWebSocketContextType {
-  getWebSocket: () => WebSocketLike | null;
   readyState: WebSocketHook["readyState"];
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   sendMessage: WebSocketHook["sendMessage"];
   openConnection: (url: string) => void;
-  closeConnection: (code: number, reason: string) => void;
 }
 
 /**
@@ -65,7 +61,7 @@ const SenderWebSocketContext = createContext<SenderWebSocketContextType | null>(
  */
 export function SenderWebSocketProvider({ children }: { children: ReactNode }) {
   const [wsUrl, setWsUrl] = useState<string | null>(null);
-  const openConnection = (url: string) => setWsUrl(url);
+  const openConnection = useCallback((url: string) => setWsUrl(url), []);
 
   // Extracting necessary values from the store
   const file = useFileSenderStore((state) => state.file);
@@ -80,64 +76,69 @@ export function SenderWebSocketProvider({ children }: { children: ReactNode }) {
   const actions = useFileSenderActions();
   // Extracting necessary values from the store [end]
 
-  // Setup WebSocket connection and handlers
-  const {
-    getWebSocket,
-    lastMessage,
-    sendJsonMessage,
-    sendMessage,
-    readyState,
-  } = useWebSocket(wsUrl, {
-    share: true,
-    shouldReconnect: () => true,
-    onError: (error: Event) => {
-      console.error("🔥 Error", error);
-      actions.setErrorMessage("WebSocket connection error. Please try again.");
-    },
-    onClose: (close: CloseEvent) =>
-      processWebSocketOnClose(close, { actions, setWsUrl }),
+  const depsRef = useRef({
+    file,
+    fileMetadata,
+    transferConnection,
+    transferStatus,
+    transferProgress,
+    actions,
   });
 
-  // Close the WebSocket connection
-  const closeConnection = useCallback(
-    (code = 1000, reason = "Connection closed") => {
-      const ws = getWebSocket();
-      if (ws && ws.readyState === WebSocket.OPEN) ws.close(code, reason);
-    },
-    [getWebSocket],
-  );
+  useEffect(() => {
+    depsRef.current = {
+      file,
+      fileMetadata,
+      transferConnection,
+      transferStatus,
+      transferProgress,
+      actions,
+    };
+  }, [
+    file,
+    fileMetadata,
+    transferConnection,
+    transferStatus,
+    transferProgress,
+    actions,
+  ]);
+
+  // Setup WebSocket connection and handlers
+  const { lastMessage, sendJsonMessage, sendMessage, readyState } =
+    useWebSocket(wsUrl, {
+      share: true,
+      shouldReconnect: () => true,
+      onError: (error: Event) => {
+        console.error("🔥 Error", error);
+        actions.setErrorMessage(
+          "WebSocket connection error. Please try again.",
+        );
+      },
+      onClose: (close: CloseEvent) =>
+        processWebSocketOnClose(close, { actions, setWsUrl }),
+    });
 
   // Handle incoming WebSocket messages
   useEffect(() => {
     if (!lastMessage || typeof lastMessage.data !== "string") return;
     try {
       const parsed = JSON.parse(lastMessage.data);
+      const deps = depsRef.current;
+
       processWebSocketTextMessage(parsed, {
-        actions,
-        file,
-        fileMetadata,
-        transferConnection,
-        transferStatus,
-        transferProgress,
+        actions: deps.actions,
+        file: deps.file,
+        fileMetadata: deps.fileMetadata,
+        transferConnection: deps.transferConnection,
+        transferStatus: deps.transferStatus,
+        transferProgress: deps.transferProgress,
         sendJsonMessage,
         sendMessage,
-        closeConnection,
       });
     } catch (error) {
       console.error("❌ Error parsing websocket message:", error);
     }
-  }, [
-    lastMessage,
-    actions,
-    file,
-    fileMetadata,
-    transferConnection,
-    transferStatus,
-    transferProgress,
-    sendJsonMessage,
-    sendMessage,
-    closeConnection,
-  ]);
+  }, [lastMessage, sendJsonMessage, sendMessage]);
 
   // Handle cleanup and notify server on window unload
   useEffect(() => {
@@ -168,12 +169,10 @@ export function SenderWebSocketProvider({ children }: { children: ReactNode }) {
   return (
     <SenderWebSocketContext.Provider
       value={{
-        getWebSocket,
         readyState,
         sendJsonMessage,
         sendMessage,
         openConnection,
-        closeConnection,
       }}
     >
       {children}

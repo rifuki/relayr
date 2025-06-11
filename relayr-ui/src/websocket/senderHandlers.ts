@@ -15,6 +15,7 @@ import {
   RecipientReadyResponse,
   RegisterResponse,
   SenderAckRequest,
+  UserCloseRequest,
   WebSocketSenderTextMessageResponse,
 } from "@/types/webSocketMessages";
 
@@ -27,7 +28,6 @@ interface ProcessWebSocketTextMessageDeps {
   transferProgress: TransferProgress;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   sendMessage: WebSocketHook["sendMessage"];
-  closeConnection: (code: number, reason: string) => void;
 }
 // Handle incoming text WebSocket messages
 export function processWebSocketTextMessage(
@@ -43,7 +43,6 @@ export function processWebSocketTextMessage(
     transferProgress,
     sendJsonMessage,
     sendMessage,
-    closeConnection,
   } = deps;
 
   if (!wsMsg.success) {
@@ -88,7 +87,6 @@ export function processWebSocketTextMessage(
         transferProgress,
         sendJsonMessage,
         sendMessage,
-        closeConnection,
       });
       break;
     case "cancelRecipientTransfer":
@@ -183,7 +181,6 @@ interface ProcessFileTransferAckMessageDeps {
   transferProgress: TransferProgress;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   sendMessage: WebSocketHook["sendMessage"];
-  closeConnection: (code: number, reason: string) => void;
 }
 function processFileTransferAckMessage(
   ack: FileTransferAckResponse,
@@ -197,7 +194,6 @@ function processFileTransferAckMessage(
     transferProgress,
     sendJsonMessage,
     sendMessage,
-    closeConnection,
   } = deps;
 
   const { senderId } = transferConnection;
@@ -210,7 +206,7 @@ function processFileTransferAckMessage(
   } = transferStatus;
   const { sender: senderProgress } = transferProgress;
 
-  if (!file) {
+  if (!file || !senderId) {
     const errorMsg = "No file found. Cannot process acknoledgment";
     actions.setErrorMessage(errorMsg);
     console.error(errorMsg);
@@ -258,10 +254,12 @@ function processFileTransferAckMessage(
     });
 
     // Close the WebSocket connection gracefully after transfer completion
-    closeConnection(
-      1000,
-      `Sender [${senderId}]: Transfer completed, closing WebSocket connection.`,
-    );
+    sendJsonMessage({
+      type: "userClose",
+      userId: senderId,
+      role: "sender",
+      reason: "Transfer Completed",
+    } satisfies UserCloseRequest);
   } else if (ack.status === "error") {
     actions.setTransferStatus({
       isTransferring: false,

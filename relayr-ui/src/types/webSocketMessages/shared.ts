@@ -23,3 +23,11 @@ export interface RegisterResponse {
   connId: string;
   timestamp: number;
 }
+
+// User close request structure for notifying the server about user-initiated closure
+export interface UserCloseRequest {
+  type: "userClose";
+  userId: string;
+  role: "sender" | "receiver";
+  reason: string;
+}

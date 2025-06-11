@@ -1,8 +1,7 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   /* config options here */
   allowedDevOrigins: ["http://192.168.1.4:3000"],
 };
 
-export default nextConfig;
+module.exports = nextConfig;

@@ -29,6 +29,8 @@ pub enum RelayIncomingPayload {
     RecipientAck(RecipientAckPayload),
     #[serde(rename = "restartTransfer")]
     RestartTransfer,
+    #[serde(rename = "userClose")]
+    UserClose(UserClosePayload),
     #[serde(rename = "terminate")]
     Terminate,
     #[serde(other)]
@@ -137,4 +139,12 @@ pub struct RecipientAckPayload {
     pub sender_id: String,
     pub status: String,
     pub message: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserClosePayload {
+    pub user_id: String,
+    pub role: String,
+    pub reason: Option<String>,
 }

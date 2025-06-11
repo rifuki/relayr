@@ -3,7 +3,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
 };
 
-use axum::extract::ws::Message;
+use axum::extract::ws::{CloseFrame, Message};
 use tokio::sync::mpsc::Sender;
 
 use crate::{
@@ -46,32 +46,6 @@ pub async fn handle_incoming_payload(
             state
                 .store_file_meta(&sender_id, &payload.name, payload.size, &payload.mime_type)
                 .await;
-            //let connected_recipient = state.get_connected_recipient(&sender_id).await;
-            //if let Some(recipient_id) = connected_recipient {
-            //    if let Some(recipient_tx) = state.get_user_tx(&recipient_id).await {
-            //        let success_msg = FileMetaResponseDto::new(
-            //            &payload.file_name,
-            //            payload.file_size,
-            //            &payload.mime_type,
-            //        )
-            //        .to_ws_msg();
-            //        send_or_break!(recipient_tx, success_msg, stop_flag);
-            //    } else {
-            //        let err_msg = ErrorMessage::new(&format!(
-            //            "Recipient `{}` is no longer connected.",
-            //            recipient_id
-            //        ))
-            //        .to_ws_msg();
-            //        send_or_break!(tx, err_msg, stop_flag);
-            //    }
-            //} else {
-            //    let err_msg = ErrorMessage::new(&format!(
-            //        "Active connection for sender_id `{}` not found.",
-            //        sender_id
-            //    ))
-            //    .to_ws_msg();
-            //    send_or_break!(tx, err_msg, stop_flag);
-            //}
         }
         RelayIncomingPayload::RecipientReady(payload) => {
             let connected_recipient = state.get_connected_recipient(&payload.sender_id).await;
@@ -376,9 +350,28 @@ pub async fn handle_incoming_payload(
                 send_or_break!(tx, err_msg, stop_flag);
             }
         }
+        RelayIncomingPayload::UserClose(payload) => {
+            let reason = format!(
+                "User `{}` with role `{}`. {}",
+                payload.user_id,
+                payload.role,
+                payload
+                    .reason
+                    .as_deref()
+                    .unwrap_or("Closed with no reason.")
+            );
+
+            let close_msg = Message::Close(Some(CloseFrame {
+                code: 1000,
+                reason: reason.into(),
+            }));
+
+            send_or_break!(tx, close_msg, stop_flag);
+        }
         RelayIncomingPayload::Terminate => stop_flag.store(true, Ordering::Relaxed),
         RelayIncomingPayload::Unknown => {
             let err_msg = ErrorMessage::new("unknown message type").to_ws_msg();
+
             send_or_break!(tx, err_msg, stop_flag);
         }
         _ => {
