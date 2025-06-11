@@ -1,15 +1,17 @@
 // External Libraries
-import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 import { create } from "zustand";
 
 // Types
 import { FileMetadata } from "@/types/file";
 
 // Helper Functions
-import { sendNextChunk as sendNextChunkHelper } from "@/lib/send-next-chunk";
+import {
+  SendNextChunkHandlers,
+  sendNextChunk as sendNextChunkHelper,
+} from "@/lib/send-next-chunk";
 
 // Interfaces for Transfer Connection, File Transfer Info, Transfer Status, and Progress
-interface TransferConnection {
+export interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
 }
@@ -18,7 +20,7 @@ interface FileTransferInfo {
   totalChunks: number;
 }
 
-interface TransferStatus {
+export interface TransferStatus {
   uploadedSize: number;
   offset: number;
   chunkIndex: number;
@@ -29,16 +31,9 @@ interface TransferStatus {
   isTransferCompleted: boolean;
 }
 
-interface TransferProgress {
+export interface TransferProgress {
   sender: number;
   receiver: number;
-}
-
-// WebSocket Handlers Interface: Contains functions for sending messages and getting WebSocket instance
-interface WebSocketHandlers {
-  sendJsonMessage: ((msg: unknown) => void) | undefined;
-  sendMessage: ((msg: string | ArrayBuffer | Blob) => void) | undefined;
-  getWebSocket: (() => WebSocketLike | null) | undefined;
 }
 
 interface LastTransferInfo {
@@ -47,20 +42,17 @@ interface LastTransferInfo {
 }
 
 // FileSender Actions Interface: Actions interface for modifying the store
-interface FileSenderActions {
+export interface FileSenderActions {
   setInitId: (id: string) => void;
   setFile: (file: File | null) => void;
   setTransferConnection: (connection: Partial<TransferConnection>) => void;
   setErrorMessage: (message: string | null) => void;
-  setWebSocketUrl: (wsUrl: string | null) => void;
-  setWebSocketReadyState: (readyState: number) => void;
-  setWebSocketHandlers: (webSocketHandlers: Partial<WebSocketHandlers>) => void;
   setIsLoading: (isLoading: boolean) => void;
   setTransferShareLink: (link: string | null) => void;
   setFileTransferInfo: (fileTransferInfo: Partial<FileTransferInfo>) => void;
   setTransferStatus: (transferStatus: Partial<TransferStatus>) => void;
   setTransferProgress: (transferProgress: Partial<TransferProgress>) => void;
-  sendNextChunk: () => void;
+  sendNextChunk: (sendNextChunkHandlers: SendNextChunkHandlers) => void;
   clearTransferState: () => void;
   setLastTransferInfo: (lastTransferInfo: LastTransferInfo) => void;
 }
@@ -72,9 +64,6 @@ export interface FileSenderState {
   fileMetadata: FileMetadata | null;
   transferConnection: TransferConnection;
   errorMessage: string | null;
-  webSocketUrl: string | null;
-  webSocketReadyState: number;
-  webSocketHandlers: WebSocketHandlers;
   isLoading: boolean;
   transferShareLink: string | null;
   fileTransferInfo: FileTransferInfo;
@@ -94,13 +83,6 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
     recipientId: null,
   },
   errorMessage: null,
-  webSocketUrl: null,
-  webSocketReadyState: -1,
-  webSocketHandlers: {
-    sendJsonMessage: undefined,
-    sendMessage: undefined,
-    getWebSocket: undefined,
-  },
   isLoading: false,
   transferShareLink: null,
   fileTransferInfo: {
@@ -141,13 +123,6 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         },
       }),
     setErrorMessage: (errorMessage) => set({ errorMessage }),
-    setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
-    setWebSocketHandlers: (webSocketHandlers) =>
-      set({
-        webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
-      }),
-    setWebSocketReadyState: (readyState) =>
-      set({ webSocketReadyState: readyState }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setTransferShareLink: (link) => set({ transferShareLink: link }),
     setFileTransferInfo: (fileTransferInfo) => {
@@ -220,9 +195,9 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
         },
       });
     },
-    sendNextChunk: () => {
+    sendNextChunk: (handlers) => {
       if (get().transferStatus.isTransferCanceled) return;
-      sendNextChunkHelper({ get, set });
+      sendNextChunkHelper({ get, set }, handlers);
     },
     clearTransferState: () =>
       set({
@@ -250,6 +225,3 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
 // Custom Hooks for accessing store and actions
 export const useFileSenderActions = () =>
   useFileSenderStore((state) => state.actions);
-
-export const useSenderWebSocketHandlers = () =>
-  useFileSenderStore((state) => state.webSocketHandlers);

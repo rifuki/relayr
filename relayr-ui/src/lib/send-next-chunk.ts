@@ -9,17 +9,25 @@ import { CHUNK_SIZE } from "./constants";
 
 // Utilities
 import { readFileAsArrayBuffer } from "@/utils/file";
+import { WebSocketHook } from "react-use-websocket/dist/lib/types";
 
 // Props for the sendNextChunk function
 interface SendNextChunkProps {
   get: () => FileSenderState;
   set: (partial: Partial<FileSenderState>) => void;
 }
+// Handlers interface for WebSocket operations
+export interface SendNextChunkHandlers {
+  sendJsonMessage: WebSocketHook["sendJsonMessage"];
+  sendMessage: WebSocketHook["sendMessage"];
+}
 
 /**
  * Sends the next chunk of a file over WebSocket.
  *
  * @param {SendNextChunkProps} props - Contains get and set functions for state management.
+ * @param {SendNextChunkHandlers} handlers - Contains WebSocket message sending functions.
+ *
  * @return Promise<void> - A promise that resolves when the chunk is sent or an error occurs.
  * @throws {Error} - Throws an error if the file cannot be read or sent.
  *
@@ -32,10 +40,13 @@ interface SendNextChunkProps {
  * - Tracks transfer progress and allows cancellation.
  * - Sends a final message once the transfer is complete.
  */
-export async function sendNextChunk({ get, set }: SendNextChunkProps) {
+export async function sendNextChunk(
+  { get, set }: SendNextChunkProps,
+  handlers: SendNextChunkHandlers,
+) {
   // Destructuring state variables from the store
-  const { file, fileTransferInfo, transferStatus, webSocketHandlers } = get();
-  const { sendJsonMessage, sendMessage } = webSocketHandlers;
+  const { file, fileTransferInfo, transferStatus } = get();
+  const { sendJsonMessage, sendMessage } = handlers;
 
   const { totalChunks } = fileTransferInfo;
   const { chunkIndex, offset } = transferStatus;

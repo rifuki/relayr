@@ -12,6 +12,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 // Providers
+import { SenderWebSocketProvider } from "@/providers/SenderWebSocketProvider";
 import ThemeProvider from "@/providers/ThemeProvider";
 import TanStackProvider from "@/providers/TanStackProvider";
 
@@ -46,21 +47,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TanStackProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div className="min-h-screen flex flex-col dark:bg-neutral-900">
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-          </ThemeProvider>
-        </TanStackProvider>
-        <Toaster />
+        <SenderWebSocketProvider>
+          <TanStackProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div className="min-h-screen flex flex-col dark:bg-neutral-900">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </ThemeProvider>
+          </TanStackProvider>
+          <Toaster />
+        </SenderWebSocketProvider>
         {/* Sonner for toast notifications */}
         {process.env.NODE_ENV !== "development" && (
           <>

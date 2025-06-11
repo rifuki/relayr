@@ -19,6 +19,7 @@ import ThemeToggle from "./ThemeToggle";
 // State Management (Stores)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
 
 // Navigation config moved outside component for clarity and maintainability
 const NAV_LINKS = [
@@ -62,9 +63,9 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
   );
 
   // Get WebSocket status and transfer state from zustand stores
-  const senderWebSocketReadyState = useFileSenderStore(
-    (state) => state.webSocketReadyState,
-  );
+  const senderWebSocket = useSenderWebSocket();
+  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+  const { readyState: senderWebSocketReadyState } = senderWebSocket;
   const receiverWebSocketReadyState = useFileReceiverStore(
     (state) => state.webSocketReadyState,
   );

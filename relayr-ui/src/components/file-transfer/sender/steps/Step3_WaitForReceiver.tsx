@@ -8,34 +8,28 @@ import {
   StepSectionWrapper,
 } from "../../shared";
 
+// Context Providers
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
+
 // State Management (Store)
-import {
-  useFileSenderActions,
-  useFileSenderStore,
-  useSenderWebSocketHandlers,
-} from "@/stores/useFileSenderStore";
+import { useFileSenderStore } from "@/stores/useFileSenderStore";
 
 export default function Step3_WaitForReceiver(props: StepProps) {
+  const senderWebSocket = useSenderWebSocket();
+  if (!senderWebSocket) throw new Error("Sender WebSocket is not available.");
+
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
-  const { getWebSocket } = useSenderWebSocketHandlers();
-  const actions = useFileSenderActions();
 
   if (!fileMetadata || !transferShareLink) return;
 
-  const handleStopSharing = () => {
-    actions.setErrorMessage(null);
-
-    const ws = getWebSocket?.();
-    if (!ws) {
-      actions.setErrorMessage("WebSocket is not available.");
-      return;
-    }
-
-    ws.close(1000, "Sender canceled the transfer link");
-  };
+  const handleStopSharing = () =>
+    senderWebSocket.closeConnection(
+      1000,
+      "Sender stopped sharing the transfer link",
+    );
 
   const buttons = [
     {

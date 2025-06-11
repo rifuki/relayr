@@ -17,11 +17,13 @@ import {
 // Constants
 import { CHUNK_SIZE } from "@/lib/constants";
 
+// Context Providers
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
+
 // State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 
 // Types
@@ -56,6 +58,9 @@ export default function Step4_ReadyToSend(props: StepProps) {
     });
   }, [controls]);
 
+  const senderWebSocket = useSenderWebSocket();
+  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
@@ -71,17 +76,9 @@ export default function Step4_ReadyToSend(props: StepProps) {
   // Retrieve current offset, transfer status flags
   const { offset, isTransferring, isTransferError, isTransferCompleted } =
     useFileSenderStore((state) => state.transferStatus);
-  const { sendJsonMessage } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
-  if (
-    !file ||
-    !fileMetadata ||
-    !transferShareLink ||
-    !recipientId ||
-    !sendJsonMessage
-  )
-    return;
+  if (!file || !fileMetadata || !transferShareLink || !recipientId) return;
 
   const handleSendFile = () => {
     if (!file || !recipientId) {
@@ -102,11 +99,14 @@ export default function Step4_ReadyToSend(props: StepProps) {
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     actions.setFileTransferInfo({ totalChunks });
 
-    actions.sendNextChunk();
+    actions.sendNextChunk({
+      sendJsonMessage: senderWebSocket.sendJsonMessage,
+      sendMessage: senderWebSocket.sendMessage,
+    });
   };
 
   const handleCancelSenderReady = () => {
-    sendJsonMessage({
+    senderWebSocket.sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
     actions.setTransferConnection({ recipientId: null });
@@ -115,7 +115,7 @@ export default function Step4_ReadyToSend(props: StepProps) {
   };
 
   const handleRestartTransfer = () => {
-    sendJsonMessage({
+    senderWebSocket.sendJsonMessage({
       type: "restartTransfer",
     } satisfies RestartTransferRequest);
 

@@ -5,8 +5,10 @@ import SenderFlow from "@/components/file-transfer/sender/SenderFlow";
 import TransferCardLayout from "@/components/file-transfer/TransferCardLayout";
 
 // Hooks
-import { useFileSenderSocket } from "@/hooks/useFileSenderSocket";
 import { useInitId } from "@/hooks/useInitId";
+
+// Context Providers
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
 
 // State Management (Store)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
@@ -19,11 +21,10 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
  * @returns JSX.Element The sender's file transfer page component.
  */
 export default function SenderPage() {
-  useFileSenderSocket();
+  const senderWebSocket = useSenderWebSocket();
+  if (!senderWebSocket)
+    throw new Error("SenderWebSocketProvider is not initialized");
 
-  const webSocketReadyState = useFileSenderStore(
-    (state) => state.webSocketReadyState,
-  );
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
   );
@@ -37,7 +38,7 @@ export default function SenderPage() {
 
   return (
     <TransferCardLayout
-      readyState={webSocketReadyState}
+      readyState={senderWebSocket.readyState}
       errorMessage={errorMessage}
       connectionId={connectionId}
       showConnectionStatus={showConnectionStatus}

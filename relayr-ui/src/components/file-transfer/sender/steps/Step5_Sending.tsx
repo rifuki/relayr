@@ -9,17 +9,22 @@ import {
   StepTransferProgressSection,
 } from "../../shared";
 
+// Context Providers
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
+
 // State Management (Store)
 import {
   useFileSenderActions,
   useFileSenderStore,
-  useSenderWebSocketHandlers,
 } from "@/stores/useFileSenderStore";
 
 // Types
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
 
 export default function Step5_Sending(props: StepProps) {
+  const senderWebSocket = useSenderWebSocket();
+  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
     (state) => state.transferShareLink,
@@ -35,20 +40,13 @@ export default function Step5_Sending(props: StepProps) {
   const { offset, isTransferring, isTransferError, isTransferCompleted } =
     useFileSenderStore((state) => state.transferStatus);
 
-  const { sendJsonMessage } = useSenderWebSocketHandlers();
   const actions = useFileSenderActions();
 
-  if (
-    !fileMetadata ||
-    !transferShareLink ||
-    !recipientId ||
-    !isTransferring ||
-    !sendJsonMessage
-  )
+  if (!fileMetadata || !transferShareLink || !recipientId || !isTransferring)
     return;
 
   const handleAbortTransfer = () => {
-    sendJsonMessage({
+    senderWebSocket.sendJsonMessage({
       type: "cancelSenderTransfer",
     } satisfies CancelSenderTransferRequest);
     actions.setTransferStatus({ isTransferCanceled: true });

@@ -25,6 +25,7 @@ import {
 
 // Types
 import { FileInfoCard } from "../../shared";
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
 
 // Motion Animation
 const checkmarkVariants = {
@@ -41,6 +42,10 @@ const checkmarkVariants = {
 };
 
 export default function Step2_FileSelected(props: StepProps) {
+  const senderWebSocket = useSenderWebSocket();
+  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+
+  // Retrieve state from the store
   const initId = useFileSenderStore((state) => state.initId);
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -54,7 +59,7 @@ export default function Step2_FileSelected(props: StepProps) {
     if (!file || !fileMetadata) {
       return { errorMessage: "File or file metadata is missing." };
     }
-    actions.setWebSocketUrl(`${WS_RELAY_API_URL}?id=${initId}`);
+    senderWebSocket.openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
     setIsGenerateLinkLoading(false);
   };
 
