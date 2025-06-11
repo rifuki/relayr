@@ -52,6 +52,14 @@ export default function StepTransferProgressSection({
   // Format the total file size for display
   const totalSizeLabel = formatFileSize(totalSize).formatted;
 
+  // Determine the number of decimal digits based on the transferred unit
+  let decimalDigits = 2;
+  if (transferredUnit === "KB" || transferredUnit === "Bytes")
+    decimalDigits = 0;
+
+  // If the transferred value is NaN, default it to 0
+  const safeTransferredValue = isNaN(transferredValue) ? 0 : transferredValue;
+
   // Determine the content to display based on transfer status
   let statusContent: ReactNode;
   if (isTransferCompleted) {
@@ -75,7 +83,8 @@ export default function StepTransferProgressSection({
             bounce: 0.25,
             duration: 100,
           }}
-          value={transferredValue}
+          value={safeTransferredValue}
+          decimalDigits={decimalDigits}
         />{" "}
         {transferredUnit} of {totalSizeLabel}
       </span>
