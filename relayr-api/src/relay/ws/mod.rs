@@ -1,10 +1,12 @@
 pub mod handlers;
+pub mod ping;
 pub mod receiver;
 pub mod sender;
 pub mod utils;
 
 use axum::extract::ws::WebSocket;
 use futures::StreamExt;
+use ping::spawn_ping_task;
 use receiver::spawn_receiver_task;
 use sender::spawn_sender_task;
 use tokio::sync::mpsc;
@@ -19,10 +21,11 @@ pub async fn handle_socket(socket: WebSocket, state: RelayState, id: String) {
     }
     let (sender, receiver) = socket.split();
 
+    let ping_task = spawn_ping_task(tx.clone());
     let sender_task = spawn_sender_task(sender, rx);
     let receiver_task = spawn_receiver_task(receiver, tx, state.clone(), id.clone());
 
-    wait_socket_tasks(sender_task, receiver_task).await;
+    wait_socket_tasks(ping_task, sender_task, receiver_task).await;
 
     state.clear_file_meta(&id).await;
     state.remove_all_connections(&id).await;

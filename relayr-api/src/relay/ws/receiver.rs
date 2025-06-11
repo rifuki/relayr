@@ -90,6 +90,15 @@ pub fn spawn_receiver_task(
                         send_or_break!(tx, err_msg, stop_flag);
                     }
                 }
+                Message::Pong(ping_data) => {
+                    tracing::info!(
+                        "Received ping from `{}` with data: {}",
+                        base_conn_id,
+                        String::from_utf8_lossy(&ping_data)
+                    );
+                    let pong_msg = Message::Pong(ping_data);
+                    send_or_break!(tx, pong_msg, stop_flag);
+                }
                 Message::Close(reason) => {
                     if let Some(reason) = &reason {
                         tracing::info!(
