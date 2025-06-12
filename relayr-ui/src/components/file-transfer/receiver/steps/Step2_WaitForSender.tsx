@@ -1,4 +1,5 @@
 // Internal Components
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 import {
   StepConfig as StepProps,
   StepButtonsSection,
@@ -18,29 +19,30 @@ import {
 import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
 
 export default function Step2_WaitForSender(props: StepProps) {
+  const receiverWebSocket = useReceiverWebSocket();
+  if (!receiverWebSocket)
+    throw new Error("Receiver WebSocket is not available");
+
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-  const { senderId } = useFileReceiverStore(
+  const { senderId, recipientId } = useFileReceiverStore(
     (state) => state.transferConnection,
-  );
-  const { sendJsonMessage, getWebSocket } = useFileReceiverStore(
-    (state) => state.webSocketHandlers,
   );
   const actions = useFileReceiverActions();
 
-  if (!senderId || !fileMetadata || !sendJsonMessage) return;
+  if (!senderId || !fileMetadata) return;
 
   const handleCancelRecipientReady = () => {
-    sendJsonMessage({
+    receiverWebSocket.sendJsonMessage({
       type: "cancelRecipientReady",
       senderId,
     } satisfies CancelRecipientReadyRequest);
 
-    const ws = getWebSocket?.();
-    if (!ws) {
-      actions.setErrorMessage("WebSocket is not available.");
-      return;
-    }
-    ws.close(1000, "Recipient canceled before transfer started");
+    receiverWebSocket.sendJsonMessage({
+      type: "cancelTransfer",
+      userId: recipientId,
+      role: "recipient",
+      reason: "Recipient canceled before transfer started",
+    });
 
     actions.setTransferConnection({ recipientId: null, isConnected: false });
     actions.setErrorMessage(null);

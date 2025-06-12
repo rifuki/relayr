@@ -9,7 +9,6 @@ import { ReceiverFlow } from "@/components/file-transfer/receiver";
 import TransferCardLayout from "@/components/file-transfer/TransferCardLayout";
 
 // Hooks
-import { useFileReceiverSocket } from "@/hooks/useFileReceiverSocket";
 import { useInitId } from "@/hooks/useInitId";
 import { useRelayFileMetadata } from "@/hooks/query/useRelay";
 
@@ -23,20 +22,19 @@ import {
 import MissingSenderId from "@/components/file-transfer/receiver/states/MissingSenderId";
 import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 export default function ReceivePageContent() {
+  const receiverWebSocket = useReceiverWebSocket();
+  if (!receiverWebSocket)
+    throw new Error("Receiver WebSocket is not available");
+
   // Get the sender ID from the URL query parameters
   const senderIdFromQuery = useSearchParams().get("id");
   // Initialize a unique connection ID for the receiver
   const connectionId = useInitId("receiver");
 
-  // Establish and manage WebSocket connection for the receiver
-  useFileReceiverSocket();
-
   // Read state values from the store
-  const webSocketReadyState = useFileReceiverStore(
-    (state) => state.webSocketReadyState,
-  );
   const errorMessage = useFileReceiverStore((state) => state.errorMessage);
   const lastValidSenderId = useFileReceiverStore(
     (state) => state.lastValidSenderId,
@@ -79,7 +77,7 @@ export default function ReceivePageContent() {
 
   return (
     <TransferCardLayout
-      readyState={webSocketReadyState}
+      readyState={receiverWebSocket.readyState}
       errorMessage={errorMessage}
       connectionId={connectionId}
     >

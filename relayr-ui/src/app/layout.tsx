@@ -12,12 +12,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 // Providers
-import { SenderWebSocketProvider } from "@/providers/SenderWebSocketProvider";
+import SenderWebSocketProvider from "@/providers/SenderWebSocketProvider";
 import ThemeProvider from "@/providers/ThemeProvider";
 import TanStackProvider from "@/providers/TanStackProvider";
 
 // Global Styles
 import "./globals.css";
+import ReceiverWebSocketProvider from "@/providers/ReceiverWebSocketProvider";
+import ReceiverWebSocketListener from "@/websocket/ReceiverWebSocketListener";
+import SenderWebSocketListener from "@/websocket/SenderWebSocketListener";
 
 // Fonts configuration
 const geistSans = Geist({
@@ -48,23 +51,27 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SenderWebSocketProvider>
-          <TanStackProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div className="min-h-screen flex flex-col dark:bg-neutral-900">
-                <Header />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </ThemeProvider>
-          </TanStackProvider>
-          <Toaster />
+          <ReceiverWebSocketProvider>
+            <TanStackProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <div className="min-h-screen flex flex-col dark:bg-neutral-900">
+                  <Header />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </ThemeProvider>
+            </TanStackProvider>
+            <ReceiverWebSocketListener />
+          </ReceiverWebSocketProvider>
+          <SenderWebSocketListener />
         </SenderWebSocketProvider>
         {/* Sonner for toast notifications */}
+        <Toaster />
         {process.env.NODE_ENV !== "development" && (
           <>
             <Analytics />

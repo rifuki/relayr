@@ -1,23 +1,22 @@
 // External Libraries
-import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 import { create } from "zustand";
 
 // Types
 import { FileMetadata } from "@/types/file";
 
 // Interfaces for Transfer Connection, File Transfer Info, Transfer Status, and Progress
-interface TransferConnection {
+export interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
   isConnected: boolean;
 }
 
-interface FileTransferInfo {
+export interface FileTransferInfo {
   totalSize: number;
   totalChunks: number;
 }
 
-interface TransferStatus {
+export interface TransferStatus {
   uploadedSize: number;
   receivedBytes: number;
   chunkIndex: number;
@@ -28,28 +27,19 @@ interface TransferStatus {
   isTransferCompleted: boolean;
 }
 
-interface TransferProgress {
+export interface TransferProgress {
   sender: number;
   receiver: number;
 }
 
-// WebSocket Handlers Interface: Contains functions for sending messages and getting WebSocket instance
-interface WebSocketHandlers {
-  sendJsonMessage: ((msg: unknown) => void) | undefined;
-  getWebSocket: (() => WebSocketLike | null) | undefined;
-}
-
 // FileReceiver Actions Interface: Actions interface for modifying the store
-interface FileReceiverActions {
+export interface FileReceiverActions {
   setInitId: (id: string) => void;
   setTransferConnection: (
     transferConnection: Partial<TransferConnection>,
   ) => void;
   setFileMetadata: (fileMetadata: FileMetadata | null) => void;
   setErrorMessage: (errorMessage: string | null) => void;
-  setWebSocketUrl: (webSocketUrl: string | null) => void;
-  setWebSocketReadyState: (readyState: number) => void;
-  setWebSocketHandlers: (webSocketHandlers: Partial<WebSocketHandlers>) => void;
   setFileTransferInfo: (fileTransferInfo: Partial<FileTransferInfo>) => void;
   setTransferStatus: (transferStatus: Partial<TransferStatus>) => void;
   setTransferProgress: (transferProgress: Partial<TransferProgress>) => void;
@@ -66,9 +56,6 @@ interface FileReceiverState {
   transferConnection: TransferConnection;
   fileMetadata: FileMetadata | null;
   errorMessage: string | null;
-  webSocketUrl: string | null;
-  webSocketReadyState: number;
-  webSocketHandlers: WebSocketHandlers;
   fileTransferInfo: FileTransferInfo;
   transferStatus: TransferStatus;
   transferProgress: TransferProgress;
@@ -89,12 +76,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   },
   fileMetadata: null,
   errorMessage: null,
-  webSocketUrl: null,
-  webSocketReadyState: -1,
-  webSocketHandlers: {
-    sendJsonMessage: undefined,
-    getWebSocket: undefined,
-  },
   isSenderTransferring: false,
   fileTransferInfo: {
     totalSize: 0,
@@ -129,13 +110,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
       }),
     setFileMetadata: (fileMetadata) => set({ fileMetadata }),
     setErrorMessage: (errorMessage) => set({ errorMessage }),
-    setWebSocketUrl: (webSocketUrl) => set({ webSocketUrl }),
-    setWebSocketReadyState: (readyState) =>
-      set({ webSocketReadyState: readyState }),
-    setWebSocketHandlers: (webSocketHandlers) =>
-      set({
-        webSocketHandlers: { ...get().webSocketHandlers, ...webSocketHandlers },
-      }),
     setFileTransferInfo: (fileTransferInfo) => {
       if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
 
@@ -265,6 +239,3 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 // Custom Hooks for accessing store and actions
 export const useFileReceiverActions = () =>
   useFileReceiverStore((state) => state.actions);
-
-export const useReceiverWebSocketHandlers = () =>
-  useFileReceiverStore((state) => state.webSocketHandlers);

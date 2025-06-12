@@ -20,6 +20,7 @@ import ThemeToggle from "./ThemeToggle";
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 // Navigation config moved outside component for clarity and maintainability
 const NAV_LINKS = [
@@ -66,9 +67,11 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
   const senderWebSocket = useSenderWebSocket();
   if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
   const { readyState: senderWebSocketReadyState } = senderWebSocket ?? -1;
-  const receiverWebSocketReadyState = useFileReceiverStore(
-    (state) => state.webSocketReadyState,
-  );
+  const receiverWebSocket = useReceiverWebSocket();
+  if (!receiverWebSocket)
+    throw new Error("Receiver WebSocket is not initialized");
+  const { readyState: receiverWebSocketReadyState } = receiverWebSocket ?? -1;
+
   const {
     isTransferring: isSenderUploading,
     isTransferCompleted: isSenderTransferCompleted,

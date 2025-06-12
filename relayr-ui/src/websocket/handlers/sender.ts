@@ -1,13 +1,12 @@
-import { WebSocketHook } from "react-use-websocket/dist/lib/types";
-
-import {
+// Types
+import type {
   FileSenderActions,
   TransferConnection,
   TransferProgress,
   TransferStatus,
 } from "@/stores/useFileSenderStore";
 import { FileMetadata } from "@/types/file";
-import {
+import type {
   CancelRecipientReadyResponse,
   CancelRecipientTransferResponse,
   FileMetaRequest,
@@ -18,6 +17,9 @@ import {
   UserCloseRequest,
   WebSocketSenderTextMessageResponse,
 } from "@/types/webSocketMessages";
+
+// External Libaries Types
+import { WebSocketHook } from "react-use-websocket/dist/lib/types";
 
 interface ProcessWebSocketTextMessageDeps {
   actions: FileSenderActions;
@@ -47,13 +49,13 @@ export function processWebSocketTextMessage(
 
   if (!wsMsg.success) {
     if (wsMsg.message.includes("is no longer connected")) {
-      deps.actions.setErrorMessage(
+      actions.setErrorMessage(
         "Recipient is no longer connection. Please try again.",
       );
-      deps.actions.setTransferConnection({ recipientId: null });
-      deps.actions.clearTransferState();
+      actions.setTransferConnection({ recipientId: null });
+      actions.clearTransferState();
     } else {
-      deps.actions.setErrorMessage(wsMsg.message ?? "Unknown error occurred");
+      actions.setErrorMessage(wsMsg.message ?? "Unknown error occurred");
     }
     return;
   }
@@ -291,30 +293,4 @@ function processCancelRecipientTransferMessage(
   actions.setTransferStatus({ isTransferCanceled: true });
   const errorMsg = `Recipient \`${msg.recipientId}\` canceled the transfer`;
   actions.setErrorMessage(errorMsg);
-}
-
-// Handle WebSocket close event
-interface ProcessWebSocketOnClose {
-  actions: FileSenderActions;
-  setWsUrl: (value: string | null) => void;
-}
-export function processWebSocketOnClose(
-  close: CloseEvent,
-  deps: ProcessWebSocketOnClose,
-) {
-  const { actions, setWsUrl } = deps;
-
-  console.info("❌ Disconnected", close.code);
-
-  actions.setErrorMessage(null);
-  actions.setTransferShareLink(null);
-  actions.setTransferConnection({ senderId: null, recipientId: null });
-  setWsUrl(null);
-
-  if (close.code === 1000) return;
-  else if (close.code === 1006) {
-    deps.actions.setErrorMessage("Lost connection to the server");
-  } else {
-    deps.actions.setErrorMessage(`Disconnected: Code ${close.code}`);
-  }
 }
