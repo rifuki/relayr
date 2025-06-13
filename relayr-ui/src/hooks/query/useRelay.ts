@@ -12,10 +12,13 @@ import { relayService } from "@/lib/api";
  * @param senderId - The ID of the sender to fetch file metadata for.
  * @returns - The result of the React Query useQuery hook for fetching file metadata.
  */
-export function useRelayFileMetadata(senderId: string) {
+export function useRelayFileMetadata(
+  senderId: string,
+  options?: { enabled: boolean },
+) {
   return useQuery({
     queryKey: ["fileMetadata", senderId], // Unique query key for caching
     queryFn: () => relayService.getFileMetadata(senderId), // Function to fetch file metadata
-    enabled: !!senderId, // Query is enabled only if senderId exists
+    enabled: !!senderId && (options?.enabled ?? true), // Query is enabled only if senderId exists
   });
 }

@@ -36,23 +36,22 @@ export default function ReceivePageContent() {
 
   // Read state values from the store
   const errorMessage = useFileReceiverStore((state) => state.errorMessage);
-  const lastValidSenderId = useFileReceiverStore(
-    (state) => state.lastValidSenderId,
-  );
-  const { isTransferCompleted } = useFileReceiverStore(
+  const { isTransferring, isTransferCompleted } = useFileReceiverStore(
     (state) => state.transferStatus,
   );
   const actions = useFileReceiverActions();
 
   // Determine the sender ID to use: either from the query or the last valid one stored
-  const senderId = senderIdFromQuery || lastValidSenderId;
+  const senderId = senderIdFromQuery;
 
   // Fetch file metadata from backend using the sender ID
   const {
     data,
     isLoading: isFetchingFileMeta,
     error,
-  } = useRelayFileMetadata(senderId ?? "");
+  } = useRelayFileMetadata(senderId ?? "", {
+    enabled: !isTransferring && !isTransferCompleted,
+  });
 
   // Reset state to indicate the receiver flow hasn't started yet
   useEffect(() => {
@@ -68,9 +67,10 @@ export default function ReceivePageContent() {
   }, [senderId, data, actions]);
 
   // Handle invalid or missing sender ID
-  if (!senderId) return <MissingSenderId />;
+  if (!senderId && !isTransferring && !isTransferCompleted)
+    return <MissingSenderId />;
   // Show error state if file metadata failed to fetch
-  if (error && !isTransferCompleted)
+  if (error && !isTransferring && !isTransferCompleted)
     return <FileMetaError message={error.message} />;
   // Show loading state while fetching metadata
   if (isFetchingFileMeta) return <FileMetaLoading />;

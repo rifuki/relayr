@@ -61,7 +61,9 @@ interface FileReceiverState {
   transferProgress: TransferProgress;
   receivedChunkData: ArrayBuffer[];
   fileUrl: string | null;
+  // Used for conditional rendering (e.g., hide WebSocketStatusIndicator on MissingSenderId page).
   isReceiverFlowActive: boolean;
+  // Not used yet, only set during finalize transfer
   lastValidSenderId: string | null;
   actions: FileReceiverActions;
 }
@@ -185,7 +187,8 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         receivedChunkData: [],
       }),
     finalizeTransfer: () => {
-      const { receivedChunkData, fileMetadata, fileUrl } = get();
+      const { fileMetadata, transferConnection, receivedChunkData, fileUrl } =
+        get();
       const blobData = new Blob(receivedChunkData, {
         type: fileMetadata?.type || "application/octet-stream",
       });
@@ -226,6 +229,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
           isTransferCompleted: true,
         },
         receivedChunkData: [],
+        lastValidSenderId: transferConnection.senderId,
       });
 
       console.info("File successfully reconstructed. URL:", newFileUrl);

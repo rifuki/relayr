@@ -1,5 +1,4 @@
 // React and Next.js
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // External Libraries
@@ -46,11 +45,6 @@ export default function Step4_TransferCompleted(props: StepProps) {
     isTransferCompleted,
   } = useFileReceiverStore((state) => state.transferStatus);
   const actions = useFileReceiverActions();
-
-  // Save the last valid sender ID for future access (e.g., prefill)
-  useEffect(() => {
-    actions.setLastValidSenderId(senderId);
-  }, [actions, senderId]);
 
   // If essential data is missing, do not render this component
   if (!fileMetadata || !senderId || !fileUrl) return;
