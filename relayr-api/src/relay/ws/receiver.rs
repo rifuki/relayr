@@ -5,7 +5,11 @@ use std::sync::{
 
 use axum::extract::ws::{Message, WebSocket};
 use futures::{StreamExt, stream::SplitStream};
-use tokio::{sync::mpsc::Sender, task::JoinHandle};
+use tokio::{
+    sync::{Mutex, mpsc::Sender},
+    task::JoinHandle,
+    time::Instant,
+};
 
 use crate::{
     relay::{
@@ -25,6 +29,7 @@ pub fn spawn_receiver_task(
     tx: Sender<Message>,
     state: RelayState,
     base_conn_id: String,
+    last_heartbeat: Arc<Mutex<Instant>>,
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
         let stop_flag = Arc::new(AtomicBool::new(false));
@@ -61,12 +66,6 @@ pub fn spawn_receiver_task(
                         state.get_connected_recipient(&base_conn_id).await
                     {
                         if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                            // tracing::info!(
-                            //     sender_id = base_conn_id,
-                            //     recipient_id = current_recipient,
-                            //     chunk_size = bin_data.len(),
-                            //     "Sending chunk of file to recipient"
-                            // );
                             send_or_break!(recipient_tx, Message::binary(bin_data), stop_flag);
                         } else {
                             let err_msg = ErrorMessage::new(&format!(
@@ -90,14 +89,9 @@ pub fn spawn_receiver_task(
                         send_or_break!(tx, err_msg, stop_flag);
                     }
                 }
-                Message::Pong(ping_data) => {
-                    tracing::info!(
-                        "Received ping from `{}` with data: {}",
-                        base_conn_id,
-                        String::from_utf8_lossy(&ping_data)
-                    );
-                    let pong_msg = Message::Pong(ping_data);
-                    send_or_break!(tx, pong_msg, stop_flag);
+                Message::Pong(_) => {
+                    let mut last_heartbeat = last_heartbeat.lock().await;
+                    *last_heartbeat = Instant::now();
                 }
                 Message::Close(reason) => {
                     if let Some(reason) = &reason {
