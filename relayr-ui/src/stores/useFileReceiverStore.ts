@@ -46,7 +46,6 @@ export interface FileReceiverActions {
   setReceivedChunkData: (receivedChunkData: ArrayBuffer) => void;
   clearTransferState: () => void;
   finalizeTransfer: () => void;
-  setIsReceiverFlowActive: (isReceiverFlowActive: boolean) => void;
   setLastValidSenderId: (senderId: string | null) => void;
 }
 
@@ -61,8 +60,6 @@ interface FileReceiverState {
   transferProgress: TransferProgress;
   receivedChunkData: ArrayBuffer[];
   fileUrl: string | null;
-  // Used for conditional rendering (e.g., hide WebSocketStatusIndicator on MissingSenderId page).
-  isReceiverFlowActive: boolean;
   // Not used yet, only set during finalize transfer
   lastValidSenderId: string | null;
   actions: FileReceiverActions;
@@ -99,7 +96,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   },
   receivedChunkData: [],
   fileUrl: null,
-  isReceiverFlowActive: false,
   lastValidSenderId: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
@@ -234,8 +230,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 
       console.info("File successfully reconstructed. URL:", newFileUrl);
     },
-    setIsReceiverFlowActive: (isReceiverFlowActive) =>
-      set({ isReceiverFlowActive }),
     setLastValidSenderId: (lastValidSenderId) => set({ lastValidSenderId }),
   },
 }));

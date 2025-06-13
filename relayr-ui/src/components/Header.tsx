@@ -12,10 +12,7 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 // Custom Components
-import {
-  HeaderWebSocketStatusButton,
-  HeaderRelayPingStatus,
-} from "./file-transfer/commons";
+import { HeaderConnectionStatus } from "./file-transfer/commons";
 
 // Internal Components
 import ThemeToggle from "./ThemeToggle";
@@ -42,6 +39,14 @@ const NAV_LINKS = [
   },
 ];
 
+function getCombinedReadyState(sender: number, receiver: number): number {
+  if (sender === 1 || receiver === 1) return 1;
+  if (sender === 0 || receiver === 0) return 0;
+  if (sender === 2 || receiver === 2) return 2;
+  if (sender === 3 || receiver === 3) return 3;
+  return -1; // Default case if no valid state is found
+}
+
 // Props interface for Header component
 interface HeaderProps {
   title?: string;
@@ -61,13 +66,6 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
   // Determine whether the user is currently on the sender or receiver page
   const isSenderPage = pathname.startsWith("/transfer/send");
   const isReceiverPage = pathname.startsWith("/transfer/receive");
-
-  const transferShareLink = useFileSenderStore(
-    (state) => state.transferShareLink,
-  );
-  const isReceiverFlowActive = useFileReceiverStore(
-    (state) => state.isReceiverFlowActive,
-  );
 
   // Get WebSocket status and transfer state from zustand stores
   const senderWebSocket = useSenderWebSocket();
@@ -103,16 +101,10 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
     },
   ];
 
-  const showWebSocketStatus =
-    (isSenderPage && (transferShareLink || isSenderTransferCompleted)) ||
-    (isReceiverPage && isReceiverFlowActive);
-
-  // Determine which WebSocket state to show based on the current page
-  const webSocketReadyState = isSenderPage
-    ? senderWebSocketReadyState
-    : isReceiverPage
-      ? receiverWebSocketReadyState
-      : -1;
+  const webSocketReadyState = getCombinedReadyState(
+    senderWebSocketReadyState,
+    receiverWebSocketReadyState,
+  );
 
   return (
     <motion.header
@@ -187,13 +179,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          {/* Show WebSocket indicator only on transfer pages */}
-          {showWebSocketStatus && (
-            <HeaderWebSocketStatusButton readyState={webSocketReadyState} />
-          )}
-
-          {/* Ping status for the relay server */}
-          <HeaderRelayPingStatus />
+          <HeaderConnectionStatus readyState={webSocketReadyState} />
 
           {/* Toggle between light and dark theme */}
           <ThemeToggle />

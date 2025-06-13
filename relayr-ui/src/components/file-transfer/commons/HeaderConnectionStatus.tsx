@@ -10,10 +10,20 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 
+// Internal Components
+import WebSocketStatusIndicator from "./WebSocketStatusIndicator";
+
 // API
 import { useRelayPing } from "@/hooks/query/useRelay";
 
-export default function HeaderRelayPingStatus() {
+// Props interface for HeaderWebSocketStatusButton component
+interface HeaderConnectionStatusProps {
+  readyState: number;
+}
+
+export default function HeaderConnectionStatus({
+  readyState,
+}: HeaderConnectionStatusProps) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const { data, isLoading, isError } = useRelayPing({ intervalMs: 2000 });
@@ -27,7 +37,7 @@ export default function HeaderRelayPingStatus() {
     textColor = "text-yellow-500";
   } else if (isError) {
     color = "bg-red-500";
-    text = "unreachable";
+    text = "Unreachable";
     textColor = "text-red-500";
   } else if (typeof data?.ms === "number") {
     if (data.ms < 100) {
@@ -48,7 +58,7 @@ export default function HeaderRelayPingStatus() {
       <Tooltip open={tooltipOpen}>
         <TooltipTrigger asChild>
           <Button
-            className="bg-transparent h-8 w-8"
+            className="bg-transparent h-8 w-8 cursor-pointer"
             variant="outline"
             size="icon"
             onClick={() => setTooltipOpen(true)}
@@ -56,12 +66,26 @@ export default function HeaderRelayPingStatus() {
             onMouseLeave={() => setTooltipOpen(false)}
             onTouchStart={() => setTooltipOpen(true)}
           >
+            {/* Relay ping status indicator */}
             <span className={`inline-block h-2 w-2 rounded-full ${color}`} />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          Latency:{" "}
-          <span className={`text-xs font-medium ${textColor}`}>{text}</span>
+        <TooltipContent side="bottom">
+          <div className="flex flex-col items-center gap-1">
+            <div className="text-sm font-semibold text-center">
+              Connection Status
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <p>Latency </p>
+                <span className={`text-xs font-bold ${textColor}`}>{text}</span>
+              </div>
+              <div>
+                <p>WebSocket </p>
+                <WebSocketStatusIndicator readyState={readyState} showText />
+              </div>
+            </div>
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

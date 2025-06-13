@@ -53,11 +53,6 @@ export default function ReceivePageContent() {
     enabled: !isTransferring && !isTransferCompleted,
   });
 
-  // Reset state to indicate the receiver flow hasn't started yet
-  useEffect(() => {
-    actions.setIsReceiverFlowActive(false);
-  }, [actions]);
-
   // When metadata is successfully fetched, update store with metadata and connection info
   useEffect(() => {
     if (senderId && data) {

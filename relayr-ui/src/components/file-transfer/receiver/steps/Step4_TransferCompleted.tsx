@@ -67,7 +67,6 @@ export default function Step4_TransferCompleted(props: StepProps) {
     });
     actions.setFileMetadata(null);
     actions.setLastValidSenderId(null);
-    actions.setIsReceiverFlowActive(false);
     router.push("/transfer/receive");
   };
 
