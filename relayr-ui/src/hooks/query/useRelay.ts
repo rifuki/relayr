@@ -17,8 +17,19 @@ export function useRelayFileMetadata(
   options?: { enabled: boolean },
 ) {
   return useQuery({
-    queryKey: ["fileMetadata", senderId], // Unique query key for caching
+    queryKey: ["relayFileMetadata", senderId], // Unique query key for caching
     queryFn: () => relayService.getFileMetadata(senderId), // Function to fetch file metadata
     enabled: !!senderId && (options?.enabled ?? true), // Query is enabled only if senderId exists
+  });
+}
+export function useRelayPing(options?: {
+  enabled?: boolean;
+  intervalMs?: number;
+}) {
+  return useQuery({
+    queryKey: ["relayPing"], // Unique query key for caching
+    queryFn: () => relayService.ping(),
+    enabled: options?.enabled ?? true,
+    refetchInterval: options?.intervalMs ?? false,
   });
 }

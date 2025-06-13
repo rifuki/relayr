@@ -12,7 +12,10 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 // Custom Components
-import { HeaderWebSocketStatusButton } from "./file-transfer/commons";
+import {
+  HeaderWebSocketStatusButton,
+  HeaderRelayPingStatus,
+} from "./file-transfer/commons";
 
 // Internal Components
 import ThemeToggle from "./ThemeToggle";
@@ -188,6 +191,9 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
           {showWebSocketStatus && (
             <HeaderWebSocketStatusButton readyState={webSocketReadyState} />
           )}
+
+          {/* Ping status for the relay server */}
+          <HeaderRelayPingStatus />
 
           {/* Toggle between light and dark theme */}
           <ThemeToggle />

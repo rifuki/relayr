@@ -22,20 +22,17 @@ export default function HeaderWebSocketStatusButton({
 }: HeaderWebSocketStatusButtonProps) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  // Toggle tooltip visibility
-  const handleTooltipToggle = () => setTooltipOpen((open) => !open);
-
   return (
     <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
-      <TooltipTrigger
-        onClick={handleTooltipToggle}
-        onTouchStart={handleTooltipToggle}
-        asChild
-      >
+      <TooltipTrigger asChild>
         <Button
           className="bg-transparent h-8 w-8"
           variant="outline"
           size="icon"
+          onClick={() => setTooltipOpen(true)}
+          onMouseEnter={() => setTooltipOpen(true)}
+          onMouseLeave={() => setTooltipOpen(false)}
+          onTouchStart={() => setTooltipOpen(true)}
         >
           {/* WebSocket status icon (e.g. connected, connecting, closed) */}
           <WebSocketStatusIndicator readyState={readyState} />
