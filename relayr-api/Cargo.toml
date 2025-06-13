@@ -24,6 +24,7 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 console-subscriber = { version = "0.4.1", optional = true }
 chrono = { version = "0.4.40", features = ["serde"] }
 tower-http = { version = "0.6.2", features = ["cors"] }
+sys-info = "0.9.1"
 
 [features]
 console = ["dep:console-subscriber"]

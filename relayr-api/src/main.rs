@@ -3,7 +3,6 @@ use tracing_subscriber::layer::SubscriberExt;
 #[allow(unused)]
 use tracing_subscriber::util::SubscriberInitExt;
 
-use axum::{Router, routing::get};
 use dotenv::dotenv;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -36,15 +35,7 @@ async fn main() -> std::io::Result<()> {
 
     let cors = CorsLayer::new().allow_origin(Any);
 
-    let app = Router::new()
-        .nest("/api/v1", app_routes())
-        .route("/ping", get(ping_handler))
-        .layer(cors);
+    let app = app_routes().layer(cors);
 
     axum::serve(tcp_listener, app).await
-}
-
-pub async fn ping_handler() -> &'static str {
-    tracing::info!("ping");
-    "pong"
 }

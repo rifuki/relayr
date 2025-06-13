@@ -1,15 +1,25 @@
 use once_cell::sync::Lazy;
-use std::env;
 
 pub struct Config {
-    pub app_env: String,
+    pub rust_env: String,
     pub port: u16,
+}
+
+fn get_rust_env() -> String {
+    #[cfg(debug_assertions)]
+    {
+        "development".to_string()
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        "production".to_string()
+    }
 }
 
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
     tracing::info!("CONFIG INIT");
     Config {
-        app_env: env::var("APP_ENV").unwrap_or("production".to_string()),
+        rust_env: get_rust_env(),
         port: std::env::var("PORT")
             .ok()
             .and_then(|v| v.parse().ok())
