@@ -16,6 +16,7 @@ import type {
   FileChunkResponse,
   FileEndResponse,
   FileTransferAckRequest,
+  PeerDisconnectedResponse,
   RecipientReadyRequest,
   RegisterResponse,
   RestartTransferResponse,
@@ -54,9 +55,13 @@ export function processWebSocketTextMessage(
   if (!wsMsg.success) {
     const shouldClose =
       wsMsg.message
-        ?.toLowerCase()
+        .toLowerCase()
         .includes("sender is already connected to recipient") ||
-      wsMsg.message === "Please ask the sender to generate new link";
+      wsMsg.message
+        .toLowerCase()
+        .includes(
+          "is no longer connected. please ask the sender to generate new link",
+        );
 
     if (shouldClose) {
       if (readyState === WebSocket.OPEN) {
@@ -126,6 +131,9 @@ export function processWebSocketTextMessage(
       break;
     case "cancelSenderTransfer":
       processCancelSenderTransferMessage(wsMsg, { actions });
+      break;
+    case "peerDisconnected":
+      processPeerDisconnectedMessage(wsMsg, { actions });
       break;
     default:
       console.error("[WebSocket] Unknown message type received:", wsMsg);
@@ -206,11 +214,18 @@ function processCancelSenderReadyMessage(
   const { actions, transferConnection, sendJsonMessage } = deps;
   const { recipientId } = transferConnection;
 
+  if (!transferConnection.isConnected) return;
   if (!recipientId) {
     console.error("Recipient ID is not available in transfer connection");
     return;
   }
   const errMsg = "The sender has canceled the connection";
+  actions.setErrorMessage(errMsg);
+  actions.clearTransferState();
+  actions.setTransferConnection({
+    isConnected: false,
+    recipientId: null,
+  });
 
   sendJsonMessage({
     type: "userClose",
@@ -218,13 +233,6 @@ function processCancelSenderReadyMessage(
     role: "receiver",
     reason: errMsg,
   } satisfies UserCloseRequest);
-
-  actions.setErrorMessage(errMsg);
-  actions.clearTransferState();
-  actions.setTransferConnection({
-    isConnected: false,
-    recipientId: null,
-  });
 }
 
 // Process incoming 'fileChunk' message
@@ -402,6 +410,21 @@ function processCancelSenderTransferMessage(
   actions.setTransferStatus({ isTransferCanceled: true });
   const errorMsg = `Sender \`${msg.senderId}\` canceled the transfer`;
   actions.setErrorMessage(errorMsg);
+}
+
+// Process incoming 'peerDisconnected' message
+interface ProcessPeerDisconnectedMessageDeps {
+  actions: FileReceiverActions;
+}
+export function processPeerDisconnectedMessage(
+  msg: PeerDisconnectedResponse,
+  deps: ProcessPeerDisconnectedMessageDeps,
+) {
+  const { actions } = deps;
+
+  actions.setTransferConnection({ isConnected: false, recipientId: null });
+  actions.clearTransferState();
+  actions.setErrorMessage(`Sender \`${msg.peerId}\` disconnected unexpectedly`);
 }
 
 // Handle incoming Blob data from WebSocket

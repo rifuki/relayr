@@ -16,7 +16,10 @@ import {
 } from "@/stores/useFileReceiverStore";
 
 // Types
-import { CancelRecipientReadyRequest } from "@/types/webSocketMessages";
+import {
+  CancelRecipientReadyRequest,
+  UserCloseRequest,
+} from "@/types/webSocketMessages";
 
 export default function Step2_WaitForSender(props: StepProps) {
   const receiverWebSocket = useReceiverWebSocket();
@@ -24,27 +27,24 @@ export default function Step2_WaitForSender(props: StepProps) {
     throw new Error("Receiver WebSocket is not available");
 
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-  const { senderId, recipientId } = useFileReceiverStore(
+  const { recipientId, senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
   const actions = useFileReceiverActions();
 
-  if (!senderId || !fileMetadata) return;
+  if (!recipientId || !senderId || !fileMetadata) return;
 
   const handleCancelRecipientReady = () => {
     receiverWebSocket.sendJsonMessage({
       type: "cancelRecipientReady",
       senderId,
     } satisfies CancelRecipientReadyRequest);
-
     receiverWebSocket.sendJsonMessage({
-      type: "cancelTransfer",
+      type: "userClose",
       userId: recipientId,
-      role: "recipient",
-      reason: "Recipient canceled before transfer started",
-    });
-
-    actions.setTransferConnection({ recipientId: null, isConnected: false });
+      role: "receiver",
+      reason: "cancelRecipientReady",
+    } satisfies UserCloseRequest);
     actions.setErrorMessage(null);
   };
 

@@ -1,9 +1,9 @@
 import { readdirSync, statSync, writeFileSync } from "fs";
 import { join, extname, relative } from "path";
 
-const basePath = "/Users/rifuki/mgodonf/relayr/relayr-ui";
+const basePath = "/Users/rifuki/mgodonf/relayr/relayr-api";
 const srcPath = join(basePath, "src");
-const includeExtensions = [".tsx", ".ts"]; // hanya file TypeScript
+const includeExtensions = [".rs"]; // hanya file TypeScript
 
 function walk(dir: string): string[] {
   let results: string[] = [];

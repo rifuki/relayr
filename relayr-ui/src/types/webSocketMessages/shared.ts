@@ -31,3 +31,11 @@ export interface UserCloseRequest {
   role: "sender" | "receiver";
   reason: string;
 }
+
+export interface PeerDisconnectedResponse {
+  success: true;
+  type: "peerDisconnected";
+  peerId: string;
+  role: "sender" | "receiver";
+  timestamp: number;
+}

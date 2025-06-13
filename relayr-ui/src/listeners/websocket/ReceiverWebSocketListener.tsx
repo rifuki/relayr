@@ -60,6 +60,7 @@ export default function ReceiverWebSocketListener() {
     fileTransferInfo,
     transferStatus,
     transferProgress,
+    readyState,
   });
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function ReceiverWebSocketListener() {
       fileTransferInfo,
       transferStatus,
       transferProgress,
+      readyState,
     };
   }, [
     actions,
@@ -78,6 +80,7 @@ export default function ReceiverWebSocketListener() {
     fileTransferInfo,
     transferStatus,
     transferProgress,
+    readyState,
   ]);
 
   // Handle incoming WebSocket messages
@@ -91,6 +94,7 @@ export default function ReceiverWebSocketListener() {
       fileTransferInfo,
       transferStatus,
       transferProgress,
+      readyState,
     } = depsRef.current;
 
     if (typeof lastMessage.data === "string") {
@@ -124,7 +128,7 @@ export default function ReceiverWebSocketListener() {
         lastMessage.data,
       );
     }
-  }, [lastMessage, readyState, sendJsonMessage]);
+  }, [lastMessage, sendJsonMessage]);
 
   // Handle cleanup and notify server on window unload
   useEffect(() => {

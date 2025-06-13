@@ -364,3 +364,26 @@ impl RestartTransferResponseDto {
     }
 }
 impl_response_dto!(RestartTransferResponseDto);
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PeerDisconnectedResponseDto {
+    pub success: bool,
+    #[serde(rename = "type")]
+    pub msg_type: String,
+    pub peer_id: String,
+    pub role: String,
+    pub timestamp: i64,
+}
+impl PeerDisconnectedResponseDto {
+    pub fn new(peer_id: &str, role: &str) -> Self {
+        Self {
+            success: true,
+            msg_type: "peerDisconnected".to_owned(),
+            peer_id: peer_id.to_owned(),
+            role: role.to_owned(),
+            timestamp: Utc::now().timestamp(),
+        }
+    }
+}
+impl_response_dto!(PeerDisconnectedResponseDto);

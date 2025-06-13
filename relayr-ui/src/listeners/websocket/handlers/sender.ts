@@ -11,6 +11,7 @@ import type {
   CancelRecipientTransferResponse,
   FileMetaRequest,
   FileTransferAckResponse,
+  PeerDisconnectedResponse,
   RecipientReadyResponse,
   RegisterResponse,
   SenderAckRequest,
@@ -93,6 +94,10 @@ export function processWebSocketTextMessage(
       break;
     case "cancelRecipientTransfer":
       processCancelRecipientTransferMessage(wsMsg, { actions });
+      break;
+
+    case "peerDisconnected":
+      processPeerDisconnectedMessage(wsMsg, { actions });
       break;
     default:
       console.error("[WebSocket] Unknown message type received:", wsMsg);
@@ -293,4 +298,26 @@ function processCancelRecipientTransferMessage(
   actions.setTransferStatus({ isTransferCanceled: true });
   const errorMsg = `Recipient \`${msg.recipientId}\` canceled the transfer`;
   actions.setErrorMessage(errorMsg);
+}
+
+interface ProcessPeerDisconnectedMessageDeps {
+  actions: FileSenderActions;
+}
+function processPeerDisconnectedMessage(
+  msg: PeerDisconnectedResponse,
+  deps: ProcessPeerDisconnectedMessageDeps,
+) {
+  const { actions } = deps;
+
+  actions.setTransferConnection({ recipientId: null });
+  actions.setTransferStatus({
+    isTransferring: false,
+    isTransferError: false,
+    isTransferCanceled: false,
+    isTransferCompleted: false,
+  });
+  actions.clearTransferState();
+  actions.setErrorMessage(
+    `Recipient \`${msg.peerId}\` disconnected unexpectedly`,
+  );
 }

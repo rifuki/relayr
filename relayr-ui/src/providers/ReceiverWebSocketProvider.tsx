@@ -32,7 +32,6 @@ export default function ReceiverWebSocketProvider({
     onClose: (close: CloseEvent) => {
       console.info("❌ Disconnected", close.code);
 
-      actions.setErrorMessage(null);
       actions.setTransferConnection({ isConnected: false, recipientId: null });
       setWsUrl(null);
 

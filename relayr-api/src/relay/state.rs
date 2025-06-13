@@ -135,6 +135,18 @@ impl RelayState {
             tracing::info!(custom_id, "remove custom connection");
         }
     }
+
+    pub async fn get_connected_sender(&self, recipient_id: &str) -> Option<String> {
+        let active_connections = self.active_connections.lock().await;
+
+        active_connections.iter().find_map(|(sender, recipient)| {
+            if recipient == recipient_id {
+                Some(sender.clone())
+            } else {
+                None
+            }
+        })
+    }
 }
 
 impl RelayState {

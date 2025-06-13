@@ -3,7 +3,11 @@ export * from "./shared";
 export * from "./receiver";
 
 // Import specific responses from shared, sender, and receiver
-import { ErrorMessageResponse, RegisterResponse } from "./shared";
+import {
+  ErrorMessageResponse,
+  PeerDisconnectedResponse,
+  RegisterResponse,
+} from "./shared";
 import {
   RecipientReadyResponse,
   CancelRecipientReadyResponse,
@@ -23,6 +27,7 @@ import {
 export type WebSocketSenderTextMessageResponse =
   | ErrorMessageResponse
   | RegisterResponse
+  | PeerDisconnectedResponse
   | RecipientReadyResponse
   | CancelRecipientReadyResponse
   | FileTransferAckResponse
@@ -32,6 +37,7 @@ export type WebSocketSenderTextMessageResponse =
 export type WebSocketReceiverTextMessageResponse =
   | ErrorMessageResponse
   | RegisterResponse
+  | PeerDisconnectedResponse
   | CancelSenderReadyResponse
   | SenderAckResponse
   | FileChunkResponse
