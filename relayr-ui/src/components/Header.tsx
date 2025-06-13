@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // External Libraries
+import { CheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
 // ShadCN UI Components
@@ -16,11 +17,13 @@ import { HeaderWebSocketStatusButton } from "./file-transfer/commons";
 // Internal Components
 import ThemeToggle from "./ThemeToggle";
 
+// Context Providers
+import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
+
 // State Management (Stores)
 import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
-import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
-import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 // Navigation config moved outside component for clarity and maintainability
 const NAV_LINKS = [
@@ -76,23 +79,24 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
     isTransferring: isSenderUploading,
     isTransferCompleted: isSenderTransferCompleted,
   } = useFileSenderStore((state) => state.transferStatus);
-  const { isTransferring: isReceiverDownloading } = useFileReceiverStore(
-    (state) => state.transferStatus,
-  );
+  const {
+    isTransferring: isReceiverDownloading,
+    isTransferCompleted: isReceiverTransferCompleted,
+  } = useFileReceiverStore((state) => state.transferStatus);
 
   // Navigation state logic
   const navState = [
     {
       ...NAV_LINKS[0],
       isActive: isSenderPage,
-      isDisabled: isReceiverDownloading,
-      isBusy: isSenderUploading,
+      isTransferring: isSenderUploading,
+      isCompleted: isSenderTransferCompleted,
     },
     {
       ...NAV_LINKS[1],
       isActive: isReceiverPage,
-      isDisabled: isSenderUploading,
-      isBusy: isReceiverDownloading,
+      isTransferring: isReceiverDownloading,
+      isCompleted: isReceiverTransferCompleted,
     },
   ];
 
@@ -117,7 +121,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
       <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-8 lg:px-10 max-w-screen-xl">
         {/* Left side: App title and navigation */}
         <motion.div
-          className="flex items-center space-x-6"
+          className="flex items-center gap-6"
           initial={{ x: -24, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.15, duration: 0.5 }}
@@ -128,39 +132,46 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
             </span>
           </Link>
           {/* Navigation buttons: Send and Receive */}
-          <nav className="flex items-center space-x-2">
-            {navState.map(
-              (nav) =>
-                !nav.isDisabled && (
-                  <Button
-                    key={nav.label}
-                    variant="ghost"
-                    size="sm"
-                    className={`px-3 py-1.5 rounded-md font-medium transition-colors
+          <nav className="flex items-center gap-2">
+            {navState.map((nav) => (
+              <Button
+                key={nav.label}
+                variant="ghost"
+                size="sm"
+                className={`relative px-3 py-1.5 rounded-md font-medium transition-colors
                     ${
                       nav.isActive
                         ? "bg-primary/10 text-primary shadow-sm"
                         : "text-muted-foreground hover:text-primary hover:bg-primary/5"
                     }
                   `}
-                    aria-current={nav.isActive ? "page" : undefined}
-                    tabIndex={nav.isBusy ? -1 : 0}
-                    disabled={nav.isBusy}
-                    asChild
-                  >
-                    {nav.isBusy ? (
-                      <span
-                        className="cursor-not-allowed"
-                        onMouseDown={(e) => e.preventDefault()}
-                      >
-                        {nav.label}
-                      </span>
-                    ) : (
-                      <Link href={nav.href}>{nav.label}</Link>
-                    )}
-                  </Button>
-                ),
-            )}
+                aria-current={nav.isActive ? "page" : undefined}
+                asChild
+              >
+                <span className="flex items-center gap-1.5">
+                  {nav.label}
+                  {nav.isCompleted ? (
+                    <span
+                      className="ml-1 inline-block h-4 w-4 rounded-full text-green-500"
+                      title="Transfer Completed"
+                    >
+                      <CheckIcon />
+                    </span>
+                  ) : (
+                    nav.isTransferring && (
+                      <span className="ml-1 inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    )
+                  )}
+
+                  <Link
+                    href={nav.href}
+                    className="absolute inset-0"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                </span>
+              </Button>
+            ))}
           </nav>
           {/* Navigation buttons: Send and Receive end */}
         </motion.div>
@@ -168,7 +179,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
 
         {/* Right side: WebSocket status and theme toggle */}
         <motion.div
-          className="flex items-center space-x-5"
+          className="flex items-center gap-5"
           initial={{ x: 24, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
