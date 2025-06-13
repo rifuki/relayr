@@ -1,13 +1,7 @@
 "use client";
 
 // React
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 // External Libraries
 import useWebSocket from "react-use-websocket";
@@ -29,6 +23,7 @@ interface SenderWebSocketContextType {
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   sendMessage: WebSocketHook["sendMessage"];
   openConnection: (url: string) => void;
+  closeConnection: () => void;
 }
 
 /**
@@ -51,7 +46,8 @@ export default function SenderWebSocketProvider({
   children: ReactNode;
 }) {
   const [wsUrl, setWsUrl] = useState<string | null>(null);
-  const openConnection = useCallback((url: string) => setWsUrl(url), []);
+  const openConnection = (url: string) => setWsUrl(url);
+  const closeConnection = () => setWsUrl(null);
 
   // Accessing actions from the file sender store
   const actions = useFileSenderActions();
@@ -92,6 +88,7 @@ export default function SenderWebSocketProvider({
         sendJsonMessage,
         sendMessage,
         openConnection,
+        closeConnection,
       }}
     >
       {children}

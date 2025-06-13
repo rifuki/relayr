@@ -11,6 +11,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 // Custom UI Components
 import ErrorAlert from "./ErrorAlert";
 import WebSocketConnectionStatus from "./WebSocketConnectionStatus";
+import { useConnectionStore } from "@/stores/useConnectionStore";
 
 // Props interface for TransferCardLayout component
 interface TransferCardLayoutProps {
@@ -31,7 +32,11 @@ export default function TransferCardLayout({
   return (
     <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none gap-5">
       <CardContent className="w-full flex flex-col gap-5">
-        {errorMessage && <ErrorAlert message={errorMessage} />}
+        {!useConnectionStore((s) => s.isOnline) ? (
+          <ErrorAlert message="❌ You are offline. Please check your internet connection. Try again later." />
+        ) : (
+          errorMessage && <ErrorAlert message={errorMessage} />
+        )}
         {children}
       </CardContent>
 

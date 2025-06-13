@@ -13,15 +13,18 @@ import Footer from "@/components/Footer";
 
 // Providers
 import SenderWebSocketProvider from "@/providers/SenderWebSocketProvider";
+import ReceiverWebSocketProvider from "@/providers/ReceiverWebSocketProvider";
+
 import ThemeProvider from "@/providers/ThemeProvider";
 import TanStackProvider from "@/providers/TanStackProvider";
 
+// Listeners
+import ConnectionStatusListener from "@/listeners/ConnectionStatusListener";
+import SenderWebSocketListener from "@/listeners/websocket/SenderWebSocketListener";
+import ReceiverWebSocketListener from "@/listeners/websocket/ReceiverWebSocketListener";
+
 // Global Styles
 import "./globals.css";
-import ReceiverWebSocketProvider from "@/providers/ReceiverWebSocketProvider";
-import ReceiverWebSocketListener from "@/websocket/ReceiverWebSocketListener";
-import SenderWebSocketListener from "@/websocket/SenderWebSocketListener";
-
 // Fonts configuration
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,7 +54,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SenderWebSocketProvider>
+          <SenderWebSocketListener />
           <ReceiverWebSocketProvider>
+            <ReceiverWebSocketListener />
+            <ConnectionStatusListener />
             <TanStackProvider>
               <ThemeProvider
                 attribute="class"
@@ -66,9 +72,7 @@ export default function RootLayout({
                 </div>
               </ThemeProvider>
             </TanStackProvider>
-            <ReceiverWebSocketListener />
           </ReceiverWebSocketProvider>
-          <SenderWebSocketListener />
         </SenderWebSocketProvider>
         {/* Sonner for toast notifications */}
         <Toaster />

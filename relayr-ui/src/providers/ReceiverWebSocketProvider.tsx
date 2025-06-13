@@ -10,6 +10,7 @@ interface ReceiverWebSocketContextType {
   readyState: WebSocketHook["readyState"];
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   openConnection: (url: string) => void;
+  closeConnection: () => void;
 }
 
 const ReceiverWebSocketContext =
@@ -22,6 +23,7 @@ export default function ReceiverWebSocketProvider({
 }) {
   const [wsUrl, setWsUrl] = useState<string | null>(null);
   const openConnection = (url: string) => setWsUrl(url);
+  const closeConnection = () => setWsUrl(null);
 
   const actions = useFileReceiverActions();
 
@@ -54,6 +56,7 @@ export default function ReceiverWebSocketProvider({
         readyState,
         sendJsonMessage,
         openConnection,
+        closeConnection,
       }}
     >
       {children}
