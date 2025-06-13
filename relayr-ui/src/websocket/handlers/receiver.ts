@@ -151,7 +151,6 @@ function processRegisterMessage(
     return;
   }
 
-  console.log("Processing register message...", { msg });
   actions.setErrorMessage(null);
   actions.setTransferConnection({ recipientId: msg.connId });
 
@@ -299,10 +298,12 @@ function processFileEndMessage(
     chunkIndex,
     chunkDataSize,
     isTransferCanceled,
+    isTransferCompleted,
   } = transferStatus;
   const { receiver: receiverTransferProgress } = transferProgress;
 
-  if (!fileMetadata || !senderId || isTransferCanceled) return;
+  if (!fileMetadata || !senderId || isTransferCanceled || isTransferCompleted)
+    return;
 
   if (!recipientId) {
     console.error("Recipient ID is not available in transfer connection");
@@ -363,7 +364,7 @@ function processFileEndMessage(
   // Close the WebSocket connection gracefully after transfer completion
   sendJsonMessage({
     type: "userClose",
-    userId: recipientId,
+    userId: recipientId!,
     role: "receiver",
     reason: `Transfer completed for file "${fileMetadata.name}". Closing connection.`,
   } satisfies UserCloseRequest);

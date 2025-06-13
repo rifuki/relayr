@@ -32,7 +32,6 @@ export default function Step1_ReadyToReceive(props: StepProps) {
   if (!fileMetadata || !senderId) return;
 
   const handleConnectToSender = () => {
-    console.log("Connecting to sender...", { initId, senderId });
     actions.setTransferStatus({
       isTransferCanceled: false,
       isTransferError: false,

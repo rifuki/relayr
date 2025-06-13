@@ -60,8 +60,6 @@ export default function Step6_TransferCompleted(props: StepProps) {
     },
   ];
 
-  console.log(recipientId);
-
   return (
     <StepSectionWrapper>
       <StepHeaderSection
