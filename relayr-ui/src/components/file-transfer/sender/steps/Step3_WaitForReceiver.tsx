@@ -32,7 +32,7 @@ export default function Step3_WaitForReceiver(props: StepProps) {
       type: "userClose",
       userId: senderId,
       role: "sender",
-      reason: "Cancelled the transfer link.",
+      reason: "User closed the transfer session.",
     } satisfies UserCloseRequest);
   };
 

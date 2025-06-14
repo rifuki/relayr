@@ -1,5 +1,5 @@
 // External Libraries Type
-import { WebSocketHook } from "react-use-websocket/dist/lib/types";
+import type { WebSocketHook } from "react-use-websocket/dist/lib/types";
 
 // Types
 import type {
@@ -25,7 +25,7 @@ import type {
   WebSocketReceiverTextMessageResponse,
 } from "@/types/webSocketMessages";
 
-// Handle incoming text WebSocket messages
+// Process incoming WebSocket text messages
 interface ProcessWebSocketTextMessageDeps {
   actions: FileReceiverActions;
   fileMetadata: FileMetadata | null;
@@ -33,7 +33,6 @@ interface ProcessWebSocketTextMessageDeps {
   fileTransferInfo: FileTransferInfo;
   transferStatus: TransferStatus;
   transferProgress: TransferProgress;
-  readyState: WebSocketHook["readyState"];
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
 }
 export function processWebSocketTextMessage(
@@ -47,7 +46,6 @@ export function processWebSocketTextMessage(
     fileTransferInfo,
     transferStatus,
     transferProgress,
-    readyState,
     sendJsonMessage,
   } = deps;
   const { recipientId } = transferConnection;
@@ -57,36 +55,18 @@ export function processWebSocketTextMessage(
       wsMsg.message
         .toLowerCase()
         .includes("sender is already connected to recipient") ||
-      wsMsg.message
-        .toLowerCase()
-        .includes(
-          "is no longer connected. please ask the sender to generate new link",
-        );
+      wsMsg.message.toLowerCase().includes("is no longer connected");
 
     if (shouldClose) {
-      if (readyState === WebSocket.OPEN) {
-        const errorMsg = wsMsg.message
-          ?.toLowerCase()
-          .includes("sender is already connected to recipient")
-          ? "Sender already connected to another recipent."
-          : wsMsg.message;
-        actions.setErrorMessage(errorMsg);
-
-        if (!recipientId)
-          throw new Error(
-            "Recipient ID is not available in transfer connection",
-          );
-
-        sendJsonMessage({
-          type: "userClose",
-          userId: recipientId,
-          role: "receiver",
-          reason: errorMsg,
-        } satisfies UserCloseRequest);
-      }
-    } else {
-      actions.setErrorMessage(wsMsg.message ?? "unknown error occurred");
+      sendJsonMessage({
+        type: "userClose",
+        userId: recipientId!,
+        role: "receiver",
+        reason: "Sender unavailable or disconnected. Closing connection.",
+      } satisfies UserCloseRequest);
     }
+    actions.setErrorMessage(wsMsg.message ?? "An unknown error occurred");
+
     return;
   }
 
@@ -100,7 +80,7 @@ export function processWebSocketTextMessage(
       });
       break;
     case "senderAck":
-      processSenderAckMessage(wsMsg, { actions, transferConnection });
+      processSenderAckMessage(wsMsg, { actions });
       break;
     case "cancelSenderReady":
       processCancelSenderReadyMessage(wsMsg, {
@@ -136,7 +116,7 @@ export function processWebSocketTextMessage(
       processPeerDisconnectedMessage(wsMsg, { actions });
       break;
     default:
-      console.error("[WebSocket] Unknown message type received:", wsMsg);
+      console.error("[Receiver] Unknown WebSocket message:", wsMsg);
       break;
   }
 }
@@ -154,49 +134,44 @@ function processRegisterMessage(
   const { actions, transferConnection, sendJsonMessage } = deps;
   const { senderId } = transferConnection;
 
-  if (!senderId) {
-    console.error("Sender ID is not available in transfer connection");
-    return;
-  }
-
   actions.setErrorMessage(null);
-  actions.setTransferConnection({ recipientId: msg.connId });
-
   sendJsonMessage({
     type: "recipientReady",
-    senderId,
+    senderId: senderId!,
   } satisfies RecipientReadyRequest);
+  actions.setTransferConnection({ recipientId: msg.connId });
 }
 
 // Process incoming 'senderAck' message
 interface ProcessSenderAckMessageDeps {
   actions: FileReceiverActions;
-  transferConnection: TransferConnection;
 }
 function processSenderAckMessage(
   msg: SenderAckResponse,
   deps: ProcessSenderAckMessageDeps,
 ) {
-  const { actions, transferConnection } = deps;
-  const { isConnected } = transferConnection;
+  const { actions } = deps;
 
   switch (msg.requestType) {
     case "recipientReady":
-      if (!isConnected) {
-        actions.setTransferConnection({ isConnected: true });
-      }
+      actions.setTransferConnection({ isConnected: true });
       break;
     case "uploadOutOfSync":
       actions.setErrorMessage(
-        "The sender's upload is out of sync. Please ask the sender to restart the transfer.",
+        "Download out of sync. Please ask the sender to restart the transfer.",
       );
       actions.setTransferStatus({
         isTransferring: false,
         isTransferError: true,
+        isTransferCanceled: false,
+        isTransferCompleted: false,
       });
       break;
     default:
-      console.error("[WebSocket] Unknown ack request type received:", msg);
+      console.error(
+        "[Receiver] Unknown senderAck request type:",
+        msg.requestType,
+      );
       break;
   }
 }
@@ -215,23 +190,18 @@ function processCancelSenderReadyMessage(
   const { recipientId } = transferConnection;
 
   if (!transferConnection.isConnected) return;
-  if (!recipientId) {
-    console.error("Recipient ID is not available in transfer connection");
-    return;
-  }
-  const errMsg = "The sender has canceled the connection";
-  actions.setErrorMessage(errMsg);
-  actions.clearTransferState();
+
+  actions.setErrorMessage("Sender canceled the transfer before it started");
   actions.setTransferConnection({
     isConnected: false,
     recipientId: null,
   });
-
+  actions.clearTransferState();
   sendJsonMessage({
     type: "userClose",
-    userId: recipientId,
+    userId: recipientId!,
     role: "receiver",
-    reason: errMsg,
+    reason: "Sender canceled the connection. Closing receiver.",
   } satisfies UserCloseRequest);
 }
 
@@ -253,25 +223,23 @@ function processFileChunkMessage(
   if (msg.chunkIndex === 0) {
     actions.setErrorMessage(null);
     actions.setTransferStatus({
+      isTransferring: true,
       isTransferCanceled: false,
       isTransferError: false,
+      isTransferCompleted: false,
     });
     actions.clearTransferState();
+    actions.setFileTransferInfo({
+      totalSize: msg.totalSize,
+      totalChunks: msg.totalChunks,
+    });
   }
 
-  actions.setFileTransferInfo({
-    totalSize: msg.totalSize,
-    totalChunks: msg.totalChunks,
-  });
-
   actions.setTransferStatus({
-    isTransferring: true,
-    isTransferCanceled: false,
     uploadedSize: msg.uploadedSize,
     chunkIndex: msg.chunkIndex,
     chunkDataSize: msg.chunkDataSize,
   });
-
   actions.setTransferProgress({ sender: msg.senderTransferProgress });
 }
 
@@ -310,29 +278,22 @@ function processFileEndMessage(
   } = transferStatus;
   const { receiver: receiverTransferProgress } = transferProgress;
 
-  if (!fileMetadata || !senderId || isTransferCanceled || isTransferCompleted)
-    return;
+  if (!fileMetadata || !senderId) return;
 
-  if (!recipientId) {
-    console.error("Recipient ID is not available in transfer connection");
-    return;
-  }
+  if (isTransferCanceled || isTransferCompleted) return;
 
   const isChunkIndexConsistent = msg.lastChunkIndex === chunkIndex + 1;
-  actions.setTransferStatus({ chunkIndex: msg.lastChunkIndex });
   const isUploadedSizeConsistent = msg.uploadedSize === receivedBytes;
-
   if (!isChunkIndexConsistent || !isUploadedSizeConsistent) {
-    console.error("[FileEnd] Payload mismatch", {
+    console.error("[Receiver] Inconsistent transfer data:", {
       lastChunkIndexFromSender: msg.lastChunkIndex,
       currentChunkIndex: chunkIndex + 1,
       uploadedSizeFromSender: msg.uploadedSize,
       receivedBytesFromClient: receivedBytes,
     });
     actions.setErrorMessage(
-      "Mismatch in file transfer data. Transfer may be corrupted.",
+      "Transfer data is inconsistent. Please ask the sender to restart the transfer.",
     );
-
     sendJsonMessage({
       type: "fileTransferAck",
       senderId,
@@ -344,14 +305,18 @@ function processFileEndMessage(
       chunkDataSize,
       recipientTransferProgress: receiverTransferProgress,
     } satisfies FileTransferAckRequest);
-
     actions.setTransferStatus({
-      isTransferError: true,
       isTransferring: false,
+      isTransferError: true,
+      isTransferCanceled: false,
+      isTransferCompleted: false,
     });
-
     return;
   }
+
+  actions.setTransferStatus({ chunkIndex: msg.lastChunkIndex });
+  // Finalize the file transfer by reconstructing the file from received chunks,
+  actions.finalizeTransfer();
 
   sendJsonMessage({
     type: "fileTransferAck",
@@ -364,11 +329,6 @@ function processFileEndMessage(
     chunkDataSize,
     recipientTransferProgress: receiverTransferProgress,
   } satisfies FileTransferAckRequest);
-
-  // Finalize the file transfer by reconstructing the file from received chunks,
-  // validating its integrity, and updating the transfer state accordingly.
-  actions.finalizeTransfer();
-
   // Close the WebSocket connection gracefully after transfer completion
   sendJsonMessage({
     type: "userClose",
@@ -388,10 +348,10 @@ function processRestartTransferMessage(
 ) {
   const { actions } = deps;
 
-  actions.setErrorMessage(null);
   actions.setTransferStatus({
     isTransferError: false,
     isTransferCanceled: false,
+    isTransferCompleted: false,
   });
   actions.clearTransferState();
   actions.setErrorMessage("Sender restarted the transfer.");
@@ -402,14 +362,17 @@ interface ProcessCancelSenderTransferMessageDeps {
   actions: FileReceiverActions;
 }
 function processCancelSenderTransferMessage(
-  msg: CancelSenderTransferResponse,
+  _msg: CancelSenderTransferResponse,
   deps: ProcessCancelSenderTransferMessageDeps,
 ) {
   const { actions } = deps;
-
-  actions.setTransferStatus({ isTransferCanceled: true });
-  const errorMsg = `Sender \`${msg.senderId}\` canceled the transfer`;
-  actions.setErrorMessage(errorMsg);
+  actions.setTransferStatus({
+    isTransferring: false,
+    isTransferError: false,
+    isTransferCanceled: true,
+    isTransferCompleted: false,
+  });
+  actions.setErrorMessage("Sender canceled the transfer");
 }
 
 // Process incoming 'peerDisconnected' message
@@ -422,9 +385,9 @@ export function processPeerDisconnectedMessage(
 ) {
   const { actions } = deps;
 
+  actions.setErrorMessage(`Sender [${msg.peerId}] disconnected unexpectedly`);
   actions.setTransferConnection({ isConnected: false, recipientId: null });
   actions.clearTransferState();
-  actions.setErrorMessage(`Sender \`${msg.peerId}\` disconnected unexpectedly`);
 }
 
 // Handle incoming Blob data from WebSocket

@@ -210,8 +210,6 @@ export const useFileSenderStore = create<FileSenderState>()((set, get) => ({
           offset: 0,
           chunkIndex: 0,
           chunkDataSize: 0,
-          isTransferring: false,
-          isTransferCompleted: false,
         },
         transferProgress: {
           sender: 0,

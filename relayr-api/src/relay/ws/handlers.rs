@@ -51,10 +51,12 @@ pub async fn handle_incoming_payload(
             let connected_recipient = state.get_connected_recipient(&payload.sender_id).await;
 
             if let Some(current_recipient) = connected_recipient {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Sender is already connected to recipient: `{current_recipient}`"
-                ))
-                .to_ws_msg();
+                tracing::info!(
+                    "Sender is already connected to another recipient: `{current_recipient}`"
+                );
+                let err_msg =
+                    ErrorMessage::new("Sender is already connected to another recipient.")
+                        .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             } else {
                 let recipient_id = payload.recipient_id.unwrap_or(base_conn_id.to_owned());
@@ -67,10 +69,9 @@ pub async fn handle_incoming_payload(
                             .to_ws_msg();
                     send_or_break!(sender_tx, success_msg, stop_flag);
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Sender `{}` is no longer connected. Please ask the sender to generate new link.",
-                        &payload.sender_id
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        "Sender is no longer connected. Please ask the sender to generate new link."
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }

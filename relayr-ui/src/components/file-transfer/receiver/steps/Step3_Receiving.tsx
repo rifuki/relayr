@@ -48,7 +48,12 @@ export default function Step3_Receiving(props: StepProps) {
       type: "cancelRecipientTransfer",
       senderId,
     } satisfies CancelRecipientTransferRequest);
-    actions.setTransferStatus({ isTransferCanceled: true });
+    actions.setTransferStatus({
+      isTransferring: false,
+      isTransferError: false,
+      isTransferCanceled: true,
+      isTransferCompleted: false,
+    });
     actions.setErrorMessage("You canceled the transfer");
   };
 

@@ -60,7 +60,6 @@ export default function ReceiverWebSocketListener() {
     fileTransferInfo,
     transferStatus,
     transferProgress,
-    readyState,
   });
 
   useEffect(() => {
@@ -71,7 +70,6 @@ export default function ReceiverWebSocketListener() {
       fileTransferInfo,
       transferStatus,
       transferProgress,
-      readyState,
     };
   }, [
     actions,
@@ -80,7 +78,6 @@ export default function ReceiverWebSocketListener() {
     fileTransferInfo,
     transferStatus,
     transferProgress,
-    readyState,
   ]);
 
   // Handle incoming WebSocket messages
@@ -94,7 +91,6 @@ export default function ReceiverWebSocketListener() {
       fileTransferInfo,
       transferStatus,
       transferProgress,
-      readyState,
     } = depsRef.current;
 
     if (typeof lastMessage.data === "string") {
@@ -107,7 +103,6 @@ export default function ReceiverWebSocketListener() {
           fileTransferInfo,
           transferStatus,
           transferProgress,
-          readyState,
           sendJsonMessage,
         });
       } catch (error: unknown) {

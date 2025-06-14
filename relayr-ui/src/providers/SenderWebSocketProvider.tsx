@@ -58,11 +58,10 @@ export default function SenderWebSocketProvider({
       share: true,
       shouldReconnect: () => true,
       onClose: (close: CloseEvent) => {
-        console.info("❌ Disconnected", close.code);
+        console.info("[WebSocket] Connection closed:", close);
 
-        actions.setErrorMessage(null);
-        actions.setTransferShareLink(null);
         actions.setTransferConnection({ senderId: null, recipientId: null });
+        actions.setTransferShareLink(null);
         setWsUrl(null);
 
         if (close.code === 1000) return;
@@ -73,10 +72,7 @@ export default function SenderWebSocketProvider({
         }
       },
       onError: (error: Event) => {
-        console.error("🔥 Error", error);
-        actions.setErrorMessage(
-          "WebSocket connection error. Please try again.",
-        );
+        console.error("[WebSocket] Error:", error);
       },
     });
 

@@ -49,9 +49,13 @@ export default function Step5_Sending(props: StepProps) {
     senderWebSocket.sendJsonMessage({
       type: "cancelSenderTransfer",
     } satisfies CancelSenderTransferRequest);
-    actions.setTransferStatus({ isTransferCanceled: true });
+    actions.setTransferStatus({
+      isTransferring: false,
+      isTransferError: false,
+      isTransferCanceled: true,
+      isTransferCompleted: false,
+    });
     actions.setErrorMessage("You canceled the transfer");
-    console.warn("Transfer has been canceled. No more chunks will be sent.");
   };
 
   const buttons = [

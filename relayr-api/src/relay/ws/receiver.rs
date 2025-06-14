@@ -86,7 +86,10 @@ pub fn spawn_receiver_task(
                             "Sender `{}` attempted to send a file, but no recipient is connected",
                             base_conn_id
                         );
-                        let err_msg = ErrorMessage::new("Active connection not found. The receiver may have disconnected").to_ws_msg();
+                        let err_msg = ErrorMessage::new(
+                            "Active connection not found. The receiver may have disconnected",
+                        )
+                        .to_ws_msg();
 
                         send_or_break!(tx, err_msg, stop_flag);
                     }
@@ -101,7 +104,7 @@ pub fn spawn_receiver_task(
                             code = reason.code,
                             reason = %reason.reason,
                         );
-                        if reason.reason.contains("Transfer Completed") {
+                        if reason.reason.to_lowercase().contains("transfer completed") {
                             return DisconnectReason::TransferCompleted;
                         } else {
                             return DisconnectReason::Other;

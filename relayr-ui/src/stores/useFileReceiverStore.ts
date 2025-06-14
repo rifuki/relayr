@@ -173,8 +173,6 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
           receivedBytes: 0,
           chunkIndex: 0,
           chunkDataSize: 0,
-          isTransferring: false,
-          isTransferCompleted: false,
         },
         transferProgress: {
           sender: 0,
@@ -230,6 +228,7 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
 
       console.info("File successfully reconstructed. URL:", newFileUrl);
     },
+
     setLastValidSenderId: (lastValidSenderId) => set({ lastValidSenderId }),
   },
 }));

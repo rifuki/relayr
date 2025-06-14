@@ -1,7 +1,5 @@
 // External Libraries
-import {
-  CircleCheckIcon,
-} from "lucide-react";
+import { CircleCheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 
 // Internal Components
@@ -47,6 +45,12 @@ export default function Step6_TransferCompleted(props: StepProps) {
 
   const handleStartNewTransfer = () => {
     actions.setFile(null);
+    actions.setTransferStatus({
+      isTransferring: false,
+      isTransferError: false,
+      isTransferCanceled: false,
+      isTransferCompleted: false,
+    });
     actions.clearTransferState();
   };
 

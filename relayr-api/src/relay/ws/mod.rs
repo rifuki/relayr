@@ -42,14 +42,14 @@ pub async fn handle_socket(socket: WebSocket, state: RelayState, id: String) {
 
     let disconnected_reason = wait_socket_tasks(ping_task, sender_task, receiver_task).await;
 
-    if let Some(recipient_id) = state.get_connected_recipient(&id).await {
-        if let Some(recipient_tx) = state.get_user_tx(&recipient_id).await {
-            let msg = PeerDisconnectedResponseDto::new(&id, "sender").to_ws_msg();
-            let _ = recipient_tx.send(msg).await;
-        }
-    }
-
     if disconnected_reason != DisconnectReason::TransferCompleted {
+        if let Some(recipient_id) = state.get_connected_recipient(&id).await {
+            if let Some(recipient_tx) = state.get_user_tx(&recipient_id).await {
+                let msg = PeerDisconnectedResponseDto::new(&id, "sender").to_ws_msg();
+                let _ = recipient_tx.send(msg).await;
+            }
+        }
+
         if let Some(sender_id) = state.get_connected_sender(&id).await {
             if let Some(sender_tx) = state.get_user_tx(&sender_id).await {
                 state.remove_active_connection(&sender_id).await;
