@@ -5,8 +5,28 @@ use chrono::Utc;
 use serde::Serialize;
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ErrorCode {
+    InvalidPayload,
+
+    SenderAlreadyConnected,
+    SenderDisconnected,
+    RecipientDisconnected,
+
+    ActiveConnectionNotFound,
+    RecipientMismatch,
+
+    UnsupportedWsMessageType,
+    UnsupportedWsMessageTextType,
+
+    NotHandledYet,
+    Unknown,
+}
+
+#[derive(Serialize)]
 pub struct ErrorMessage {
     pub success: bool,
+    pub code: ErrorCode,
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub details: Option<String>,
@@ -14,9 +34,10 @@ pub struct ErrorMessage {
 }
 
 impl ErrorMessage {
-    pub fn new(msg: &str) -> Self {
+    pub fn new(code: ErrorCode, msg: &str) -> Self {
         Self {
             success: false,
+            code,
             message: msg.to_owned(),
             details: None,
             timestamp: Utc::now().timestamp(),

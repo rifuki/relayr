@@ -5,7 +5,11 @@ use std::sync::{
 
 use axum::extract::ws::{Message, WebSocket};
 use futures::{StreamExt, stream::SplitStream};
-use tokio::{sync::mpsc::Sender, task::JoinHandle};
+use tokio::{
+    sync::{Mutex, mpsc::Sender},
+    task::JoinHandle,
+    time::Instant,
+};
 
 use crate::{
     relay::{
@@ -13,19 +17,26 @@ use crate::{
             requests::RelayIncomingPayload,
             responses::{RegisterResponseDto, WsResponse},
         },
-        error::ErrorMessage,
+        error::{ErrorCode, ErrorMessage},
         state::RelayState,
         ws::handlers::handle_incoming_payload,
     },
     send_or_break,
 };
 
+#[derive(PartialEq)]
+pub enum DisconnectReason {
+    TransferCompleted,
+    Other,
+}
+
 pub fn spawn_receiver_task(
     mut receiver: SplitStream<WebSocket>,
     tx: Sender<Message>,
     state: RelayState,
     base_conn_id: String,
-) -> JoinHandle<()> {
+    last_heartbeat: Arc<Mutex<Instant>>,
+) -> JoinHandle<DisconnectReason> {
     tokio::spawn(async move {
         let stop_flag = Arc::new(AtomicBool::new(false));
 
@@ -49,9 +60,12 @@ pub fn spawn_receiver_task(
                             .await
                         }
                         Err(e) => {
-                            let err_msg = ErrorMessage::new("failed to parse payload")
-                                .with_details(&e.to_string())
-                                .to_ws_msg();
+                            let err_msg = ErrorMessage::new(
+                                ErrorCode::InvalidPayload,
+                                "failed to parse payload",
+                            )
+                            .with_details(&e.to_string())
+                            .to_ws_msg();
                             send_or_break!(tx, err_msg, stop_flag);
                         }
                     }
@@ -61,51 +75,58 @@ pub fn spawn_receiver_task(
                         state.get_connected_recipient(&base_conn_id).await
                     {
                         if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                            tracing::info!(
-                                sender_id = base_conn_id,
-                                recipient_id = current_recipient,
-                                chunk_size = bin_data.len(),
-                                "Sending chunk of file to recipient"
-                            );
                             send_or_break!(recipient_tx, Message::binary(bin_data), stop_flag);
                         } else {
-                            let err_msg = ErrorMessage::new(&format!(
-                                "Recipient `{}` is no longer connected",
-                                current_recipient
-                            ))
+                            let err_msg = ErrorMessage::new(
+                                ErrorCode::RecipientDisconnected,
+                                &format!(
+                                    "recipient [{}] is no longer connected",
+                                    current_recipient
+                                ),
+                            )
                             .to_ws_msg();
                             send_or_break!(tx, err_msg, stop_flag);
                         }
                     } else {
                         tracing::warn!(
-                            "Sender `{}` attempted to send a file, but no recipient is connected",
+                            "sender [{}] attempted to send a file, but no recipient is connected",
                             base_conn_id
                         );
-                        let err_msg = ErrorMessage::new(&format!(
-                            "Active connection for sender_id: `{}` not found",
-                            &base_conn_id
-                        ))
+                        let err_msg = ErrorMessage::new(
+                            ErrorCode::ActiveConnectionNotFound,
+                            "active connection for sender_id: [{}] not found",
+                        )
                         .to_ws_msg();
 
                         send_or_break!(tx, err_msg, stop_flag);
                     }
+                }
+                Message::Pong(_) => {
+                    let mut last_heartbeat = last_heartbeat.lock().await;
+                    *last_heartbeat = Instant::now();
                 }
                 Message::Close(reason) => {
                     if let Some(reason) = &reason {
                         tracing::info!(
                             code = reason.code,
                             reason = %reason.reason,
-                            "websocket closed"
                         );
+                        if reason.reason.to_lowercase().contains("transfer completed") {
+                            return DisconnectReason::TransferCompleted;
+                        } else {
+                            return DisconnectReason::Other;
+                        }
                     } else {
-                        tracing::info!("WebSocket closed with no close frame (e.g., code 1006)");
+                        tracing::info!("webSocket closed with no close frame (e.g., code 1006)");
                     }
-
-                    let close_msg = Message::Close(reason);
-                    send_or_break!(tx, close_msg, stop_flag);
+                    break;
                 }
                 _ => {
-                    let err_msg = ErrorMessage::new("unsupported ws message type").to_ws_msg();
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::UnsupportedWsMessageType,
+                        "unsupported websocket message type",
+                    )
+                    .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             }
@@ -114,5 +135,6 @@ pub fn spawn_receiver_task(
                 break;
             }
         }
+        DisconnectReason::Other
     })
 }

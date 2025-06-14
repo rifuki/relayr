@@ -1,155 +1,203 @@
+// External Libraries
 import { create } from "zustand";
-import { WebSocketLike } from "react-use-websocket/dist/lib/types";
 
+// Types
 import { FileMetadata } from "@/types/file";
 
-interface WebSocketHandlers {
-  sendJsonMessage: ((msg: unknown) => void) | undefined;
-  getWebSocket: (() => WebSocketLike | null) | undefined;
-}
-
-interface FileReceiverActions {
-  setInitId: (id: string) => void;
-  setSenderId: (senderId: string | null) => void;
-  setRecipientId: (recipientId: string | null) => void;
-  setFileMetadata: (fileMetadata: FileMetadata) => void;
-  setErrorMessage: (message: string | null) => void;
-  setWebSocketUrl: (wsUrl: string | null) => void;
-  setWebSocketHandlers: (handlers: Partial<WebSocketHandlers>) => void;
-  setIsConnectedToSender: (isConnectedToSender: boolean) => void;
-  setIsSenderTransferring: (isSenderTransferring: boolean) => void;
-
-  setTotalSize: (totalSize: number) => void;
-  setTotalChunks: (totalChunks: number) => void;
-  setChunkIndex: (chunkIndex: number) => void;
-  setChunkDataSize: (chunkDataSize: number) => void;
-  setUploadedSize: (uploadedSize: number) => void;
-  setSenderTransferProgress: (senderTransferProgress: number) => void;
-  resetTransferStatus: () => void;
-
-  setReceivedChunkData: (receivedChunkData: ArrayBuffer) => void;
-  setReceivedBytes: (receivedBytes: number) => void;
-  setReceiverTransferProgress: (receiverTransferProgress: number) => void;
-  setIsTransferCompleted: (isTransferCompleted: boolean) => void;
-  setIsTransferError: (isTransferError: boolean) => void;
-  finalizeTransfer: () => void;
-}
-
-interface FileReceiverState {
-  initId: string | null;
+// Interfaces for Transfer Connection, File Transfer Info, Transfer Status, and Progress
+export interface TransferConnection {
   senderId: string | null;
   recipientId: string | null;
-  fileMetadata: FileMetadata | null;
-  errorMessage: string | null;
-  webSocketUrl: string | null;
-  wsHandlers: WebSocketHandlers;
-  isConnectedToSender: boolean;
-  isSenderTransferring: boolean;
+  isConnected: boolean;
+}
+
+export interface FileTransferInfo {
   totalSize: number;
   totalChunks: number;
+}
+
+export interface TransferStatus {
+  uploadedSize: number;
+  receivedBytes: number;
   chunkIndex: number;
   chunkDataSize: number;
-  uploadedSize: number;
-  senderTransferProgress: number;
-  receivedChunkData: ArrayBuffer[];
-  receivedBytes: number;
-  receiverTransferProgress: number;
-  isTransferCompleted: boolean;
+  isTransferring: boolean;
   isTransferError: boolean;
+  isTransferCanceled: boolean;
+  isTransferCompleted: boolean;
+}
+
+export interface TransferProgress {
+  sender: number;
+  receiver: number;
+}
+
+// FileReceiver Actions Interface: Actions interface for modifying the store
+export interface FileReceiverActions {
+  setInitId: (id: string) => void;
+  setTransferConnection: (
+    transferConnection: Partial<TransferConnection>,
+  ) => void;
+  setFileMetadata: (fileMetadata: FileMetadata | null) => void;
+  setErrorMessage: (errorMessage: string | null) => void;
+  setFileTransferInfo: (fileTransferInfo: Partial<FileTransferInfo>) => void;
+  setTransferStatus: (transferStatus: Partial<TransferStatus>) => void;
+  setTransferProgress: (transferProgress: Partial<TransferProgress>) => void;
+  setReceivedChunkData: (receivedChunkData: ArrayBuffer) => void;
+  clearTransferState: () => void;
+  finalizeTransfer: () => void;
+  setLastValidSenderId: (senderId: string | null) => void;
+}
+
+// FileReceiver State Interface
+interface FileReceiverState {
+  initId: string | null;
+  transferConnection: TransferConnection;
+  fileMetadata: FileMetadata | null;
+  errorMessage: string | null;
+  fileTransferInfo: FileTransferInfo;
+  transferStatus: TransferStatus;
+  transferProgress: TransferProgress;
+  receivedChunkData: ArrayBuffer[];
   fileUrl: string | null;
+  // Not used yet, only set during finalize transfer
+  lastValidSenderId: string | null;
   actions: FileReceiverActions;
 }
 
+// Zustand Store for File Receiver
 export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
   initId: null,
-  senderId: null,
-  recipientId: null,
+  transferConnection: {
+    senderId: null,
+    recipientId: null,
+    isConnected: false,
+  },
   fileMetadata: null,
   errorMessage: null,
-  webSocketUrl: null,
-  wsHandlers: {
-    sendJsonMessage: undefined,
-    getWebSocket: undefined,
-  },
-  isConnectedToSender: false,
   isSenderTransferring: false,
-  totalSize: 0,
-  totalChunks: 0,
-  chunkIndex: 0,
-  chunkDataSize: 0,
-  uploadedSize: 0,
-  senderTransferProgress: 0,
+  fileTransferInfo: {
+    totalSize: 0,
+    totalChunks: 0,
+  },
+  transferStatus: {
+    uploadedSize: 0,
+    receivedBytes: 0,
+    chunkIndex: 0,
+    chunkDataSize: 0,
+    isTransferring: false,
+    isTransferError: false,
+    isTransferCanceled: false,
+    isTransferCompleted: false,
+  },
+  transferProgress: {
+    sender: 0,
+    receiver: 0,
+  },
   receivedChunkData: [],
-  receivedBytes: 0,
-  receiverTransferProgress: 0,
-  isTransferCompleted: false,
-  isTransferError: false,
   fileUrl: null,
+  lastValidSenderId: null,
   actions: {
     setInitId: (id) => set({ initId: id }),
-    setSenderId: (senderId) => set({ senderId }),
-    setRecipientId: (recipientId) => set({ recipientId }),
-    setFileMetadata: (fileMetadata) =>
+    setTransferConnection: (transferConnection) =>
       set({
-        fileMetadata,
+        transferConnection: {
+          ...get().transferConnection,
+          ...transferConnection,
+        },
       }),
-    setErrorMessage: (message) => set({ errorMessage: message }),
-    setWebSocketUrl: (wsUrl) => set({ webSocketUrl: wsUrl }),
-    setWebSocketHandlers: (handlers) =>
-      set((state) => ({
-        wsHandlers: { ...state.wsHandlers, ...handlers },
-      })),
-    setIsConnectedToSender: (isConnectedToSender) =>
-      set({ isConnectedToSender }),
-    setIsSenderTransferring: (isSenderTransferring) =>
-      set({ isSenderTransferring }),
+    setFileMetadata: (fileMetadata) => set({ fileMetadata }),
+    setErrorMessage: (errorMessage) => set({ errorMessage }),
+    setFileTransferInfo: (fileTransferInfo) => {
+      if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
 
-    setTotalSize: (totalSize: number) => set({ totalSize }),
-    setTotalChunks: (totalChunks: number) => set({ totalChunks }),
-    setChunkIndex: (chunkIndex: number) => set({ chunkIndex }),
-    setChunkDataSize: (chunkDataSize: number) => set({ chunkDataSize }),
-    setUploadedSize: (uploadedSize: number) => set({ uploadedSize }),
-    setSenderTransferProgress: (senderTransferProgress: number) =>
-      set({ senderTransferProgress }),
-    resetTransferStatus: () =>
       set({
-        isSenderTransferring: false,
-        totalSize: 0,
-        totalChunks: 0,
-        chunkIndex: 0,
-        chunkDataSize: 0,
-        uploadedSize: 0,
-        senderTransferProgress: 0,
+        fileTransferInfo: {
+          ...get().fileTransferInfo,
+          ...fileTransferInfo,
+        },
+      });
+    },
+    setTransferStatus: (transferStatus) => {
+      // Prevent status update if the transfer is canceled
+      if (
+        get().transferStatus.isTransferCanceled &&
+        transferStatus.isTransferCanceled !== false
+      )
+        return;
+
+      if (transferStatus.isTransferCanceled) {
+        set({
+          transferStatus: {
+            ...get().transferStatus,
+            ...transferStatus,
+          },
+        });
+        get().actions.clearTransferState(); // Clear transfer state if canceled
+        return;
+      }
+
+      set({
+        transferStatus: {
+          ...get().transferStatus,
+          ...transferStatus,
+        },
+      });
+    },
+    setTransferProgress: (transferProgress) => {
+      if (get().transferStatus.isTransferCanceled) return; // Don't set if transfer is canceled
+
+      set({
+        transferProgress: {
+          ...get().transferProgress,
+          ...transferProgress,
+        },
+      });
+    },
+    setReceivedChunkData: (receivedChunkData: ArrayBuffer) => {
+      if (get().transferStatus.isTransferCanceled) return; // Don't store data if transfer is canceled
+
+      set({
+        receivedChunkData: [...get().receivedChunkData, receivedChunkData],
+      });
+    },
+    clearTransferState: () =>
+      set({
+        fileTransferInfo: {
+          totalChunks: 0,
+          totalSize: 0,
+        },
+        transferStatus: {
+          ...get().transferStatus,
+          uploadedSize: 0,
+          receivedBytes: 0,
+          chunkIndex: 0,
+          chunkDataSize: 0,
+        },
+        transferProgress: {
+          sender: 0,
+          receiver: 0,
+        },
         receivedChunkData: [],
-        receivedBytes: 0,
-        receiverTransferProgress: 0,
       }),
-
-    setReceivedChunkData: (receivedChunkData: ArrayBuffer) =>
-      set((state) => ({
-        receivedChunkData: state.receivedChunkData.concat(receivedChunkData),
-      })),
-    setReceivedBytes: (receivedBytes: number) =>
-      set({
-        receivedBytes,
-      }),
-    setReceiverTransferProgress: (receiverTransferProgress: number) =>
-      set({
-        receiverTransferProgress,
-      }),
-    setIsTransferCompleted: (isTransferCompleted) =>
-      set({ isTransferCompleted }),
-    setIsTransferError: (isTransferError) => set({ isTransferError }),
     finalizeTransfer: () => {
-      const { receivedChunkData, fileMetadata, fileUrl } = get();
+      const { fileMetadata, transferConnection, receivedChunkData, fileUrl } =
+        get();
       const blobData = new Blob(receivedChunkData, {
         type: fileMetadata?.type || "application/octet-stream",
       });
 
+      // File size mismatch validation
       if (blobData.size === 0 || blobData.size !== fileMetadata?.size) {
         set({
           errorMessage: "File reconstruction failed. Size mismatch.",
-          isTransferError: true,
+          transferStatus: {
+            ...get().transferStatus,
+            isTransferring: false,
+            isTransferError: true,
+            isTransferCanceled: false,
+            isTransferCompleted: false,
+          },
         });
         console.error(
           `File size mismatch. Blob size: ${blobData.size}. Expected: ${fileMetadata?.size}`,
@@ -157,20 +205,34 @@ export const useFileReceiverStore = create<FileReceiverState>()((set, get) => ({
         return;
       }
 
+      // Revoke existing file URL if any
       if (fileUrl) {
         URL.revokeObjectURL(fileUrl);
       }
 
+      // Create a new file URL for the reconstructed file
       const newFileUrl = URL.createObjectURL(blobData);
 
       set({
         fileUrl: newFileUrl,
-        isTransferCompleted: true,
-        isTransferError: false,
+        transferStatus: {
+          ...get().transferStatus,
+          isTransferring: false,
+          isTransferError: false,
+          isTransferCanceled: false,
+          isTransferCompleted: true,
+        },
+        receivedChunkData: [],
+        lastValidSenderId: transferConnection.senderId,
       });
+
+      console.info("File successfully reconstructed. URL:", newFileUrl);
     },
+
+    setLastValidSenderId: (lastValidSenderId) => set({ lastValidSenderId }),
   },
 }));
 
+// Custom Hooks for accessing store and actions
 export const useFileReceiverActions = () =>
   useFileReceiverStore((state) => state.actions);

@@ -24,6 +24,19 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 console-subscriber = { version = "0.4.1", optional = true }
 chrono = { version = "0.4.40", features = ["serde"] }
 tower-http = { version = "0.6.2", features = ["cors"] }
+sys-info = "0.9.1"
 
 [features]
 console = ["dep:console-subscriber"]
+
+[profile.release]
+opt-level = 3
+lto =  true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.release-debug]
+inherits = "release"
+strip = false
+debug = true

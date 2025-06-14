@@ -29,6 +29,8 @@ pub enum RelayIncomingPayload {
     RecipientAck(RecipientAckPayload),
     #[serde(rename = "restartTransfer")]
     RestartTransfer,
+    #[serde(rename = "userClose")]
+    UserClose(UserClosePayload),
     #[serde(rename = "terminate")]
     Terminate,
     #[serde(other)]
@@ -77,9 +79,9 @@ pub struct FileChunkPayload {
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
+    pub uploaded_size: u64,
     pub chunk_index: u32,
     pub chunk_data_size: u32,
-    pub uploaded_size: u64,
     pub sender_transfer_progress: u8,
 }
 
@@ -91,8 +93,8 @@ pub struct FileTransferAckPayload {
     pub status: String,
     pub file_name: String,
     pub total_chunks: u16,
-    pub chunk_index: u32,
     pub uploaded_size: u64,
+    pub chunk_index: u32,
     pub chunk_data_size: u32,
     pub recipient_transfer_progress: u8,
 }
@@ -104,8 +106,8 @@ pub struct FileEndPayload {
     pub file_name: String,
     pub total_size: u64,
     pub total_chunks: u16,
-    pub last_chunk_index: u32,
     pub uploaded_size: u64,
+    pub last_chunk_index: u32,
 }
 
 #[derive(Deserialize)]
@@ -127,7 +129,6 @@ pub struct SenderAckPayload {
     pub request_type: String,
     pub sender_id: Option<String>,
     pub recipient_id: String,
-    pub status: String,
     pub message: Option<String>,
 }
 
@@ -138,4 +139,12 @@ pub struct RecipientAckPayload {
     pub sender_id: String,
     pub status: String,
     pub message: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserClosePayload {
+    pub user_id: String,
+    pub role: String,
+    pub reason: Option<String>,
 }

@@ -1,37 +1,46 @@
 export * from "./sender";
-export * from "./receiver";
 export * from "./shared";
+export * from "./receiver";
 
-import { ErrorMessageResponse, RegisterResponse } from "./shared";
-
+// Import specific responses from shared, sender, and receiver
+import {
+  ErrorMessageResponse,
+  PeerDisconnectedResponse,
+  RegisterResponse,
+} from "./shared";
 import {
   RecipientReadyResponse,
   CancelRecipientReadyResponse,
   FileTransferAckResponse,
+  CancelRecipientTransferResponse,
 } from "./sender";
-
 import {
   CancelSenderReadyResponse,
-  CancelSenderTransfer,
+  CancelSenderTransferResponse,
   FileChunkResponse,
   FileEndResponse,
   RestartTransferResponse,
   SenderAckResponse,
 } from "./receiver";
 
+// Define WebSocket sender message types
 export type WebSocketSenderTextMessageResponse =
   | ErrorMessageResponse
   | RegisterResponse
+  | PeerDisconnectedResponse
   | RecipientReadyResponse
   | CancelRecipientReadyResponse
-  | FileTransferAckResponse;
+  | FileTransferAckResponse
+  | CancelRecipientTransferResponse;
 
+// Define WebSocket receiver message types
 export type WebSocketReceiverTextMessageResponse =
   | ErrorMessageResponse
   | RegisterResponse
+  | PeerDisconnectedResponse
   | CancelSenderReadyResponse
   | SenderAckResponse
   | FileChunkResponse
   | FileEndResponse
   | RestartTransferResponse
-  | CancelSenderTransfer;
+  | CancelSenderTransferResponse;
