@@ -55,7 +55,7 @@ export interface UserCloseRequest {
   type: "userClose";
   userId: string;
   role: "sender" | "receiver";
-  reason: string;
+  reason?: string;
 }
 
 export interface PeerDisconnectedResponse {

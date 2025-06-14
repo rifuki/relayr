@@ -373,19 +373,21 @@ pub async fn handle_incoming_payload(
             }
         }
         RelayIncomingPayload::UserClose(payload) => {
-            let reason = format!(
-                "User `{}` with role `{}`. {}",
-                payload.user_id,
-                payload.role,
-                payload
-                    .reason
-                    .as_deref()
-                    .unwrap_or("Closed with no reason.")
-            );
+            let user_id = payload.user_id;
+            let role = payload.role;
+            let reason = payload
+                .reason
+                .unwrap_or("Closed with no reason.".to_owned());
+
+            let mut close_reason = format!("User `{}` with role `{}`. {}", user_id, role, reason);
+
+            while close_reason.len() > 123 {
+                close_reason.pop();
+            }
 
             let close_msg = Message::Close(Some(CloseFrame {
                 code: 1000,
-                reason: reason.into(),
+                reason: close_reason.into(),
             }));
 
             send_or_break!(tx, close_msg, stop_flag);
