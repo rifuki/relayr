@@ -24,13 +24,19 @@ use crate::{
     send_or_break,
 };
 
+#[derive(PartialEq)]
+pub enum DisconnectReason {
+    TransferCompleted,
+    Other,
+}
+
 pub fn spawn_receiver_task(
     mut receiver: SplitStream<WebSocket>,
     tx: Sender<Message>,
     state: RelayState,
     base_conn_id: String,
     last_heartbeat: Arc<Mutex<Instant>>,
-) -> JoinHandle<()> {
+) -> JoinHandle<DisconnectReason> {
     tokio::spawn(async move {
         let stop_flag = Arc::new(AtomicBool::new(false));
 
@@ -80,11 +86,7 @@ pub fn spawn_receiver_task(
                             "Sender `{}` attempted to send a file, but no recipient is connected",
                             base_conn_id
                         );
-                        let err_msg = ErrorMessage::new(&format!(
-                            "Active connection for sender_id: `{}` not found",
-                            &base_conn_id
-                        ))
-                        .to_ws_msg();
+                        let err_msg = ErrorMessage::new("Active connection not found. The receiver may have disconnected").to_ws_msg();
 
                         send_or_break!(tx, err_msg, stop_flag);
                     }
@@ -99,6 +101,11 @@ pub fn spawn_receiver_task(
                             code = reason.code,
                             reason = %reason.reason,
                         );
+                        if reason.reason.contains("Transfer Completed") {
+                            return DisconnectReason::TransferCompleted;
+                        } else {
+                            return DisconnectReason::Other;
+                        }
                     } else {
                         tracing::info!("WebSocket closed with no close frame (e.g., code 1006)");
                     }
@@ -114,5 +121,6 @@ pub fn spawn_receiver_task(
                 break;
             }
         }
+        DisconnectReason::Other
     })
 }

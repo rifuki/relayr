@@ -265,7 +265,7 @@ function processFileTransferAckMessage(
       type: "userClose",
       userId: senderId,
       role: "sender",
-      reason: "Transfer Completed",
+      reason: `Transfer completed for file "${file.name}". Closing connection.`,
     } satisfies UserCloseRequest);
   } else if (ack.status === "error") {
     actions.setTransferStatus({
@@ -309,12 +309,12 @@ function processPeerDisconnectedMessage(
 ) {
   const { actions } = deps;
 
+  console.warn("[Sender] Peer disconnected:", msg.peerId);
   actions.setTransferConnection({ recipientId: null });
   actions.setTransferStatus({
     isTransferring: false,
     isTransferError: false,
     isTransferCanceled: false,
-    isTransferCompleted: false,
   });
   actions.clearTransferState();
   actions.setErrorMessage(

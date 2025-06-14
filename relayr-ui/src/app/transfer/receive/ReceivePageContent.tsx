@@ -35,12 +35,9 @@ export default function ReceivePageContent() {
   const connectionId = useInitId("receiver");
 
   // Read state values from the store
-  const errorMessage = useFileReceiverStore((state) => state.errorMessage);
-  const { recipientId, isConnected } = useFileReceiverStore(
-    (s) => s.transferConnection,
-  );
+  const errorMessage = useFileReceiverStore((s) => s.errorMessage);
   const { isTransferring, isTransferCompleted } = useFileReceiverStore(
-    (state) => state.transferStatus,
+    (s) => s.transferStatus,
   );
   const actions = useFileReceiverActions();
 
@@ -63,17 +60,6 @@ export default function ReceivePageContent() {
       actions.setTransferConnection({ senderId });
     }
   }, [senderId, data, actions]);
-
-  console.log({
-    senderId,
-    recipientId,
-    isConnected,
-    isTransferring,
-    isTransferCompleted,
-    isFetchingFileMeta,
-    error,
-    connectionId,
-  });
 
   // Handle invalid or missing sender ID
   if (!senderId && !isTransferring && !isTransferCompleted)

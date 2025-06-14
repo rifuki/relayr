@@ -9,7 +9,7 @@ use std::sync::Arc;
 use axum::extract::ws::WebSocket;
 use futures::StreamExt;
 use ping::spawn_ping_task;
-use receiver::spawn_receiver_task;
+use receiver::{DisconnectReason, spawn_receiver_task};
 use sender::spawn_sender_task;
 use tokio::{
     sync::{Mutex, mpsc},
@@ -40,7 +40,7 @@ pub async fn handle_socket(socket: WebSocket, state: RelayState, id: String) {
         last_heartbeat.clone(),
     );
 
-    wait_socket_tasks(ping_task, sender_task, receiver_task).await;
+    let disconnected_reason = wait_socket_tasks(ping_task, sender_task, receiver_task).await;
 
     if let Some(recipient_id) = state.get_connected_recipient(&id).await {
         if let Some(recipient_tx) = state.get_user_tx(&recipient_id).await {
@@ -49,10 +49,14 @@ pub async fn handle_socket(socket: WebSocket, state: RelayState, id: String) {
         }
     }
 
-    if let Some(sender_id) = state.get_connected_sender(&id).await {
-        if let Some(sender_tx) = state.get_user_tx(&sender_id).await {
-            let msg = PeerDisconnectedResponseDto::new(&id, "recipient").to_ws_msg();
-            let _ = sender_tx.send(msg).await;
+    if disconnected_reason != DisconnectReason::TransferCompleted {
+        if let Some(sender_id) = state.get_connected_sender(&id).await {
+            if let Some(sender_tx) = state.get_user_tx(&sender_id).await {
+                state.remove_active_connection(&sender_id).await;
+
+                let msg = PeerDisconnectedResponseDto::new(&id, "recipient").to_ws_msg();
+                let _ = sender_tx.send(msg).await;
+            }
         }
     }
 
