@@ -10,19 +10,21 @@ import type {
   TransferStatus,
 } from "@/stores/useFileReceiverStore";
 import type { FileMetadata } from "@/types/file";
-import type {
-  CancelSenderReadyResponse,
-  CancelSenderTransferResponse,
-  FileChunkResponse,
-  FileEndResponse,
-  FileTransferAckRequest,
-  PeerDisconnectedResponse,
-  RecipientReadyRequest,
-  RegisterResponse,
-  RestartTransferResponse,
-  SenderAckResponse,
-  UserCloseRequest,
-  WebSocketReceiverTextMessageResponse,
+import {
+  errorCodeMessages,
+  type CancelSenderReadyResponse,
+  type CancelSenderTransferResponse,
+  type ErrorMessageResponse,
+  type FileChunkResponse,
+  type FileEndResponse,
+  type FileTransferAckRequest,
+  type PeerDisconnectedResponse,
+  type RecipientReadyRequest,
+  type RegisterResponse,
+  type RestartTransferResponse,
+  type SenderAckResponse,
+  type UserCloseRequest,
+  type WebSocketReceiverTextMessageResponse,
 } from "@/types/webSocketMessages";
 
 // Process incoming WebSocket text messages
@@ -48,24 +50,13 @@ export function processWebSocketTextMessage(
     transferProgress,
     sendJsonMessage,
   } = deps;
-  const { recipientId } = transferConnection;
 
   if (!wsMsg.success) {
-    const shouldClose =
-      wsMsg.message
-        .toLowerCase()
-        .includes("sender is already connected to recipient") ||
-      wsMsg.message.toLowerCase().includes("is no longer connected");
-
-    if (shouldClose) {
-      sendJsonMessage({
-        type: "userClose",
-        userId: recipientId!,
-        role: "receiver",
-        reason: "Sender unavailable or disconnected. Closing connection.",
-      } satisfies UserCloseRequest);
-    }
-    actions.setErrorMessage(wsMsg.message ?? "An unknown error occurred");
+    handleWebSocketTextErrorMessage(wsMsg, {
+      transferConnection,
+      sendJsonMessage,
+      actions,
+    });
 
     return;
   }
@@ -119,6 +110,40 @@ export function processWebSocketTextMessage(
       console.error("[Receiver] Unknown WebSocket message:", wsMsg);
       break;
   }
+}
+
+interface handleWebSocketTextErrorMessageArgs {
+  transferConnection: TransferConnection;
+  sendJsonMessage: WebSocketHook["sendJsonMessage"];
+  actions: FileReceiverActions;
+}
+function handleWebSocketTextErrorMessage(
+  wsMsg: ErrorMessageResponse,
+  args: handleWebSocketTextErrorMessageArgs,
+) {
+  const { transferConnection, sendJsonMessage, actions } = args;
+  const { recipientId } = transferConnection;
+
+  const errorMessage =
+    errorCodeMessages[wsMsg.code] ||
+    wsMsg.message ||
+    "An unknown error occurred";
+
+  sendJsonMessage({
+    type: "userClose",
+    userId: recipientId!,
+    role: "receiver",
+    reason: errorMessage,
+  } satisfies UserCloseRequest);
+
+  actions.setErrorMessage(errorMessage);
+  actions.setTransferStatus({
+    isTransferring: false,
+    isTransferError: true,
+    isTransferCanceled: false,
+    isTransferCompleted: false,
+  });
+  actions.clearTransferState();
 }
 
 // Process incoming 'register' message

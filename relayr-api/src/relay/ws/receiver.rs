@@ -17,7 +17,7 @@ use crate::{
             requests::RelayIncomingPayload,
             responses::{RegisterResponseDto, WsResponse},
         },
-        error::ErrorMessage,
+        error::{ErrorCode, ErrorMessage},
         state::RelayState,
         ws::handlers::handle_incoming_payload,
     },
@@ -60,9 +60,12 @@ pub fn spawn_receiver_task(
                             .await
                         }
                         Err(e) => {
-                            let err_msg = ErrorMessage::new("failed to parse payload")
-                                .with_details(&e.to_string())
-                                .to_ws_msg();
+                            let err_msg = ErrorMessage::new(
+                                ErrorCode::InvalidPayload,
+                                "failed to parse payload",
+                            )
+                            .with_details(&e.to_string())
+                            .to_ws_msg();
                             send_or_break!(tx, err_msg, stop_flag);
                         }
                     }
@@ -74,20 +77,24 @@ pub fn spawn_receiver_task(
                         if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
                             send_or_break!(recipient_tx, Message::binary(bin_data), stop_flag);
                         } else {
-                            let err_msg = ErrorMessage::new(&format!(
-                                "Recipient `{}` is no longer connected",
-                                current_recipient
-                            ))
+                            let err_msg = ErrorMessage::new(
+                                ErrorCode::RecipientDisconnected,
+                                &format!(
+                                    "recipient [{}] is no longer connected",
+                                    current_recipient
+                                ),
+                            )
                             .to_ws_msg();
                             send_or_break!(tx, err_msg, stop_flag);
                         }
                     } else {
                         tracing::warn!(
-                            "Sender `{}` attempted to send a file, but no recipient is connected",
+                            "sender [{}] attempted to send a file, but no recipient is connected",
                             base_conn_id
                         );
                         let err_msg = ErrorMessage::new(
-                            "Active connection not found. The receiver may have disconnected",
+                            ErrorCode::ActiveConnectionNotFound,
+                            "active connection for sender_id: [{}] not found",
                         )
                         .to_ws_msg();
 
@@ -110,12 +117,16 @@ pub fn spawn_receiver_task(
                             return DisconnectReason::Other;
                         }
                     } else {
-                        tracing::info!("WebSocket closed with no close frame (e.g., code 1006)");
+                        tracing::info!("webSocket closed with no close frame (e.g., code 1006)");
                     }
                     break;
                 }
                 _ => {
-                    let err_msg = ErrorMessage::new("unsupported ws message type").to_ws_msg();
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::UnsupportedWsMessageType,
+                        "unsupported websocket message type",
+                    )
+                    .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             }

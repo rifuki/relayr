@@ -18,7 +18,7 @@ use crate::{
                 SenderAckResponseDto, WsResponse,
             },
         },
-        error::ErrorMessage,
+        error::{ErrorCode, ErrorMessage},
         state::RelayState,
     },
     send_or_break,
@@ -51,12 +51,14 @@ pub async fn handle_incoming_payload(
             let connected_recipient = state.get_connected_recipient(&payload.sender_id).await;
 
             if let Some(current_recipient) = connected_recipient {
-                tracing::info!(
-                    "Sender is already connected to another recipient: `{current_recipient}`"
-                );
-                let err_msg =
-                    ErrorMessage::new("Sender is already connected to another recipient.")
-                        .to_ws_msg();
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::SenderAlreadyConnected,
+                    &format!(
+                        "sender `{}` is already connected to recipient `{}`",
+                        &payload.sender_id, current_recipient
+                    ),
+                )
+                .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             } else {
                 let recipient_id = payload.recipient_id.unwrap_or(base_conn_id.to_owned());
@@ -70,7 +72,8 @@ pub async fn handle_incoming_payload(
                     send_or_break!(sender_tx, success_msg, stop_flag);
                 } else {
                     let err_msg = ErrorMessage::new(
-                        "Sender is no longer connected. Please ask the sender to generate new link."
+                        ErrorCode::SenderDisconnected,
+                        &format!("sender `{}` is no longer connected", &payload.sender_id),
                     )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
@@ -90,26 +93,32 @@ pub async fn handle_incoming_payload(
                                 .to_ws_msg();
                         send_or_break!(sender_tx, success_msg, stop_flag);
                     } else {
-                        let err_msg = ErrorMessage::new(&format!(
-                            "Sender `{}` is no longer connected",
-                            &payload.sender_id
-                        ))
+                        let err_msg = ErrorMessage::new(
+                            ErrorCode::SenderDisconnected,
+                            &format!("sender `{}` is no longer connected", &payload.sender_id),
+                        )
                         .to_ws_msg();
                         send_or_break!(tx, err_msg, stop_flag);
                     }
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient ID mismatch. Expected `{}`, `{}`",
-                        current_recipient, recipient_id
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientMismatch,
+                        &format!(
+                            "recipient ID mismatch. expected `{}`, got `{}`",
+                            current_recipient, recipient_id
+                        ),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    &payload.sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!(
+                        "active connection for sender_id: `{}` not found",
+                        &payload.sender_id
+                    ),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -126,18 +135,21 @@ pub async fn handle_incoming_payload(
                             .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient with id `{}` has no active connection",
-                        current_recipient
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientDisconnected,
+                        &format!(
+                            "recipient with id `{}` has no active connection",
+                            current_recipient
+                        ),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!("active connection for sender_id: `{}` not found", sender_id),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -162,18 +174,18 @@ pub async fn handle_incoming_payload(
                     .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient `{}` is no longer connected",
-                        current_recipient
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientDisconnected,
+                        &format!("recipient `{}` is no longer connected", current_recipient),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!("active connection for sender_id: `{}` not found", sender_id),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -195,10 +207,10 @@ pub async fn handle_incoming_payload(
                 .to_ws_msg();
                 send_or_break!(sender_tx, success_msg, stop_flag);
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Sender `{}` is no longer connected",
-                    &payload.sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::SenderDisconnected,
+                    &format!("sender `{}` is no longer connected", &payload.sender_id),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -221,18 +233,18 @@ pub async fn handle_incoming_payload(
                     .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient `{}` is no longer connected",
-                        current_recipient
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientDisconnected,
+                        &format!("recipient `{}` is no longer connected", current_recipient),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!("active connection for sender_id: `{}` not found", sender_id),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -248,18 +260,18 @@ pub async fn handle_incoming_payload(
                             .to_ws_msg();
                     send_or_break!(recipient_tx, success_msg, stop_flag);
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient `{}` is no longer connected",
-                        current_recipient
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientDisconnected,
+                        &format!("recipient `{}` is no longer connected", current_recipient),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!("active connection for sender_id: `{}` not found", sender_id),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -278,26 +290,32 @@ pub async fn handle_incoming_payload(
                         .to_ws_msg();
                         send_or_break!(sender_tx, success_msg, stop_flag);
                     } else {
-                        let err_msg = ErrorMessage::new(&format!(
-                            "Sender `{}` is no longer connected",
-                            &payload.sender_id
-                        ))
+                        let err_msg = ErrorMessage::new(
+                            ErrorCode::SenderDisconnected,
+                            &format!("sender `{}` is no longer connected", &payload.sender_id),
+                        )
                         .to_ws_msg();
                         send_or_break!(tx, err_msg, stop_flag);
                     }
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient ID mismatch. Expected `{}`, `{}`",
-                        current_recipient, recipient_id
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientMismatch,
+                        &format!(
+                            "recipient ID mismatch. Expected `{}`, `{}`",
+                            current_recipient, recipient_id
+                        ),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    &payload.sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!(
+                        "active connection for sender_id: `{}` not found",
+                        &payload.sender_id
+                    ),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -314,10 +332,13 @@ pub async fn handle_incoming_payload(
                 .to_ws_msg();
                 send_or_break!(recipient_tx, success_msg, stop_flag);
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Recipient `{}` is no longer connected",
-                    &payload.recipient_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::RecipientDisconnected,
+                    &format!(
+                        "recipient `{}` is no longer connected",
+                        &payload.recipient_id
+                    ),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -335,18 +356,18 @@ pub async fn handle_incoming_payload(
                         RestartTransferResponseDto::new(&sender_id, &current_recipient).to_ws_msg();
                     send_or_break!(recipient_tx, response_message, stop_flag);
                 } else {
-                    let err_msg = ErrorMessage::new(&format!(
-                        "Recipient `{}` is no longer connected",
-                        current_recipient
-                    ))
+                    let err_msg = ErrorMessage::new(
+                        ErrorCode::RecipientDisconnected,
+                        &format!("recipient `{}` is no longer connected", current_recipient),
+                    )
                     .to_ws_msg();
                     send_or_break!(tx, err_msg, stop_flag);
                 }
             } else {
-                let err_msg = ErrorMessage::new(&format!(
-                    "Active connection for sender_id: `{}` not found",
-                    sender_id
-                ))
+                let err_msg = ErrorMessage::new(
+                    ErrorCode::ActiveConnectionNotFound,
+                    &format!("active connection for sender_id: `{}` not found", sender_id),
+                )
                 .to_ws_msg();
                 send_or_break!(tx, err_msg, stop_flag);
             }
@@ -371,12 +392,17 @@ pub async fn handle_incoming_payload(
         }
         RelayIncomingPayload::Terminate => stop_flag.store(true, Ordering::Relaxed),
         RelayIncomingPayload::Unknown => {
-            let err_msg = ErrorMessage::new("unknown message type").to_ws_msg();
+            let err_msg = ErrorMessage::new(
+                ErrorCode::UnsupportedWsMessageTextType,
+                "unknown json message type",
+            )
+            .to_ws_msg();
 
             send_or_break!(tx, err_msg, stop_flag);
         }
         _ => {
-            let err_msg = ErrorMessage::new("not handled yet!").to_ws_msg();
+            let err_msg =
+                ErrorMessage::new(ErrorCode::NotHandledYet, "not handled yet!").to_ws_msg();
             send_or_break!(tx, err_msg, stop_flag);
         }
     }
