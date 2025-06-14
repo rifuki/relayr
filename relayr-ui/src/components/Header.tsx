@@ -69,12 +69,13 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
 
   // Get WebSocket status and transfer state from zustand stores
   const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
-  const { readyState: senderWebSocketReadyState } = senderWebSocket ?? -1;
+  const { readyState: senderWebSocketReadyState } = senderWebSocket ?? {
+    readyState: -1,
+  };
   const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket)
-    throw new Error("Receiver WebSocket is not initialized");
-  const { readyState: receiverWebSocketReadyState } = receiverWebSocket ?? -1;
+  const { readyState: receiverWebSocketReadyState } = receiverWebSocket ?? {
+    readyState: -1,
+  };
 
   const {
     isTransferring: isSenderUploading,
@@ -106,6 +107,9 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
     receiverWebSocketReadyState,
   );
 
+  const isTransferCompleted =
+    isSenderTransferCompleted && isReceiverTransferCompleted;
+
   return (
     <motion.header
       className={`sticky top-0 z-10 border-b  ${pathname === "/" ? "bg-background/10" : "bg-background/50 sm:bg-background/10"} backdrop-blur-md`}
@@ -116,7 +120,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
       <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-8 lg:px-10 max-w-screen-xl">
         {/* Left side: App title and navigation */}
         <motion.div
-          className="flex items-center gap-6"
+          className={`flex items-center ${isTransferCompleted ? "gap-2" : "gap-4"} sm:gap-5`}
           initial={{ x: -24, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.15, duration: 0.5 }}
@@ -127,7 +131,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
             </span>
           </Link>
           {/* Navigation buttons: Send and Receive */}
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1 sm:gap-2">
             {navState.map((nav) => (
               <Button
                 key={nav.label}
@@ -174,7 +178,7 @@ export default function Header({ title = "Relayr" }: HeaderProps) {
 
         {/* Right side: WebSocket status and theme toggle */}
         <motion.div
-          className="flex items-center gap-5"
+          className={`flex items-center ${isTransferCompleted ? "gap-1.5" : "gap-4"} sm:gap-4`}
           initial={{ x: 24, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}

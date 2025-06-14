@@ -26,7 +26,7 @@ export default function HeaderConnectionStatus({
 }: HeaderConnectionStatusProps) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  const { data, isLoading, isError } = useRelayPing({ intervalMs: 2000 });
+  const { data, isLoading, isError } = useRelayPing({ intervalMs: 500 });
   let color = "bg-red-500";
   let text = "-";
   let textColor = "text-red-500";

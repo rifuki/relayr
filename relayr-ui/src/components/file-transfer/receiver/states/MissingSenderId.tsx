@@ -15,6 +15,7 @@ import CardState from "./CardState";
 
 // Custom Components
 import { MotionButton } from "@/components/animations/motion-button";
+import { useFileReceiverActions } from "@/stores/useFileReceiverStore";
 
 /**
  * MissingSenderId component allows users to enter a sender ID or a full transfer link.
@@ -25,6 +26,8 @@ import { MotionButton } from "@/components/animations/motion-button";
 export default function MissingSenderId() {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
+
+  const actions = useFileReceiverActions();
 
   const router = useRouter();
 
@@ -55,6 +58,7 @@ export default function MissingSenderId() {
 
     // If senderId is valid, navigate to the receive transfer page
     router.push(`/transfer/receive?id=${encodeURIComponent(senderId)}`);
+    actions.setErrorMessage(null);
   };
 
   return (

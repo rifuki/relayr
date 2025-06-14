@@ -1,5 +1,5 @@
 // Constants for Chunk Size
-export const CHUNK_SIZE = 128 * 1024; // 128 KB
+export const CHUNK_SIZE = 32 * 1024; // 32 KB chunk size for file transfers
 
 // Environment-specific configurations
 const isDev = process.env.NODE_ENV === "development"; // Check if the environment is development
