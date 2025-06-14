@@ -25,16 +25,14 @@ export default function SenderPage() {
   if (!senderWebSocket)
     throw new Error("SenderWebSocketProvider is not initialized");
 
-  const transferShareLink = useFileSenderStore(
-    (state) => state.transferShareLink,
-  );
+  const file = useFileSenderStore((state) => state.file);
   const { isTransferCompleted } = useFileSenderStore(
     (state) => state.transferStatus,
   );
   const errorMessage = useFileSenderStore((state) => state.errorMessage);
   const connectionId = useInitId("sender");
 
-  const showConnectionStatus = !!transferShareLink || isTransferCompleted;
+  const showConnectionStatus = !!file || isTransferCompleted;
 
   return (
     <TransferCardLayout

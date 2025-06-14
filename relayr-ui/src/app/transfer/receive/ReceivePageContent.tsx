@@ -12,6 +12,9 @@ import TransferCardLayout from "@/components/file-transfer/TransferCardLayout";
 import { useInitId } from "@/hooks/useInitId";
 import { useRelayFileMetadata } from "@/hooks/query/useRelay";
 
+// Context Providers
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
+
 // State Management (Store)
 import {
   useFileReceiverActions,
@@ -22,7 +25,6 @@ import {
 import MissingSenderId from "@/components/file-transfer/receiver/states/MissingSenderId";
 import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
-import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 export default function ReceivePageContent() {
   const receiverWebSocket = useReceiverWebSocket();
@@ -36,6 +38,7 @@ export default function ReceivePageContent() {
 
   // Read state values from the store
   const errorMessage = useFileReceiverStore((s) => s.errorMessage);
+  const { isConnected } = useFileReceiverStore((s) => s.transferConnection);
   const { isTransferring, isTransferCompleted } = useFileReceiverStore(
     (s) => s.transferStatus,
   );
@@ -50,7 +53,7 @@ export default function ReceivePageContent() {
     isLoading: isFetchingFileMeta,
     error,
   } = useRelayFileMetadata(senderId ?? "", {
-    enabled: !isTransferring && !isTransferCompleted,
+    enabled: !isConnected && !isTransferring && !isTransferCompleted,
   });
 
   // When metadata is successfully fetched, update store with metadata and connection info
@@ -62,10 +65,10 @@ export default function ReceivePageContent() {
   }, [senderId, data, actions]);
 
   // Handle invalid or missing sender ID
-  if (!senderId && !isTransferring && !isTransferCompleted)
+  if (!senderId && !isConnected && !isTransferring && !isTransferCompleted)
     return <MissingSenderId />;
   // Show error state if file metadata failed to fetch
-  if (error && !isTransferring && !isTransferCompleted)
+  if (error && !isConnected && !isTransferring && !isTransferCompleted)
     return <FileMetaError message={error.message} />;
   // Show loading state while fetching metadata
   if (isFetchingFileMeta) return <FileMetaLoading />;

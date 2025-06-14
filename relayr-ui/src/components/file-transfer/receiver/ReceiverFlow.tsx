@@ -1,5 +1,5 @@
 // React
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // External Libraries
 import useMeasure from "react-use-measure";
@@ -25,6 +25,14 @@ import {
 // Step Configurations
 import { STEP_CONFIGS } from "./";
 
+// Define stepMap with state combinations and corresponding step values
+const stepMap: { [key: string]: number } = {
+  "000": 1, // Initial state
+  "100": 2, // Connected, ready to receive
+  "110": 3, // Transferring
+  "001": 4, // Transfer completed
+};
+
 /**
  * ReceiverFlow Component
  * This component manages the flow of file receiving steps, transitioning between different states
@@ -48,28 +56,23 @@ export default function ReceiverFlow() {
   // Dynamic measurement hook to get the bounds (height) of the container for smooth transitions
   const [ref, bounds] = useMeasure();
 
+  // Generate the stepKey based on boolean values (converted to numbers) of states
+  const stepKey = useMemo(
+    () => `${+isConnected}${+isTransferring}${+isTransferCompleted}`,
+    [isConnected, isTransferring, isTransferCompleted],
+  );
+
   // useEffect hook to determine the current step based on connection and transfer status
   useEffect(() => {
-    // Define stepMap with state combinations and corresponding step values
-    const stepMap: { [key: string]: number } = {
-      "000": 1, // Initial state
-      "100": 2, // Connected, ready to receive
-      "110": 3, // Transferring
-      "001": 4, // Transfer completed
-    };
-
-    // Generate the stateKey based on boolean values (converted to numbers) of states
-    const stateKey = `${+isConnected}${+isTransferring}${+isTransferCompleted}`;
-
     // Retrieve the new step from stepMap, default to 0 if not found or unexpected state
-    const newStep = stepMap[stateKey] || 0;
+    const newStep = stepMap[stepKey] || 0;
 
     // If the new step is different from the current step, update the state and direction
     if (newStep !== currentStep) {
       setDirection(newStep > currentStep ? 1 : -1);
       setCurrentStep(newStep);
     }
-  }, [isConnected, isTransferring, isTransferCompleted, currentStep]);
+  }, [stepKey, currentStep]);
 
   // Array containing the components for each step, mapped to the current step
   const FLOW_COMPONENTS = [
