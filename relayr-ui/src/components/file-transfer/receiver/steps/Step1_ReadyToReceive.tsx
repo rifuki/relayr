@@ -1,3 +1,6 @@
+// Next.js
+import { useRouter } from "next/navigation";
+
 // Internal Components
 import {
   StepConfig as StepProps,
@@ -14,14 +17,20 @@ import { WS_RELAY_API_URL } from "@/lib/constants";
 import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 // State Management (Store)
-import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
+import {
+  useFileReceiverActions,
+  useFileReceiverStore,
+} from "@/stores/useFileReceiverStore";
 
 export default function Step1_ReadyToReceive(props: StepProps) {
+  const router = useRouter();
+
   const { openConnection } = useReceiverWebSocket();
 
   const initId = useFileReceiverStore((s) => s.initId);
   const { senderId } = useFileReceiverStore((s) => s.transferConnection);
   const fileMetadata = useFileReceiverStore((s) => s.fileMetadata);
+  const actions = useFileReceiverActions();
 
   if (!fileMetadata || !senderId) return;
 
@@ -29,11 +38,24 @@ export default function Step1_ReadyToReceive(props: StepProps) {
     openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
   };
 
+  const handleBack = () => {
+    actions.setFileMetadata(null);
+    actions.setTransferConnection({ senderId: null });
+    actions.setTransferStatus({ isTransferError: false });
+    router.push("/transfer/receive");
+  };
+
   const buttons = [
     {
       ...props.buttons.connectToSender,
       buttonProps: {
         onClick: handleConnectToSender,
+      },
+    },
+    {
+      ...props.buttons.back,
+      buttonProps: {
+        onClick: handleBack,
       },
     },
   ];

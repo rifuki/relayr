@@ -29,6 +29,11 @@ export const STEP_CONFIGS: StepConfig[] = [
         label: "Connect to Sender",
         key: "connectToSender",
       },
+      back: {
+        label: "Back",
+        key: "back",
+        variant: "destructive",
+      },
     },
   },
   // Step 2
