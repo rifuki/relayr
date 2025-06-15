@@ -1,5 +1,4 @@
 // Internal Components
-import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 import {
   StepConfig as StepProps,
   StepButtonsSection,
@@ -8,6 +7,9 @@ import {
   StepNoticeSection,
   StepSectionWrapper,
 } from "../../shared";
+
+// Context Providers
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 // State Management (Store)
 import {
@@ -22,9 +24,7 @@ import {
 } from "@/types/webSocketMessages";
 
 export default function Step2_WaitForSender(props: StepProps) {
-  const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket)
-    throw new Error("Receiver WebSocket is not available");
+  const { sendJsonMessage } = useReceiverWebSocket();
 
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { recipientId, senderId } = useFileReceiverStore(
@@ -35,11 +35,11 @@ export default function Step2_WaitForSender(props: StepProps) {
   if (!recipientId || !senderId || !fileMetadata) return;
 
   const handleCancelRecipientReady = () => {
-    receiverWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "cancelRecipientReady",
       senderId,
     } satisfies CancelRecipientReadyRequest);
-    receiverWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "userClose",
       userId: recipientId,
       role: "receiver",

@@ -58,8 +58,7 @@ export default function Step4_ReadyToSend(props: StepProps) {
     });
   }, [controls]);
 
-  const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+  const { sendJsonMessage, sendMessage } = useSenderWebSocket();
 
   const file = useFileSenderStore((state) => state.file);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -100,13 +99,13 @@ export default function Step4_ReadyToSend(props: StepProps) {
     actions.setFileTransferInfo({ totalChunks });
 
     actions.sendNextChunk({
-      sendJsonMessage: senderWebSocket.sendJsonMessage,
-      sendMessage: senderWebSocket.sendMessage,
+      sendJsonMessage,
+      sendMessage,
     });
   };
 
   const handleCancelSenderReady = () => {
-    senderWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "cancelSenderReady",
     } satisfies CancelSenderReadyRequest);
     actions.setTransferConnection({ recipientId: null });
@@ -115,7 +114,7 @@ export default function Step4_ReadyToSend(props: StepProps) {
   };
 
   const handleRestartTransfer = () => {
-    senderWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "restartTransfer",
     } satisfies RestartTransferRequest);
 

@@ -1,5 +1,4 @@
 // Internal Components
-import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 import {
   type StepConfig as StepProps,
   StepButtonsSection,
@@ -9,6 +8,9 @@ import {
   StepSectionWrapper,
   StepTransferProgressSection,
 } from "../../shared";
+
+// Context Providers
+import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 // State Management (Store)
 import {
@@ -20,9 +22,7 @@ import {
 import { CancelRecipientTransferRequest } from "@/types/webSocketMessages";
 
 export default function Step3_Receiving(props: StepProps) {
-  const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket)
-    throw new Error("Receiver WebSocket is not available");
+  const { sendJsonMessage } = useReceiverWebSocket();
 
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
   const { senderId } = useFileReceiverStore(
@@ -44,7 +44,7 @@ export default function Step3_Receiving(props: StepProps) {
   if (!senderId || !fileMetadata) return;
 
   const handleAbortTransfer = () => {
-    receiverWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "cancelRecipientTransfer",
       senderId,
     } satisfies CancelRecipientTransferRequest);

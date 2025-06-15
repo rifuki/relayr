@@ -33,7 +33,7 @@ export default function TransferCardLayout({
     <Card className="w-screen max-w-sm sm:max-w-md overflow-hidden bg-opacity border-none shadow-none gap-5">
       <CardContent className="w-full flex flex-col gap-5">
         {!useConnectionStore((s) => s.isOnline) ? (
-          <ErrorAlert message="❌ You are offline. Please check your internet connection. Try again later." />
+          <ErrorAlert message="❌ You are offline. Please check your internet connection." />
         ) : (
           errorMessage && <ErrorAlert message={errorMessage} />
         )}

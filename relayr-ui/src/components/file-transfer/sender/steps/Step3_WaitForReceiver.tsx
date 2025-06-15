@@ -16,8 +16,7 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
 import { UserCloseRequest } from "@/types/webSocketMessages";
 
 export default function Step3_WaitForReceiver(props: StepProps) {
-  const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket) throw new Error("Sender WebSocket is not available.");
+  const { sendJsonMessage } = useSenderWebSocket();
 
   const { senderId } = useFileSenderStore((state) => state.transferConnection);
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
@@ -28,7 +27,7 @@ export default function Step3_WaitForReceiver(props: StepProps) {
   if (!fileMetadata || !senderId || !transferShareLink) return;
 
   const handleStopSharing = () => {
-    senderWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "userClose",
       userId: senderId,
       role: "sender",

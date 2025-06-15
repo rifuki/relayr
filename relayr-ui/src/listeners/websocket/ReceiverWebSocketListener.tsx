@@ -22,18 +22,13 @@ import {
 } from "./handlers/receiver";
 
 // Types
-import type {
-  CancelRecipientReadyRequest,
-  CancelRecipientTransferRequest,
-} from "@/types/webSocketMessages";
+import type { UserCloseRequest } from "@/types/webSocketMessages";
 
 export default function ReceiverWebSocketListener() {
   // Accessing the receiver WebSocket context
-  const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket) throw new Error("ReceiverWebSocket is not available");
 
   // Extracting necessary values from the WebSocket
-  const { lastMessage, readyState, sendJsonMessage } = receiverWebSocket;
+  const { lastMessage, sendJsonMessage } = useReceiverWebSocket();
 
   // Extracting necessary values from the store
   const {
@@ -129,27 +124,16 @@ export default function ReceiverWebSocketListener() {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function handleBeforeUnload(_e: BeforeUnloadEvent) {
-      const { isConnected, senderId } = transferConnection;
-      const { isTransferring } = transferStatus;
-
-      const canSend = readyState === WebSocket.OPEN && senderId && isConnected;
-      if (!canSend) return;
-
-      if (isTransferring) {
-        sendJsonMessage({
-          type: "cancelRecipientTransfer",
-          senderId,
-        } satisfies CancelRecipientTransferRequest);
-      }
       sendJsonMessage({
-        type: "cancelRecipientReady",
-        senderId,
-      } satisfies CancelRecipientReadyRequest);
+        type: "userClose",
+        userId: transferConnection.recipientId!,
+        role: "receiver",
+        reason: "Receiver closed the window/tab.",
+      } satisfies UserCloseRequest);
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
-
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [transferConnection, transferStatus, readyState, sendJsonMessage]);
+  }, [sendJsonMessage, transferConnection]);
 
   return null;
 }

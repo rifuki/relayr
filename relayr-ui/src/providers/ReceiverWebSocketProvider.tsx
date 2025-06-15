@@ -63,4 +63,12 @@ export default function ReceiverWebSocketProvider({
   );
 }
 
-export const useReceiverWebSocket = () => useContext(ReceiverWebSocketContext);
+export const useReceiverWebSocket = () => {
+  const ctx = useContext(ReceiverWebSocketContext);
+  if (!ctx) {
+    throw new Error(
+      "useReceiverWebSocket must be used within a ReceiverWebSocketProvider",
+    );
+  }
+  return ctx;
+};

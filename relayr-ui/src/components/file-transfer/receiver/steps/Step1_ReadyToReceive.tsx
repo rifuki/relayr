@@ -9,39 +9,24 @@ import {
 
 // Constants
 import { WS_RELAY_API_URL } from "@/lib/constants";
+
+// Context Providers
 import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
 
 // State Management (Store)
-import {
-  useFileReceiverActions,
-  useFileReceiverStore,
-} from "@/stores/useFileReceiverStore";
+import { useFileReceiverStore } from "@/stores/useFileReceiverStore";
 
 export default function Step1_ReadyToReceive(props: StepProps) {
-  const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket)
-    throw new Error("ReceiverWebSocketProvider is not initialized");
+  const { openConnection } = useReceiverWebSocket();
 
-  const initId = useFileReceiverStore((state) => state.initId);
-  const { senderId } = useFileReceiverStore(
-    (state) => state.transferConnection,
-  );
-  const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-  const actions = useFileReceiverActions();
+  const initId = useFileReceiverStore((s) => s.initId);
+  const { senderId } = useFileReceiverStore((s) => s.transferConnection);
+  const fileMetadata = useFileReceiverStore((s) => s.fileMetadata);
 
   if (!fileMetadata || !senderId) return;
 
   const handleConnectToSender = () => {
-    actions.setErrorMessage(null);
-    actions.setTransferStatus({
-      isTransferring: false,
-      isTransferCanceled: false,
-      isTransferError: false,
-      isTransferCompleted: false,
-    });
-    actions.clearTransferState();
-
-    receiverWebSocket.openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
+    openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
   };
 
   const buttons = [

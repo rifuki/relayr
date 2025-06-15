@@ -21,9 +21,7 @@ import { useFileSenderStore } from "@/stores/useFileSenderStore";
  * @returns JSX.Element The sender's file transfer page component.
  */
 export default function SenderPage() {
-  const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket)
-    throw new Error("SenderWebSocketProvider is not initialized");
+  const { readyState } = useSenderWebSocket();
 
   const file = useFileSenderStore((state) => state.file);
   const { isTransferCompleted } = useFileSenderStore(
@@ -36,7 +34,7 @@ export default function SenderPage() {
 
   return (
     <TransferCardLayout
-      readyState={senderWebSocket.readyState}
+      readyState={readyState}
       errorMessage={errorMessage}
       connectionId={connectionId}
       showConnectionStatus={showConnectionStatus}

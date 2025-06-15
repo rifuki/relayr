@@ -28,32 +28,29 @@ export default function ConnectionStatusListener() {
   const setIsOnline = useConnectionStore((state) => state.setIsOnline);
 
   const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket)
-    throw new Error(
-      "Sender WebSocket is not initialized. Please ensure the SenderWebSocketProvider is set up correctly. ",
-    );
   const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket)
-    throw new Error(
-      "Receiver WebSocket is not initialized. Please ensure the ReceiverWebSocketProvider is set up correctly.",
-    );
 
   const { closeConnection: closeSenderConnection } = senderWebSocket;
   const { closeConnection: closeReceiverConnection } = receiverWebSocket;
-  const { recipientId, isSenderTransferring } = useFileSenderStore(
-    useShallow((s) => ({
-      recipientId: s.transferConnection.recipientId,
-      isSenderTransferring: s.transferStatus.isTransferring,
-    })),
-  );
+
+  const { recipientId, isSenderUploading, isSenderCompleted } =
+    useFileSenderStore(
+      useShallow((s) => ({
+        recipientId: s.transferConnection.recipientId,
+        isSenderUploading: s.transferStatus.isTransferring,
+        isSenderCompleted: s.transferStatus.isTransferCompleted,
+      })),
+    );
   const senderActions = useFileSenderActions();
 
-  const { isConnected, isRecipientTransferring } = useFileReceiverStore(
-    useShallow((s) => ({
-      isConnected: s.transferConnection.isConnected,
-      isRecipientTransferring: s.transferStatus.isTransferring,
-    })),
-  );
+  const { isConnected, isReceiverDownloading, isReceiverCompleted } =
+    useFileReceiverStore(
+      useShallow((s) => ({
+        isConnected: s.transferConnection.isConnected,
+        isReceiverDownloading: s.transferStatus.isTransferring,
+        isReceiverCompleted: s.transferStatus.isTransferCompleted,
+      })),
+    );
   const receiverActions = useFileReceiverActions();
 
   useEffect(() => {
@@ -63,29 +60,42 @@ export default function ConnectionStatusListener() {
   useEffect(() => {
     function handleOffline() {
       setIsOnline(false);
-      if (!recipientId || isSenderTransferring) {
+      if ((recipientId || isSenderUploading) && !isSenderCompleted) {
         senderActions.clearTransferState();
         senderActions.setTransferShareLink(null);
         senderActions.setTransferConnection({
           senderId: null,
           recipientId: null,
         });
+        senderActions.setTransferStatus({
+          isTransferring: false,
+          isTransferError: true,
+          isTransferCanceled: false,
+          isTransferCompleted: false,
+        });
       }
 
-      if (!isConnected || isRecipientTransferring) {
+      if ((isConnected || isReceiverDownloading) && !isReceiverCompleted) {
         receiverActions.clearTransferState();
         receiverActions.setTransferConnection({
           recipientId: null,
           isConnected: false,
         });
+        receiverActions.setTransferStatus({
+          isTransferring: false,
+          isTransferError: true,
+          isTransferCanceled: false,
+          isTransferCompleted: false,
+        });
       }
+
       closeSenderConnection();
       closeReceiverConnection();
     }
 
     function handleOnline() {
       setIsOnline(true);
-      toast.success("Connection Restored. Refresh this page", {
+      toast.success("You are back online!", {
         duration: 3000,
         action: {
           label: "Dismiss",
@@ -103,10 +113,12 @@ export default function ConnectionStatusListener() {
   }, [
     setIsOnline,
     isConnected,
-    isSenderTransferring,
+    isSenderUploading,
+    isSenderCompleted,
     senderActions,
     recipientId,
-    isRecipientTransferring,
+    isReceiverDownloading,
+    isReceiverCompleted,
     receiverActions,
     closeSenderConnection,
     closeReceiverConnection,

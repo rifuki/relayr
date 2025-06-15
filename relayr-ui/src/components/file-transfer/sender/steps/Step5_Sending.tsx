@@ -22,8 +22,7 @@ import {
 import { CancelSenderTransferRequest } from "@/types/webSocketMessages";
 
 export default function Step5_Sending(props: StepProps) {
-  const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+  const { sendJsonMessage } = useSenderWebSocket();
 
   const fileMetadata = useFileSenderStore((state) => state.fileMetadata);
   const transferShareLink = useFileSenderStore(
@@ -46,7 +45,7 @@ export default function Step5_Sending(props: StepProps) {
     return;
 
   const handleAbortTransfer = () => {
-    senderWebSocket.sendJsonMessage({
+    sendJsonMessage({
       type: "cancelSenderTransfer",
     } satisfies CancelSenderTransferRequest);
     actions.setTransferStatus({

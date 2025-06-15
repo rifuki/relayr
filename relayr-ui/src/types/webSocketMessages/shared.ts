@@ -34,7 +34,8 @@ export const errorCodeMessages: Record<ErrorCode, string> = {
   senderAlreadyConnected: "Sender is already connected to another recipient.",
   senderDisconnected: "Sender is no longer connected.",
   recipientDisconnected: "Recipient is no longer connected.",
-  activeConnectionNotFound: "No active connection found. Please try again.",
+  activeConnectionNotFound:
+    "No active transfer session found. The recipient may have disconnected.",
   recipientMismatch: "Recipient ID mismatch. Please check your link.",
   unsupportedWsMessageTextType: "Unsupported websocket text message.",
   unsupportedWsMessageType: "Unknown message type received.",

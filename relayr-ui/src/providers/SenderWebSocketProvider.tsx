@@ -97,4 +97,11 @@ export default function SenderWebSocketProvider({
  * ------------------
  * Custom hook to access the sender WebSocket context.
  */
-export const useSenderWebSocket = () => useContext(SenderWebSocketContext);
+export const useSenderWebSocket = () => {
+  const ctx = useContext(SenderWebSocketContext);
+  if (!ctx)
+    throw new Error(
+      "useSenderWebSocket must be used within SenderWebSocketProvider",
+    );
+  return ctx;
+};

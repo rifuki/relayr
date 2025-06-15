@@ -42,8 +42,7 @@ const checkmarkVariants = {
 };
 
 export default function Step2_FileSelected(props: StepProps) {
-  const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket) throw new Error("Sender WebSocket is not initialized");
+  const { openConnection } = useSenderWebSocket();
 
   // Retrieve state from the store
   const initId = useFileSenderStore((state) => state.initId);
@@ -59,7 +58,7 @@ export default function Step2_FileSelected(props: StepProps) {
     if (!file || !fileMetadata) {
       return { errorMessage: "File or file metadata is missing." };
     }
-    senderWebSocket.openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
+    openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
     setIsGenerateLinkLoading(false);
   };
 

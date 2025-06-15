@@ -19,19 +19,11 @@ import {
 import { processWebSocketTextMessage } from "./handlers/sender";
 
 // Types
-import type {
-  CancelSenderReadyRequest,
-  CancelSenderTransferRequest,
-} from "@/types/webSocketMessages";
+import type { UserCloseRequest } from "@/types/webSocketMessages";
 
 export default function SenderWebSocketListener() {
   // Accessing the sender WebSocket context
-  const senderWebSocket = useSenderWebSocket();
-  if (!senderWebSocket) throw new Error("SenderWebSocket is not available");
-
-  // Extracting necessary values from the WebSocket
-  const { lastMessage, readyState, sendMessage, sendJsonMessage } =
-    senderWebSocket;
+  const { lastMessage, sendMessage, sendJsonMessage } = useSenderWebSocket();
 
   // Extracting necessary values from the store
   const {
@@ -113,23 +105,16 @@ export default function SenderWebSocketListener() {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function handleBeforeUnload(_e: BeforeUnloadEvent) {
-      const { recipientId } = transferConnection;
-
-      const canSend = readyState === WebSocket.OPEN && recipientId;
-      if (!canSend) return;
-
-      if (transferStatus.isTransferring) {
-        sendJsonMessage({
-          type: "cancelSenderTransfer",
-        } satisfies CancelSenderTransferRequest);
-      }
       sendJsonMessage({
-        type: "cancelSenderReady",
-      } satisfies CancelSenderReadyRequest);
+        type: "userClose",
+        userId: transferConnection.senderId!,
+        role: "sender",
+        reason: "Sender closed the window/tab.",
+      } satisfies UserCloseRequest);
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [transferConnection, transferStatus, readyState, sendJsonMessage]);
+  }, [sendJsonMessage, transferConnection]);
 
   return null;
 }

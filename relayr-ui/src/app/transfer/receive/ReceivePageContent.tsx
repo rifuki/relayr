@@ -27,9 +27,7 @@ import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaEr
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
 
 export default function ReceivePageContent() {
-  const receiverWebSocket = useReceiverWebSocket();
-  if (!receiverWebSocket)
-    throw new Error("Receiver WebSocket is not available");
+  const { readyState } = useReceiverWebSocket();
 
   // Get the sender ID from the URL query parameters
   const senderIdFromQuery = useSearchParams().get("id");
@@ -39,9 +37,12 @@ export default function ReceivePageContent() {
   // Read state values from the store
   const errorMessage = useFileReceiverStore((s) => s.errorMessage);
   const { isConnected } = useFileReceiverStore((s) => s.transferConnection);
-  const { isTransferring, isTransferCompleted } = useFileReceiverStore(
-    (s) => s.transferStatus,
-  );
+  const {
+    isTransferring,
+    isTransferError,
+    isTransferCanceled,
+    isTransferCompleted,
+  } = useFileReceiverStore((s) => s.transferStatus);
   const actions = useFileReceiverActions();
 
   // Determine the sender ID to use: either from the query or the last valid one stored
@@ -53,7 +54,12 @@ export default function ReceivePageContent() {
     isLoading: isFetchingFileMeta,
     error,
   } = useRelayFileMetadata(senderId ?? "", {
-    enabled: !isConnected && !isTransferring && !isTransferCompleted,
+    enabled:
+      !isConnected &&
+      !isTransferError &&
+      !isTransferCanceled &&
+      !isTransferring &&
+      !isTransferCompleted,
   });
 
   // When metadata is successfully fetched, update store with metadata and connection info
@@ -75,7 +81,7 @@ export default function ReceivePageContent() {
 
   return (
     <TransferCardLayout
-      readyState={receiverWebSocket.readyState}
+      readyState={readyState}
       errorMessage={errorMessage}
       connectionId={connectionId}
     >

@@ -104,7 +104,11 @@ export function processWebSocketTextMessage(
       processCancelSenderTransferMessage(wsMsg, { actions });
       break;
     case "peerDisconnected":
-      processPeerDisconnectedMessage(wsMsg, { actions });
+      processPeerDisconnectedMessage(wsMsg, {
+        actions,
+        sendJsonMessage,
+        transferConnection,
+      });
       break;
     default:
       console.error("[Receiver] Unknown WebSocket message:", wsMsg);
@@ -112,6 +116,7 @@ export function processWebSocketTextMessage(
   }
 }
 
+// Handle WebSocket text error messages
 interface handleWebSocketTextErrorMessageArgs {
   transferConnection: TransferConnection;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
@@ -179,7 +184,16 @@ function processSenderAckMessage(
 
   switch (msg.requestType) {
     case "recipientReady":
+      actions.setErrorMessage(null);
+
+      actions.clearTransferState();
       actions.setTransferConnection({ isConnected: true });
+      actions.setTransferStatus({
+        isTransferring: false,
+        isTransferError: false,
+        isTransferCanceled: false,
+        isTransferCompleted: false,
+      });
       break;
     case "uploadOutOfSync":
       actions.setErrorMessage(
@@ -403,15 +417,32 @@ function processCancelSenderTransferMessage(
 // Process incoming 'peerDisconnected' message
 interface ProcessPeerDisconnectedMessageDeps {
   actions: FileReceiverActions;
+  sendJsonMessage: WebSocketHook["sendJsonMessage"];
+  transferConnection: TransferConnection;
 }
 export function processPeerDisconnectedMessage(
   msg: PeerDisconnectedResponse,
   deps: ProcessPeerDisconnectedMessageDeps,
 ) {
-  const { actions } = deps;
+  const { actions, sendJsonMessage, transferConnection } = deps;
+  const { recipientId } = transferConnection;
 
-  actions.setErrorMessage(`Sender [${msg.peerId}] disconnected unexpectedly`);
+  const errorMsg = `Sender [${msg.peerId}] disconnected unexpectedly`;
+  sendJsonMessage({
+    type: "userClose",
+    userId: recipientId!,
+    role: "receiver",
+    reason: errorMsg,
+  } satisfies UserCloseRequest);
+
+  actions.setErrorMessage(errorMsg);
   actions.setTransferConnection({ isConnected: false, recipientId: null });
+  actions.setTransferStatus({
+    isTransferring: false,
+    isTransferError: true,
+    isTransferCanceled: false,
+    isTransferCompleted: false,
+  });
   actions.clearTransferState();
 }
 
