@@ -53,7 +53,6 @@ export function processWebSocketTextMessage(
 
   if (!wsMsg.success) {
     handleWebSocketTextErrorMessage(wsMsg, {
-      transferConnection,
       sendJsonMessage,
       actions,
     });
@@ -107,7 +106,6 @@ export function processWebSocketTextMessage(
       processPeerDisconnectedMessage(wsMsg, {
         actions,
         sendJsonMessage,
-        transferConnection,
       });
       break;
     default:
@@ -118,7 +116,6 @@ export function processWebSocketTextMessage(
 
 // Handle WebSocket text error messages
 interface handleWebSocketTextErrorMessageArgs {
-  transferConnection: TransferConnection;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   actions: FileReceiverActions;
 }
@@ -126,8 +123,7 @@ function handleWebSocketTextErrorMessage(
   wsMsg: ErrorMessageResponse,
   args: handleWebSocketTextErrorMessageArgs,
 ) {
-  const { transferConnection, sendJsonMessage, actions } = args;
-  const { recipientId } = transferConnection;
+  const { sendJsonMessage, actions } = args;
 
   const errorMessage =
     errorCodeMessages[wsMsg.code] ||
@@ -136,7 +132,6 @@ function handleWebSocketTextErrorMessage(
 
   sendJsonMessage({
     type: "userClose",
-    userId: recipientId!,
     role: "receiver",
     reason: errorMessage,
   } satisfies UserCloseRequest);
@@ -226,9 +221,9 @@ function processCancelSenderReadyMessage(
   deps: ProcessCancelSenderReadyMessageDeps,
 ) {
   const { actions, transferConnection, sendJsonMessage } = deps;
-  const { recipientId } = transferConnection;
+  const { isConnected } = transferConnection;
 
-  if (!transferConnection.isConnected) return;
+  if (!isConnected) return;
 
   actions.setErrorMessage("Sender canceled the transfer before it started");
   actions.setTransferConnection({
@@ -238,7 +233,6 @@ function processCancelSenderReadyMessage(
   actions.clearTransferState();
   sendJsonMessage({
     type: "userClose",
-    userId: recipientId!,
     role: "receiver",
     reason: "Sender canceled the connection. Closing receiver.",
   } satisfies UserCloseRequest);
@@ -305,7 +299,7 @@ function processFileEndMessage(
     transferProgress,
     sendJsonMessage,
   } = deps;
-  const { senderId, recipientId } = transferConnection;
+  const { senderId } = transferConnection;
   const { totalChunks } = fileTransferInfo;
   const {
     uploadedSize,
@@ -371,7 +365,6 @@ function processFileEndMessage(
   // Close the WebSocket connection gracefully after transfer completion
   sendJsonMessage({
     type: "userClose",
-    userId: recipientId!,
     role: "receiver",
     reason: `Transfer completed for file "${fileMetadata.name}". Closing connection.`,
   } satisfies UserCloseRequest);
@@ -418,19 +411,17 @@ function processCancelSenderTransferMessage(
 interface ProcessPeerDisconnectedMessageDeps {
   actions: FileReceiverActions;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
-  transferConnection: TransferConnection;
 }
 export function processPeerDisconnectedMessage(
   msg: PeerDisconnectedResponse,
   deps: ProcessPeerDisconnectedMessageDeps,
 ) {
-  const { actions, sendJsonMessage, transferConnection } = deps;
-  const { recipientId } = transferConnection;
+  const { actions, sendJsonMessage } = deps;
 
   const errorMsg = `Sender [${msg.peerId}] disconnected unexpectedly`;
+
   sendJsonMessage({
     type: "userClose",
-    userId: recipientId!,
     role: "receiver",
     reason: errorMsg,
   } satisfies UserCloseRequest);

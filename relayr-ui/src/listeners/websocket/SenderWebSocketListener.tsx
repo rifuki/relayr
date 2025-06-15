@@ -26,29 +26,22 @@ export default function SenderWebSocketListener() {
   const { lastMessage, sendMessage, sendJsonMessage } = useSenderWebSocket();
 
   // Extracting necessary values from the store
-  const {
-    file,
-    fileMetadata,
-    transferConnection,
-    transferStatus,
-    transferProgress,
-  } = useFileSenderStore(
-    useShallow((state) => ({
-      file: state.file,
-      fileMetadata: state.fileMetadata,
-      transferConnection: state.transferConnection,
-      transferStatus: state.transferStatus,
-      transferProgress: state.transferProgress,
-      actions: state.actions,
-    })),
-  );
+  const { file, fileMetadata, transferStatus, transferProgress } =
+    useFileSenderStore(
+      useShallow((state) => ({
+        file: state.file,
+        fileMetadata: state.fileMetadata,
+        transferStatus: state.transferStatus,
+        transferProgress: state.transferProgress,
+        actions: state.actions,
+      })),
+    );
   const actions = useFileSenderActions();
 
   const depsRef = useRef({
     actions,
     file,
     fileMetadata,
-    transferConnection,
     transferStatus,
     transferProgress,
   });
@@ -58,31 +51,17 @@ export default function SenderWebSocketListener() {
       actions,
       file,
       fileMetadata,
-      transferConnection,
       transferStatus,
       transferProgress,
     };
-  }, [
-    actions,
-    file,
-    fileMetadata,
-    transferConnection,
-    transferStatus,
-    transferProgress,
-  ]);
+  }, [actions, file, fileMetadata, transferStatus, transferProgress]);
 
   // Handle incoming WebSocket messages
   useEffect(() => {
     if (!lastMessage || typeof lastMessage.data !== "string") return;
 
-    const {
-      actions,
-      file,
-      fileMetadata,
-      transferConnection,
-      transferStatus,
-      transferProgress,
-    } = depsRef.current;
+    const { actions, file, fileMetadata, transferStatus, transferProgress } =
+      depsRef.current;
 
     try {
       const parsedMessage = JSON.parse(lastMessage.data);
@@ -90,7 +69,6 @@ export default function SenderWebSocketListener() {
         actions,
         file,
         fileMetadata,
-        transferConnection,
         transferStatus,
         transferProgress,
         sendJsonMessage,
@@ -107,14 +85,13 @@ export default function SenderWebSocketListener() {
     function handleBeforeUnload(_e: BeforeUnloadEvent) {
       sendJsonMessage({
         type: "userClose",
-        userId: transferConnection.senderId!,
         role: "sender",
         reason: "Sender closed the window/tab.",
       } satisfies UserCloseRequest);
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [sendJsonMessage, transferConnection]);
+  }, [sendJsonMessage]);
 
   return null;
 }

@@ -126,7 +126,6 @@ export default function ReceiverWebSocketListener() {
     function handleBeforeUnload(_e: BeforeUnloadEvent) {
       sendJsonMessage({
         type: "userClose",
-        userId: transferConnection.recipientId!,
         role: "receiver",
         reason: "Receiver closed the window/tab.",
       } satisfies UserCloseRequest);

@@ -4,7 +4,6 @@ import type { WebSocketHook } from "react-use-websocket/dist/lib/types";
 // Types
 import type {
   FileSenderActions,
-  TransferConnection,
   TransferProgress,
   TransferStatus,
 } from "@/stores/useFileSenderStore";
@@ -29,7 +28,6 @@ interface ProcessWebSocketTextMessageDeps {
   actions: FileSenderActions;
   file: File | null;
   fileMetadata: FileMetadata | null;
-  transferConnection: TransferConnection;
   transferStatus: TransferStatus;
   transferProgress: TransferProgress;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
@@ -43,7 +41,6 @@ export function processWebSocketTextMessage(
     actions,
     file,
     fileMetadata,
-    transferConnection,
     transferStatus,
     transferProgress,
     sendJsonMessage,
@@ -52,7 +49,6 @@ export function processWebSocketTextMessage(
 
   if (!wsMsg.success) {
     handleWebSocketTextErrorMessage(wsMsg, {
-      transferConnection,
       sendJsonMessage,
       actions,
     });
@@ -83,7 +79,6 @@ export function processWebSocketTextMessage(
       processFileTransferAckMessage(wsMsg, {
         actions,
         file,
-        transferConnection,
         transferStatus,
         transferProgress,
         sendJsonMessage,
@@ -95,7 +90,7 @@ export function processWebSocketTextMessage(
       break;
 
     case "peerDisconnected":
-      processPeerDisconnectedMessage(wsMsg, { actions });
+      processPeerDisconnectedMessage(wsMsg, { actions, sendJsonMessage });
       break;
     default:
       console.error("[Sender] Unknown WebSocket message:", wsMsg);
@@ -104,7 +99,6 @@ export function processWebSocketTextMessage(
 }
 
 interface handleWebSocketTextErrorMessageArgs {
-  transferConnection: TransferConnection;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
   actions: FileSenderActions;
 }
@@ -112,8 +106,7 @@ function handleWebSocketTextErrorMessage(
   wsMsg: ErrorMessageResponse,
   args: handleWebSocketTextErrorMessageArgs,
 ) {
-  const { transferConnection, sendJsonMessage, actions } = args;
-  const { senderId } = transferConnection;
+  const { sendJsonMessage, actions } = args;
 
   const errorMessage =
     errorCodeMessages[wsMsg.code] ||
@@ -122,7 +115,6 @@ function handleWebSocketTextErrorMessage(
 
   sendJsonMessage({
     type: "userClose",
-    userId: senderId!,
     role: "receiver",
     reason: errorMessage,
   } satisfies UserCloseRequest);
@@ -220,7 +212,6 @@ function processCancelRecipientReadyMessage(
 interface ProcessFileTransferAckMessageDeps {
   actions: FileSenderActions;
   file: File | null;
-  transferConnection: TransferConnection;
   transferStatus: TransferStatus;
   transferProgress: TransferProgress;
   sendJsonMessage: WebSocketHook["sendJsonMessage"];
@@ -233,14 +224,12 @@ function processFileTransferAckMessage(
   const {
     actions,
     file,
-    transferConnection,
     transferStatus,
     transferProgress,
     sendJsonMessage,
     sendMessage,
   } = deps;
 
-  const { senderId } = transferConnection;
   const {
     offset,
     chunkIndex,
@@ -250,7 +239,7 @@ function processFileTransferAckMessage(
   } = transferStatus;
   const { sender: senderProgress } = transferProgress;
 
-  if (!file || !senderId) {
+  if (!file) {
     const errorMsg =
       "File or sender ID not available. Please refresh the page and try again.";
     actions.setErrorMessage(errorMsg);
@@ -298,7 +287,6 @@ function processFileTransferAckMessage(
     // Close the WebSocknnection gracefully after transfer completion
     sendJsonMessage({
       type: "userClose",
-      userId: senderId,
       role: "sender",
       reason: `Transfer completed for file "${file.name}". Closing connection.`,
     } satisfies UserCloseRequest);
@@ -327,7 +315,7 @@ interface ProcessCancelRecipientTransferMessageDeps {
   actions: FileSenderActions;
 }
 function processCancelRecipientTransferMessage(
-  msg: CancelRecipientTransferResponse,
+  _msg: CancelRecipientTransferResponse,
   deps: ProcessCancelRecipientTransferMessageDeps,
 ) {
   const { actions } = deps;
@@ -344,20 +332,27 @@ function processCancelRecipientTransferMessage(
 
 interface ProcessPeerDisconnectedMessageDeps {
   actions: FileSenderActions;
+  sendJsonMessage: WebSocketHook["sendJsonMessage"];
 }
 function processPeerDisconnectedMessage(
   msg: PeerDisconnectedResponse,
   deps: ProcessPeerDisconnectedMessageDeps,
 ) {
-  const { actions } = deps;
+  const { actions, sendJsonMessage } = deps;
 
-  actions.setErrorMessage(
-    `Recipient [${msg.peerId}] disconnected unexpectedly`,
-  );
+  const errorMsg = `Recipient [${msg.peerId}] disconnected unexpectedly`;
+
+  sendJsonMessage({
+    type: "userClose",
+    role: "sender",
+    reason: errorMsg,
+  } satisfies UserCloseRequest);
+
+  actions.setErrorMessage(errorMsg);
   actions.setTransferConnection({ recipientId: null });
   actions.setTransferStatus({
     isTransferring: false,
-    isTransferError: false,
+    isTransferError: true,
     isTransferCanceled: false,
     isTransferCompleted: false,
   });

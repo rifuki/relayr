@@ -144,7 +144,7 @@ pub struct RecipientAckPayload {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserClosePayload {
-    pub user_id: String,
+    pub user_id: Option<String>,
     pub role: String,
     pub reason: Option<String>,
 }

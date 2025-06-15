@@ -54,7 +54,7 @@ export interface RegisterResponse {
 // User close request structure for notifying the server about user-initiated closure
 export interface UserCloseRequest {
   type: "userClose";
-  userId: string;
+  userId?: string;
   role: "sender" | "receiver";
   reason?: string;
 }

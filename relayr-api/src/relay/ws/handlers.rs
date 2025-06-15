@@ -373,7 +373,7 @@ pub async fn handle_incoming_payload(
             }
         }
         RelayIncomingPayload::UserClose(payload) => {
-            let user_id = payload.user_id;
+            let user_id = payload.user_id.unwrap_or(base_conn_id.to_owned());
             let role = payload.role;
             let reason = payload
                 .reason
