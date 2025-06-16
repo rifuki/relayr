@@ -65,6 +65,7 @@ export default function HeaderConnectionStatus({
             onMouseEnter={() => setTooltipOpen(true)}
             onMouseLeave={() => setTooltipOpen(false)}
             onTouchStart={() => setTooltipOpen(true)}
+            aria-label="Connection Status"
           >
             {/* Relay ping status indicator */}
             <span className={`inline-block h-2 w-2 rounded-full ${color}`} />

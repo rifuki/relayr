@@ -31,23 +31,15 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
           >
-            <motion.h1
-              className="text-3xl font-bold tracking-tight md:text-5xl text-neutral-900 dark:text-neutral-100"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            >
-              Relayr – Instant, Effortless File Transfer
-            </motion.h1>
-            <motion.p
-              className="text-base sm:text-lg text-muted-foreground font-medium max-w-md mx-auto"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            >
-              Share files instantly—no accounts, no hassle. Powered by Axum
-              (Rust) for unmatched speed and privacy.
-            </motion.p>
+            <div className="space-y-7">
+              <h1 className="text-3xl font-bold tracking-tight md:text-5xl text-neutral-900 dark:text-neutral-100">
+                Relayr – Instant, Effortless File Transfer
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground font-medium max-w-md mx-auto">
+                Share files instantly—no accounts, no hassle. Powered by Axum
+                (Rust) for unmatched speed and privacy.
+              </p>
+            </div>
           </motion.div>
           {/* Title and Description End */}
 
@@ -137,9 +129,9 @@ export default function Home() {
                 <ZapIcon className="w-5 h-5 text-blue-500" />
               </motion.div>
               <div className="text-left space-y-1">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                   Real-Time Transfer
-                </h3>
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   Experience instant file transfers with WebSocket technology
                 </p>
@@ -171,9 +163,9 @@ export default function Home() {
                 <LockIcon className="w-5 h-5 text-purple-500" />
               </motion.div>
               <div className="text-left space-y-1">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                   Secure & Private
-                </h3>
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   All files are end-to-end encrypted, with zero storage or
                   traces left on our servers.
@@ -206,9 +198,9 @@ export default function Home() {
                 <UserPlusIcon className="w-5 h-5 text-pink-500" />
               </motion.div>
               <div className="text-left space-y-1">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                   No Sign Up, No Hassle
-                </h3>
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   Start transferring files instantly—no account, no
                   registration, just seamless sharing.
