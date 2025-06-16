@@ -1,20 +1,11 @@
 // React
 import { ReactNode } from "react";
 
-// props interface for DevLayout
-interface DevLayoutProps {
+interface LayoutProps {
   children: ReactNode;
 }
 
-/**
- * DevLayout component
- * This component serves as a layout wrapper for development-related pages,
- * providing a consistent structure for displaying development content.
- *
- * @param {DevLayoutProps} props - The properties for the DevLayout component.
- * @return JSX.Element - The rendered DevLayout component.
- */
-export default function DevLayout({ children }: DevLayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <div
       className="w-full flex items-center justify-center"

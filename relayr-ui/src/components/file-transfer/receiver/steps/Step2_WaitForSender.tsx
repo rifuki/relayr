@@ -27,12 +27,12 @@ export default function Step2_WaitForSender(props: StepProps) {
   const { sendJsonMessage } = useReceiverWebSocket();
 
   const fileMetadata = useFileReceiverStore((state) => state.fileMetadata);
-  const { recipientId, senderId } = useFileReceiverStore(
+  const { senderId } = useFileReceiverStore(
     (state) => state.transferConnection,
   );
   const actions = useFileReceiverActions();
 
-  if (!recipientId || !senderId || !fileMetadata) return;
+  if (!senderId || !fileMetadata) return;
 
   const handleCancelRecipientReady = () => {
     sendJsonMessage({
@@ -41,7 +41,6 @@ export default function Step2_WaitForSender(props: StepProps) {
     } satisfies CancelRecipientReadyRequest);
     sendJsonMessage({
       type: "userClose",
-      userId: recipientId,
       role: "receiver",
       reason: "cancelRecipientReady",
     } satisfies UserCloseRequest);

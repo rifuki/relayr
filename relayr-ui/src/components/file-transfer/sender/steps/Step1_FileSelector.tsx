@@ -8,13 +8,11 @@ import { motion } from "motion/react";
 // Internal Components
 import {
   type StepConfig as StepProps,
-  StepButtonsSection,
   StepHeaderSection,
   StepSectionWrapper,
 } from "../../shared";
 
 // Utilities
-import { handlePrepareDummyFile } from "@/utils/download";
 import { isFolderLike } from "@/utils/file";
 
 // State Management (Store)
@@ -131,24 +129,6 @@ export default function Step1_FileSelector(props: StepProps) {
     return () => clearTimeout(timer); // Clean up the timer
   }, []);
 
-  const handlePrepareDummyFileClick = async () => {
-    await handlePrepareDummyFile(
-      setIsFileLoading,
-      actions.setFile,
-      setProgress,
-    );
-  };
-
-  const buttons = [
-    {
-      ...props.buttons.prepareDummyFile,
-      buttonProps: {
-        onClick: handlePrepareDummyFileClick,
-        disabled: isFileLoading,
-      },
-    },
-  ];
-
   return (
     <StepSectionWrapper variants={{}}>
       {/* Render the header section with title and description  */}
@@ -244,10 +224,6 @@ export default function Step1_FileSelector(props: StepProps) {
         {/* Render the text instructions end */}
       </motion.div>
       {/* Render the transfer header with icon and title end */}
-
-      {/* Render the buttons for file selection */}
-      <StepButtonsSection buttons={buttons} />
-      {/* Render the buttons for file selection end */}
     </StepSectionWrapper>
   );
 }

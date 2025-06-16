@@ -26,7 +26,7 @@ import MissingSenderId from "@/components/file-transfer/receiver/states/MissingS
 import FileMetaError from "@/components/file-transfer/receiver/states/FileMetaError";
 import FileMetaLoading from "@/components/file-transfer/receiver/states/FileMetaLoading";
 
-export default function ReceivePageContent() {
+export default function Receive() {
   const { readyState } = useReceiverWebSocket();
 
   // Get the sender ID from the URL query parameters

@@ -17,7 +17,7 @@ export default function ExperienceLoading() {
 
       {/* Loading Text */}
       <p className="text-muted-foreground text-base font-medium tracking-wide animate-fade-in">
-        Preparing your experience...
+        Preparing your experience
       </p>
     </div>
   );

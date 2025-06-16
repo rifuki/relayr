@@ -49,8 +49,7 @@ export default function ReceiverWebSocketProvider({
       }
     },
     onError: (error: Event) => {
-      console.error("🔥 Error", error);
-      actions.setErrorMessage("WebSocket error occurred");
+      console.error("[WebSocket] Error:", error);
     },
   });
 
