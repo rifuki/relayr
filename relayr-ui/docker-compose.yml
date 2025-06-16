@@ -1,0 +1,11 @@
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/arm64
+        - linux/amd64
+    image: rifuki/relayr-ui:latest
+    ports:
+      - "3000:3000"

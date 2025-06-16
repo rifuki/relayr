@@ -1,0 +1,11 @@
+.next
+node_modules
+scripts
+
+*.log
+Dockerfile
+.dockerignore
+
+.env.local
+.env.development
+# .env.production
