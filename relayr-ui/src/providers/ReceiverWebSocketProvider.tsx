@@ -37,6 +37,12 @@ export default function ReceiverWebSocketProvider({
 
       if (close.code === 1000) return;
       else if (close.code === 1006) {
+        actions.setTransferStatus({
+          isTransferring: false,
+          isTransferError: true,
+          isTransferCanceled: false,
+          isTransferCompleted: false,
+        });
         actions.setErrorMessage("Lost connection to the server");
       } else {
         actions.setErrorMessage(`Disconnected: Code ${close.code}`);
