@@ -24,11 +24,13 @@ import {
 } from "@/stores/useFileSenderStore";
 
 // Types
+import { Variants } from "motion/react";
 import { FileInfoCard } from "../../shared";
 import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
 
+
 // Motion Animation
-const checkmarkVariants = {
+const checkmarkVariants: Variants = {
   hidden: { scale: 0, opacity: 0 },
   visible: {
     scale: [0, 1.2, 1],

@@ -1,12 +1,15 @@
+// Types
+import type { Variants } from "motion/react";
+
 // Transition Settings for the Panel
 export const transitionPanelTransition = {
-  x: { type: "spring", stiffness: 300, damping: 30 }, // Horizontal transition
+  x: { type: "spring" as const, stiffness: 300, damping: 30 }, // Horizontal transition
   opacity: { duration: 0.2 }, // Opacity transition duration
-  height: { type: "spring", stiffness: 500, damping: 50 }, // Height transition
+  height: { type: "spring" as const, stiffness: 500, damping: 50 }, // Height transition
 };
 
 // Variants for the File List Wrapper (container)
-export const fileListWrapperVariants = {
+export const fileListWrapperVariants: Variants = {
   hidden: { opacity: 0 }, // Hidden state with no opacity
   show: {
     opacity: 1, // Show state with full opacity
@@ -18,7 +21,7 @@ export const fileListWrapperVariants = {
 };
 
 // Variants for individual File List Items
-export const fileListItemVariants = {
+export const fileListItemVariants: Variants = {
   hidden: { opacity: 0, y: 20 }, // Hidden state with opacity 0 and vertical offset
   show: {
     opacity: 1, // Show state with full opacity

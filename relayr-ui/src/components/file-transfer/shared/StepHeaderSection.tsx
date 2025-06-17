@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 
 // External Libraries
 import {
-  AnimationProps,
   HTMLMotionProps,
   motion,
   MotionProps,
@@ -26,7 +25,7 @@ interface StepHeaderSectionProps {
   iconClassName?: string;
   Icon?: StepIconConfig;
   customIcon?: ReactNode;
-  iconAnimation?: AnimationProps & MotionProps;
+  iconAnimation?: MotionProps;
   motionVariants?: Variants;
   motionTitleDescProps?: HTMLMotionProps<"div">;
 }
