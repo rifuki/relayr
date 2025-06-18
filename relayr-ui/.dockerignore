@@ -10,3 +10,5 @@ Dockerfile
 .env.local
 .env.development
 # .env.production
+
+build_image.sh

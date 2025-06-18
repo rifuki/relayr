@@ -11,8 +11,8 @@ COPY . .
 ENV NODE_ENV=production
 RUN npm run build
 
-# Production stage: serve static files with nginx
-FROM nginx:latest AS production
-COPY --from=builder /usr/src/app/out /usr/share/nginx/html
+# Production stage: serve static files with caddy
+FROM caddy:alpine AS production
+COPY --from=build /usr/src/app/out /usr/share/caddy
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["caddy", "file-server", "--root", "/usr/share/caddy", "--listen", ":80"]

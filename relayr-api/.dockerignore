@@ -1,2 +1,7 @@
-/target
-/.git
+.git
+.gitignore
+target
+README.md
+*.log
+
+build_image.sh

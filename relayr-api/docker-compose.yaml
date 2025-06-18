@@ -1,8 +1,8 @@
 services:
-  ui:
+  api:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/rifuki/relayr-ui:latest
+    image: ghcr.io/rifuki/relayr-api:latest
     ports:
-      - "3000:3000"
+      - "8080:8080"
