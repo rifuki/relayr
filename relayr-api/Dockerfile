@@ -37,7 +37,7 @@ WORKDIR /app
 COPY --from=builder /usr/src/app/relayr-api ./relayr-api
 # Use the nonroot user provided by distroless image for better security
 USER nonroot
-EXPOSE 9001
+EXPOSE 8080
 CMD ["/app/relayr-api"]
 
 LABEL org.opencontainers.image.source="https://github.com/rifuki/relayr"

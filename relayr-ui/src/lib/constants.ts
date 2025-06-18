@@ -5,7 +5,7 @@ export const CHUNK_SIZE = 32 * 1024; // 32 KB chunk size for file transfers
 const isDev = process.env.NODE_ENV === "development";
 
 // Get API_HOST from environment, fallback to localhost
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || "http://localhost:9001";
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || "http://localhost:8080";
 // Parse protocol from BASE_URL
 const urlObject = new URL(API_HOST);
 

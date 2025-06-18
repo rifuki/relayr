@@ -2,7 +2,7 @@ import os from "os";
 import fs from "fs";
 import path from "path";
 
-const PORT = 9001;
+const PORT = 8080;
 const ENV_PATH = path.resolve(__dirname, "../.env.local");
 
 function getLocalExternalIP() {

@@ -23,6 +23,6 @@ pub static CONFIG: Lazy<Config> = Lazy::new(|| {
         port: std::env::var("PORT")
             .ok()
             .and_then(|v| v.parse().ok())
-            .unwrap_or(9001),
+            .unwrap_or(8080),
     }
 });

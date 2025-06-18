@@ -5,4 +5,4 @@ services:
       dockerfile: Dockerfile
     image: ghcr.io/rifuki/relayr-ui:latest
     ports:
-      - "3000:3000"
+      - "3000:80"
