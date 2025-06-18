@@ -1,7 +1,11 @@
 .git
-.gitignore
 target
+
+build_image.sh
+docker-compose.yaml
+Dockerfile
 README.md
 *.log
 
-build_image.sh
+.gitignore
+.env.example

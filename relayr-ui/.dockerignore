@@ -1,14 +1,18 @@
+.git
 .next
-out
 node_modules
+out
 scripts
 
-*.log
-Dockerfile
 .dockerignore
+build_image.sh
+docker-compose.yaml
+Dockerfile
+README.md
+*.log
 
+.gitignore
+.env.example
 .env.local
 .env.development
 # .env.production
-
-build_image.sh

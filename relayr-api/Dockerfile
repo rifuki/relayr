@@ -1,46 +1,44 @@
-# Stage 1: Build stage - use Rust official image based on Alpine Linux
-FROM rust:1.85-alpine AS builder
-
-# Install required build dependencies
-# musl libc development files for static linking
-# meta package including gcc, libc-dev, etc.
-# GNU C compiler
-RUN apk add --no-cache \
-    musl-dev \
-    build-base \
-    gcc                 
-
-# Set working directory inside container
+# Stage 1: Build
+FROM rust:alpine AS builder
+ARG TARGETPLATFORM
 WORKDIR /usr/src/app
 
-# Copy manifest files to leverage Docker cache for dependencies
+# Install base dependencies
+RUN apk add --no-cache musl-dev build-base gcc binutils
+
+# Set up target - use native compilation for the target platform
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+      rustup target add x86_64-unknown-linux-musl; \
+      echo "x86_64-unknown-linux-musl" > /tmp/target; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+      rustup target add aarch64-unknown-linux-musl; \
+      echo "aarch64-unknown-linux-musl" > /tmp/target; \
+    else \
+      echo "Unsupported platform: $TARGETPLATFORM" && exit 1; \
+    fi
+
+# Copy manifest and cache deps
 COPY Cargo.toml Cargo.lock ./
-
-# Add musl target for static linking to produce fully static binary
-RUN rustup target add x86_64-unknown-linux-musl
-
-# Dummy build step to cache dependencies layer
 RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release --target x86_64-unknown-linux-musl
-RUN rm -rf src
+RUN TARGET=$(cat /tmp/target) && \
+    cargo build --release --target $TARGET --locked && \
+    rm -rf src 
 
-# Copy full source code into working directory
+# Copy actual source code and build binary
 COPY . .
+RUN TARGET=$(cat /tmp/target) && \
+    cargo build --release --target $TARGET --locked && \
+    strip target/$TARGET/release/relayr-api && \
+    cp target/$TARGET/release/relayr-api ./relayr-api
 
-# Build the actual release binary statically linked for musl target
-RUN cargo build --release --target x86_64-unknown-linux-musl
-
-# Stage 2: Distroless runtime image - minimal, no shell or package manager
+# Stage 2: Distroless runtime
 FROM gcr.io/distroless/static:nonroot
-
-# Copy the statically linked binary from builder stage
-COPY --from=builder /usr/src/app/target/x86_64-unknown-linux-musl/release/relayr-api /relayr-api
-
+WORKDIR /app
+COPY --from=builder /usr/src/app/relayr-api ./relayr-api
 # Use the nonroot user provided by distroless image for better security
 USER nonroot
-
-# Expose the port where the app listens
 EXPOSE 9001
+CMD ["/app/relayr-api"]
 
-# Run the binary as container entrypoint
-CMD ["/relayr-api"]
+LABEL org.opencontainers.image.source="https://github.com/rifuki/relayr"
+
