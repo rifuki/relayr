@@ -1,4 +1,4 @@
-name: Rust CI
+name: Monorepo CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ["dev", "main"]
 
 jobs:
-  rust-ci:
+  relayr-api-ci:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -20,6 +20,9 @@ jobs:
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('relayr-api/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
+
+      - name: Ensure Cargo Git Folder Exists
+        run: mkdir -p ~/.cargo/git
 
       - name: Cache Cargo Git
         uses: actions/cache@v4
@@ -36,7 +39,7 @@ jobs:
           key: ${{ runner.os }}-cargo-target-${{ hashFiles('relayr-api/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-target-
-            
+
       - name: Build
         working-directory: relayr-api
         run: cargo build --verbose --release
@@ -48,3 +51,24 @@ jobs:
       - name: Tests
         working-directory: relayr-api
         run: cargo test --verbose
+
+  relayr-ui-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: relayr-ui/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: relayr-ui
+        run: npm ci
+
+      - name: Build Next.js Application
+        working-directory: relayr-ui
+        run: npm run build
