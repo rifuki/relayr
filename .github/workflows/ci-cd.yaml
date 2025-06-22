@@ -1,0 +1,251 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["dev", "main"]
+  pull_request:
+    branches: ["dev", "main"]
+
+env:
+  CARGO_TERM_COLOR: always
+  # Docker Hub images
+  IMAGE_API_DOCKERHUB: rifuki/relayr-api
+  IMAGE_UI_DOCKERHUB: rifuki/relayr-ui
+  # GitHub Container Registry images
+  IMAGE_API_GHCR: ghcr.io/${{ github.repository_owner }}/relayr-api
+  IMAGE_UI_GHCR: ghcr.io/${{ github.repository_owner }}/relayr-ui
+
+jobs:
+  # =============================================================================
+  # CI JOBS - Always run for both PR and Push events
+  # =============================================================================
+
+  api-ci:
+    name: "🦀 API - Build & Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      # Cargo Registry Cache - dependencies downloaded from crates.io
+      - name: 💾 Cache Cargo Registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      # Ensure git cache directory exists to avoid cache errors
+      - name: 📁 Ensure Cargo Git Folder Exists
+        run: mkdir -p ~/.cargo/git
+
+      # Cargo Git Cache - dependencies from git repositories
+      - name: 💾 Cache Cargo Git
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-git-
+
+      # Target Cache - compiled dependencies and build artifacts
+      - name: 💾 Cache Build Output (relayr-api/target)
+        uses: actions/cache@v4
+        with:
+          path: relayr-api/target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-
+
+      # Lint code first - fastest feedback for style issues
+      - name: 📋 Lint with Clippy
+        working-directory: relayr-api
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      # Run tests early - catch logic errors before expensive builds
+      - name: 🧪 Tests
+        working-directory: relayr-api
+        run: cargo test --verbose
+
+      # Build in release mode last - most expensive step
+      - name: 🔨 Build Release
+        working-directory: relayr-api
+        run: cargo build --release --verbose
+
+  ui-ci:
+    name: "🌐 UI - Build & Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup Node.js with npm cache for faster dependency installation
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: relayr-ui/package-lock.json
+
+      # Install dependencies using npm ci for faster, reliable, reproducible builds
+      - name: 📦 Install Dependencies
+        working-directory: relayr-ui
+        run: npm ci
+
+      # Lint code first - fastest feedback for style/syntax issues
+      - name: 📋 Lint with ESLint
+        working-directory: relayr-ui
+        run: npm run lint
+
+      # Run tests early - catch logic errors before expensive builds
+      - name: 🧪 Run Tests
+        working-directory: relayr-ui
+        run: npm test --if-present -- --watchAll=false
+
+      # Build Next.js application last - most resource intensive
+      - name: 🔨 Build Next.js Application
+        working-directory: relayr-ui
+        run: npm run build
+
+  # =============================================================================
+  # CD JOBS - Only run on push to main/dev (not on PR)
+  # =============================================================================
+  #
+  api-docker:
+    name: "🐳 API - Build & Push Docker Image"
+    # Only run on push events (skip for PR to save resources and time)
+    if: github.event_name == 'push'
+    # Wait for CI jobs to pass before deploying
+    needs: [api-ci, ui-ci]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      # Setup Docker Buildx for multi-platform builds
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to Docker Hub registry
+      - name: 🔑 Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      # Login to GitHub Container Registry
+      - name: 🔑 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Cache Docker layers to speed up builds
+      - name: 💾 Cache Docker Layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache-api
+          key: ${{ runner.os }}-buildx-api-${{ hashFiles('relayr-api/Dockerfile', 'relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-api-
+
+      # Build and push multi-arch images to Docker & GHCR
+      - name: 🏗️ Build and Push Multi-Arch Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./relayr-api
+          file: ./relayr-api/Dockerfile
+          # Support both AMD64 and ARM64 architectures
+          platforms: linux/amd64,linux/arm64
+          # Tag with both latest and commit SHA for better versioning
+          tags: |
+            ${{ env.IMAGE_API_DOCKERHUB }}:latest
+            ${{ env.IMAGE_API_DOCKERHUB }}:${{ github.sha }}
+            ${{ env.IMAGE_API_GHCR }}:latest
+            ${{ env.IMAGE_API_GHCR }}:${{ github.sha }}
+          push: true
+          # Use cache to speed up builds
+          cache-from: type=local,src=/tmp/.buildx-cache-api
+          cache-to: type=local,dest=/tmp/.buildx-cache-api,mode=max
+
+      # Security: Always logout from registries, even if build fails
+      - name: 🚪 Logout from Docker Hub
+        if: always()
+        run: docker logout docker.io
+
+      - name: 🚪 Logout from GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io
+
+  ui-docker:
+    name: "🐳 UI - Build & Push Docker Image"
+    # Only run on push events (skip for PR to save resources and time)
+    if: github.event_name == 'push'
+    # Wait for CI jobs to pass before deploying
+    needs: [api-ci, ui-ci]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to Docker Hub Registry
+      - name: 🔑 Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      # Login to GitHub Container Registry
+      - name: 🔑 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Cache Docker layers to speed up builds
+      - name: 💾 Cache Docker Layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache-ui
+          key: ${{ runner.os }}-buildx-ui-${{ hashFiles('relayr-ui/Dockerfile', 'relayr-ui/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-ui-
+
+      # Build and push multi-arch images to Docker & GHCR
+      - name: 🏗️ Build and Push Multi-Arch Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./relayr-ui
+          file: ./relayr-ui/Dockerfile
+          # Support both AMD64 and ARM64 architectures
+          platforms: linux/amd64,linux/arm64
+          # Build arguments for Next.js API
+          build-args: |
+            NEXT_PUBLIC_API_HOST=${{ secrets.NEXT_PUBLIC_API_HOST }}
+          # Tag with both latest and commit SHA for better versioning
+          tags: |
+            ${{ env.IMAGE_UI_DOCKERHUB }}:latest
+            ${{ env.IMAGE_UI_DOCKERHUB }}:${{ github.sha }}
+            ${{ env.IMAGE_UI_GHCR }}:latest
+            ${{ env.IMAGE_UI_GHCR }}:${{ github.sha }}
+          push: true
+          # Use cache to speed up builds
+          cache-from: type=local,src=/tmp/.buildx-cache-ui
+          cache-to: type=local,dest=/tmp/.buildx-cache-ui,mode=max
+
+      # Security: Always logout from registries, even if build fails
+      - name: 🚪 Logout from Docker Hub
+        if: always()
+        run: docker logout docker.io
+
+      - name: 🚪 Logout from GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io
