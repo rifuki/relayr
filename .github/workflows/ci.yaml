@@ -12,12 +12,39 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Cache Cargo Registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo Git
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-git-
+
+      - name: Cache Build Output (relayr-api/target)
+        uses: actions/cache@v4
+        with:
+          path: relayr-api/target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('relayr-api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-
+            
       - name: Build
         working-directory: relayr-api
         run: cargo build --verbose --release
+
       - name: Clippy
         working-directory: relayr-api
         run: cargo clippy --all-targets --all-features -- -D warnings
+
       - name: Tests
         working-directory: relayr-api
         run: cargo test --verbose
