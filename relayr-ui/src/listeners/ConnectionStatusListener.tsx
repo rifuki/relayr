@@ -33,14 +33,19 @@ export default function ConnectionStatusListener() {
   const { closeConnection: closeSenderConnection } = senderWebSocket;
   const { closeConnection: closeReceiverConnection } = receiverWebSocket;
 
-  const { recipientId, isSenderUploading, isSenderCompleted } =
-    useFileSenderStore(
-      useShallow((s) => ({
-        recipientId: s.transferConnection.recipientId,
-        isSenderUploading: s.transferStatus.isTransferring,
-        isSenderCompleted: s.transferStatus.isTransferCompleted,
-      })),
-    );
+  const {
+    transferShareLink,
+    recipientId,
+    isSenderUploading,
+    isSenderCompleted,
+  } = useFileSenderStore(
+    useShallow((s) => ({
+      transferShareLink: s.transferShareLink,
+      recipientId: s.transferConnection.recipientId,
+      isSenderUploading: s.transferStatus.isTransferring,
+      isSenderCompleted: s.transferStatus.isTransferCompleted,
+    })),
+  );
   const senderActions = useFileSenderActions();
 
   const { isConnected, isReceiverDownloading, isReceiverCompleted } =
@@ -60,7 +65,10 @@ export default function ConnectionStatusListener() {
   useEffect(() => {
     function handleOffline() {
       setIsOnline(false);
-      if ((recipientId || isSenderUploading) && !isSenderCompleted) {
+      if (
+        (transferShareLink || recipientId || isSenderUploading) &&
+        !isSenderCompleted
+      ) {
         senderActions.clearTransferState();
         senderActions.setTransferShareLink(null);
         senderActions.setTransferConnection({
@@ -112,11 +120,12 @@ export default function ConnectionStatusListener() {
     };
   }, [
     setIsOnline,
-    isConnected,
+    transferShareLink,
+    recipientId,
     isSenderUploading,
     isSenderCompleted,
     senderActions,
-    recipientId,
+    isConnected,
     isReceiverDownloading,
     isReceiverCompleted,
     receiverActions,
