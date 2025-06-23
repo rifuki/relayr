@@ -14,8 +14,8 @@ import {
   StepSectionWrapper,
 } from "../../shared";
 
-// Constants
-import { WS_RELAY_API_URL } from "@/lib/constants";
+// API URLs
+import { ws_relay_api_url } from "@/lib/api";
 
 // State Management (Store)
 import {
@@ -27,7 +27,6 @@ import {
 import { Variants } from "motion/react";
 import { FileInfoCard } from "../../shared";
 import { useSenderWebSocket } from "@/providers/SenderWebSocketProvider";
-
 
 // Motion Animation
 const checkmarkVariants: Variants = {
@@ -60,7 +59,7 @@ export default function Step2_FileSelected(props: StepProps) {
     if (!file || !fileMetadata) {
       return { errorMessage: "File or file metadata is missing." };
     }
-    openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
+    openConnection(`${ws_relay_api_url}?id=${initId}`);
     setIsGenerateLinkLoading(false);
   };
 

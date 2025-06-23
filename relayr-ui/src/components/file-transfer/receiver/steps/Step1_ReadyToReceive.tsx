@@ -10,8 +10,8 @@ import {
   StepSectionWrapper,
 } from "../../shared";
 
-// Constants
-import { WS_RELAY_API_URL } from "@/lib/constants";
+// API URLs
+import { ws_relay_api_url } from "@/lib/api";
 
 // Context Providers
 import { useReceiverWebSocket } from "@/providers/ReceiverWebSocketProvider";
@@ -35,7 +35,7 @@ export default function Step1_ReadyToReceive(props: StepProps) {
   if (!fileMetadata || !senderId) return;
 
   const handleConnectToSender = () => {
-    openConnection(`${WS_RELAY_API_URL}?id=${initId}`);
+    openConnection(`${ws_relay_api_url}?id=${initId}`);
   };
 
   const handleBack = () => {
