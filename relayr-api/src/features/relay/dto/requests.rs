@@ -8,7 +8,7 @@ pub enum RelayIncomingPayload {
     #[serde(rename = "recipientReady")]
     RecipientReady(RecipientReadyPayload),
     #[serde(rename = "fileMeta")]
-    FileMeta(FileMetaPayload),
+    FileMetadata(FileMetadataPayload),
     #[serde(rename = "cancelRecipientReady")]
     CancelRecipientReady(CancelRecipientReadyPayload),
     #[serde(rename = "cancelSenderReady")]
@@ -52,7 +52,7 @@ pub struct RecipientReadyPayload {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FileMetaPayload {
+pub struct FileMetadataPayload {
     pub sender_id: Option<String>,
     pub name: String,
     pub size: u64,

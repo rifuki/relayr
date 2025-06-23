@@ -51,7 +51,7 @@ impl ErrorMessage {
 }
 
 impl ErrorMessage {
-    pub fn to_ws_msg(&self) -> Message {
+    pub fn as_ws_text_message(&self) -> Message {
         Message::text(self.to_string())
     }
 }

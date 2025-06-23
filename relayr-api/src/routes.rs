@@ -3,20 +3,11 @@ use std::time::Duration;
 use axum::{Json, Router, http::StatusCode, routing::get};
 use serde_json::{Value as SerdeJson, json};
 
-use crate::config::CONFIG;
-use crate::relay::routes::relay_router;
+use crate::{config::CONFIG, features::relay::routes::relay_router};
 
 pub fn app_routes() -> Router {
     Router::new()
-        .nest(
-            "/api/v1",
-            Router::new().nest(
-                "/relay",
-                Router::new()
-                    .merge(relay_router())
-                    .route("/ping", get(ping)),
-            ),
-        )
+        .nest("/api/v1", Router::new().nest("/relay", relay_router()))
         .route("/health", get(check_health))
 }
 
@@ -60,8 +51,4 @@ async fn check_health() -> (StatusCode, Json<SerdeJson>) {
             }
         })),
     )
-}
-
-async fn ping() -> &'static str {
-    "pong"
 }

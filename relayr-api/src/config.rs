@@ -6,18 +6,15 @@ pub struct Config {
 }
 
 fn get_rust_env() -> String {
-    #[cfg(debug_assertions)]
-    {
+    if cfg!(debug_assertions) {
         "development".to_string()
-    }
-    #[cfg(not(debug_assertions))]
-    {
+    } else {
         "production".to_string()
     }
 }
 
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
-    tracing::info!("CONFIG INIT");
+    tracing::info!(".env file loaded, initializing configuration");
     Config {
         rust_env: get_rust_env(),
         port: std::env::var("PORT")
