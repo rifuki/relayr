@@ -3,11 +3,11 @@ use chrono::Utc;
 use serde::Serialize;
 use std::fmt;
 
-use crate::impl_response_dto;
+use crate::impl_ws_text_response;
 
 // Define a trait for shared functionality
-pub trait WsResponse {
-    fn to_ws_msg(&self) -> Message;
+pub trait AsWsTextMessage {
+    fn as_ws_text_message(&self) -> Message;
 }
 
 #[derive(Debug, Serialize)]
@@ -29,7 +29,7 @@ impl RegisterResponseDto {
         }
     }
 }
-impl_response_dto!(RegisterResponseDto);
+impl_ws_text_response!(RegisterResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -52,32 +52,7 @@ impl RecipientReadyResponseDto {
         }
     }
 }
-impl_response_dto!(RecipientReadyResponseDto);
-
-//#[derive(Debug, Serialize)]
-//#[serde(rename_all = "camelCase")]
-//pub struct FileMetaResponseDto {
-//    pub success: bool,
-//    #[serde(rename = "type")]
-//    pub msg_type: String,
-//    pub file_name: String,
-//    pub file_size: u64,
-//    pub mime_type: String,
-//    pub timestamp: i64,
-//}
-//impl FileMetaResponseDto {
-//    pub fn new(file_name: &str, file_size: u64, mime_type: &str) -> Self {
-//        Self {
-//            success: true,
-//            msg_type: "fileMeta".to_owned(),
-//            file_name: file_name.to_owned(),
-//            file_size,
-//            mime_type: mime_type.to_owned(),
-//            timestamp: Utc::now().timestamp(),
-//        }
-//    }
-//}
-//impl_response_dto!(FileMetaResponseDto);
+impl_ws_text_response!(RecipientReadyResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -100,7 +75,7 @@ impl CancelRecipientReadyResponseDto {
         }
     }
 }
-impl_response_dto!(CancelRecipientReadyResponseDto);
+impl_ws_text_response!(CancelRecipientReadyResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -123,7 +98,7 @@ impl CancelSenderReadyResponseDto {
         }
     }
 }
-impl_response_dto!(CancelSenderReadyResponseDto);
+impl_ws_text_response!(CancelSenderReadyResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -172,7 +147,7 @@ impl FileChunkResponseDto {
         }
     }
 }
-impl_response_dto!(FileChunkResponseDto);
+impl_ws_text_response!(FileChunkResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -221,7 +196,7 @@ impl FileTransferAckResponseDto {
         }
     }
 }
-impl_response_dto!(FileTransferAckResponseDto);
+impl_ws_text_response!(FileTransferAckResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -262,7 +237,7 @@ impl FileEndResponseDto {
         }
     }
 }
-impl_response_dto!(FileEndResponseDto);
+impl_ws_text_response!(FileEndResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -285,7 +260,7 @@ impl CancelSenderTransferResponseDto {
         }
     }
 }
-impl_response_dto!(CancelSenderTransferResponseDto);
+impl_ws_text_response!(CancelSenderTransferResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -308,7 +283,7 @@ impl CancelRecipientTransferResponseDto {
         }
     }
 }
-impl_response_dto!(CancelRecipientTransferResponseDto);
+impl_ws_text_response!(CancelRecipientTransferResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -340,7 +315,7 @@ impl SenderAckResponseDto {
         self
     }
 }
-impl_response_dto!(SenderAckResponseDto);
+impl_ws_text_response!(SenderAckResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -363,7 +338,7 @@ impl RestartTransferResponseDto {
         }
     }
 }
-impl_response_dto!(RestartTransferResponseDto);
+impl_ws_text_response!(RestartTransferResponseDto);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -386,4 +361,4 @@ impl PeerDisconnectedResponseDto {
         }
     }
 }
-impl_response_dto!(PeerDisconnectedResponseDto);
+impl_ws_text_response!(PeerDisconnectedResponseDto);

@@ -12,49 +12,46 @@ use tokio::{
 };
 
 use crate::{
-    relay::{
+    features::relay::{
         dto::{
             requests::RelayIncomingPayload,
-            responses::{RegisterResponseDto, WsResponse},
+            responses::{AsWsTextMessage, RegisterResponseDto},
         },
         error::{ErrorCode, ErrorMessage},
         state::RelayState,
-        ws::handlers::handle_incoming_payload,
+        types::DisconnectReason,
+        ws::read_handlers::handle_text_message_payload,
     },
-    send_or_break,
+    send_or_stop,
 };
 
-#[derive(PartialEq)]
-pub enum DisconnectReason {
-    TransferCompleted,
-    Other,
-}
-
-pub fn spawn_receiver_task(
-    mut receiver: SplitStream<WebSocket>,
+pub fn spawn_read_task(
+    mut read: SplitStream<WebSocket>,
     tx: Sender<Message>,
     state: RelayState,
-    base_conn_id: String,
+    peer_id: String,
     last_heartbeat: Arc<Mutex<Instant>>,
 ) -> JoinHandle<DisconnectReason> {
     tokio::spawn(async move {
         let stop_flag = Arc::new(AtomicBool::new(false));
 
-        let send_initial_registration_response =
-            RegisterResponseDto::new(&base_conn_id).to_ws_msg();
-        send_or_break!(tx, send_initial_registration_response, stop_flag);
+        send_or_stop!(
+            tx,
+            RegisterResponseDto::new(&peer_id).as_ws_text_message(),
+            stop_flag
+        );
 
-        while let Some(Ok(msg_stream)) = receiver.next().await {
+        while let Some(Ok(msg_stream)) = read.next().await {
             match msg_stream {
                 Message::Text(text) => {
                     let incoming_payload = serde_json::from_str::<RelayIncomingPayload>(&text);
                     match incoming_payload {
                         Ok(payload) => {
-                            handle_incoming_payload(
+                            handle_text_message_payload(
                                 payload,
                                 &tx,
                                 &state,
-                                &base_conn_id,
+                                &peer_id,
                                 stop_flag.clone(),
                             )
                             .await
@@ -65,40 +62,38 @@ pub fn spawn_receiver_task(
                                 "failed to parse payload",
                             )
                             .with_details(&e.to_string())
-                            .to_ws_msg();
-                            send_or_break!(tx, err_msg, stop_flag);
+                            .as_ws_text_message();
+                            send_or_stop!(tx, err_msg, stop_flag);
                         }
                     }
                 }
                 Message::Binary(bin_data) => {
-                    if let Some(current_recipient) =
-                        state.get_connected_recipient(&base_conn_id).await
-                    {
-                        if let Some(recipient_tx) = state.get_user_tx(&current_recipient).await {
-                            send_or_break!(recipient_tx, Message::binary(bin_data), stop_flag);
+                    if let Some(current_recipient) = state.get_connected_recipient(&peer_id).await {
+                        if let Some(recipient_tx) = state.get_peer_tx(&current_recipient).await {
+                            send_or_stop!(recipient_tx, Message::binary(bin_data), stop_flag);
                         } else {
                             let err_msg = ErrorMessage::new(
                                 ErrorCode::RecipientDisconnected,
                                 &format!(
-                                    "recipient [{}] is no longer connected",
+                                    "recipient `{}` is no longer connected",
                                     current_recipient
                                 ),
                             )
-                            .to_ws_msg();
-                            send_or_break!(tx, err_msg, stop_flag);
+                            .as_ws_text_message();
+                            send_or_stop!(tx, err_msg, stop_flag);
                         }
                     } else {
                         tracing::warn!(
-                            "sender [{}] attempted to send a file, but no recipient is connected",
-                            base_conn_id
+                            "sender `{}` attempted to send a file, but no recipient is connected",
+                            peer_id
                         );
                         let err_msg = ErrorMessage::new(
                             ErrorCode::ActiveConnectionNotFound,
-                            "active connection for sender_id: [{}] not found",
+                            "active connection for sender_id: `{}` not found",
                         )
-                        .to_ws_msg();
+                        .as_ws_text_message();
 
-                        send_or_break!(tx, err_msg, stop_flag);
+                        send_or_stop!(tx, err_msg, stop_flag);
                     }
                 }
                 Message::Pong(_) => {
@@ -111,13 +106,12 @@ pub fn spawn_receiver_task(
                             code = reason.code,
                             reason = %reason.reason,
                         );
+
                         if reason.reason.to_lowercase().contains("transfer completed") {
                             return DisconnectReason::TransferCompleted;
-                        } else {
-                            return DisconnectReason::Other;
                         }
                     } else {
-                        tracing::info!("webSocket closed with no close frame (e.g., code 1006)");
+                        tracing::info!("WebSocket closed with no close frame (e.g., code 1006)");
                     }
                     break;
                 }
@@ -126,8 +120,8 @@ pub fn spawn_receiver_task(
                         ErrorCode::UnsupportedWsMessageType,
                         "unsupported websocket message type",
                     )
-                    .to_ws_msg();
-                    send_or_break!(tx, err_msg, stop_flag);
+                    .as_ws_text_message();
+                    send_or_stop!(tx, err_msg, stop_flag);
                 }
             }
 
