@@ -16,8 +16,8 @@ env:
   IMAGE_API_DOCKERHUB: rifuki/relayr-api
   IMAGE_UI_DOCKERHUB: rifuki/relayr-ui
   # GitHub Container Registry images
-  IMAGE_API_GHCR: ghcr.io/${{ github.repository_owner }}/relayr-api
-  IMAGE_UI_GHCR: ghcr.io/${{ github.repository_owner }}/relayr-ui
+  IMAGE_API_GHCR: ghcr.io/${{ github.repository_owner }}/relayr/relayr-api
+  IMAGE_UI_GHCR: ghcr.io/${{ github.repository_owner }}/relayr/relayr-ui
 
 jobs:
   # =============================================================================
