@@ -10,8 +10,8 @@ RUN npm install
 COPY . .
 
 # Set environment variables for Next.js
-ARG NEXT_PUBLIC_API_HOST
-ENV NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST}
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NODE_ENV=production
 
 # Build the Next.js application
@@ -20,5 +20,6 @@ RUN npm run build
 # Production stage: serve static files with caddy
 FROM caddy:alpine AS production
 COPY --from=builder /usr/src/app/out /usr/share/caddy
+COPY Caddyfile /etc/caddy/Caddyfile
 EXPOSE 80
-CMD ["caddy", "file-server", "--root", "/usr/share/caddy", "--listen", ":80"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
