@@ -118,8 +118,8 @@ jobs:
   #
   api-docker:
     name: "🐳 API - Build & Push Docker Image"
-    # Only run on push events (skip for PR to save resources and time)
-    if: github.event_name == 'push'
+    # Only run on push events to main branch (skip for PR to save resources and time)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     # Wait for CI jobs to pass before deploying
     needs: [api-ci, ui-ci]
     runs-on: ubuntu-latest
@@ -187,8 +187,8 @@ jobs:
 
   ui-docker:
     name: "🐳 UI - Build & Push Docker Image"
-    # Only run on push events (skip for PR to save resources and time)
-    if: github.event_name == 'push'
+    # Only run on push events to main branch (skip for PR to save resources and time)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     # Wait for CI jobs to pass before deploying
     needs: [api-ci, ui-ci]
     runs-on: ubuntu-latest
