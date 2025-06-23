@@ -159,7 +159,8 @@ jobs:
           context: ./relayr-api
           file: ./relayr-api/Dockerfile
           # Support both AMD64 and ARM64 architectures
-          platforms: linux/amd64,linux/arm64
+          # Use only AMD64 for non-main branches to save resources
+          platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           # Tag with both latest and commit SHA for better versioning
           tags: |
             ${{ env.IMAGE_API_DOCKERHUB }}:latest
@@ -226,7 +227,8 @@ jobs:
           context: ./relayr-ui
           file: ./relayr-ui/Dockerfile
           # Support both AMD64 and ARM64 architectures
-          platforms: linux/amd64,linux/arm64
+          # Use only AMD64 for non-main branches to save resources
+          platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           # Build arguments for Next.js API
           build-args: |
             NEXT_PUBLIC_API_HOST=${{ secrets.NEXT_PUBLIC_API_HOST }}
