@@ -1,12 +1,13 @@
 // External Libraries
 import axios from "axios";
 
-// Constants
-import { HTTP_API_URL } from "../constants";
+// WARNING: Always import http_api_url directly from './api-url', NOT from the barrel/index '../api'.
+// Importing from the index can cause circular imports and build/SSR errors in Next.js.
+import { http_api_url } from "./api-url";
 
 // Create Axios Instance with default configuration
 const apiClient = axios.create({
-  baseURL: HTTP_API_URL, // Set the base URL for all requests
+  baseURL: http_api_url, // Set the base URL for all requests
   headers: {
     "Content-Type": "application/json", // Set default content type for all requests
   },
