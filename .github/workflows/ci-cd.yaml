@@ -235,7 +235,7 @@ jobs:
           platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           # Build arguments for Next.js API
           build-args: |
-            NEXT_PUBLIC_API_HOST=${{ secrets.NEXT_PUBLIC_API_HOST }}
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
           # Tag with both latest and commit SHA for better versioning
           tags: |
             ${{ env.IMAGE_UI_DOCKERHUB }}:latest
