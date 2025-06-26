@@ -39,7 +39,34 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Relayr",
   description:
-    "A fast and secure file transfer app powered by WebSocket technology.",
+    "A fast, simple, and direct file transfer app powered by WebSocket technology. Instantly send files between devices with ease.",
+  keywords: [
+    "file-transfer",
+    "websocket",
+    "fast",
+    "simple",
+    "relayr",
+    "direct",
+  ],
+  openGraph: {
+    title: "Relayr",
+    description:
+      "A fast, simple, and direct file transfer app powered by WebSocket technology. Instantly send files between devices with ease.",
+    url: "https://relayr.rifuki.dev",
+    siteName: "Relayr",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 // Root layout component
