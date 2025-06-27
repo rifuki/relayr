@@ -5,6 +5,7 @@ on:
     branches: ["dev", "main"]
   pull_request:
     branches: ["dev", "main"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -118,8 +119,8 @@ jobs:
   #
   api-docker:
     name: "🐳 API - Build & Push Docker Image"
-    # Only run on push events to main branch (skip for PR to save resources and time)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only run on push events to main branch (skip for PR to save resources and time) or on manual dispatch
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch')
     # Wait for CI jobs to pass before deploying
     needs: [api-ci, ui-ci]
     runs-on: ubuntu-latest
@@ -164,13 +165,15 @@ jobs:
           file: ./relayr-api/Dockerfile
           # Support both AMD64 and ARM64 architectures
           # Use only AMD64 for non-main branches to save resources
-          platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
-          # Tag with both latest and commit SHA for better versioning
+          platforms: ${{ (github.ref == 'refs/heads/main') && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          # Tag with both latest and commit SHA and branch name for better versioning
           tags: |
             ${{ env.IMAGE_API_DOCKERHUB }}:latest
             ${{ env.IMAGE_API_DOCKERHUB }}:${{ github.sha }}
+            ${{ env.IMAGE_API_DOCKERHUB }}:${{ github.ref_name }}
             ${{ env.IMAGE_API_GHCR }}:latest
             ${{ env.IMAGE_API_GHCR }}:${{ github.sha }}
+            ${{ env.IMAGE_API_GHCR }}:${{ github.ref_name }}
           push: true
           # Use cache to speed up builds
           cache-from: type=local,src=/tmp/.buildx-cache-api
@@ -187,8 +190,8 @@ jobs:
 
   ui-docker:
     name: "🐳 UI - Build & Push Docker Image"
-    # Only run on push events to main branch (skip for PR to save resources and time)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only run on push events to main branch (skip for PR to save resources and time) or on manual dispatch
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch')
     # Wait for CI jobs to pass before deploying
     needs: [api-ci, ui-ci]
     runs-on: ubuntu-latest
@@ -232,16 +235,17 @@ jobs:
           file: ./relayr-ui/Dockerfile
           # Support both AMD64 and ARM64 architectures
           # Use only AMD64 for non-main branches to save resources
-          platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
-          # Build arguments for Next.js API
+          platforms: ${{ (github.ref == 'refs/heads/main') && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-          # Tag with both latest and commit SHA for better versioning
+          # Tag with both latest and commit SHA and branch name for better versioning
           tags: |
             ${{ env.IMAGE_UI_DOCKERHUB }}:latest
             ${{ env.IMAGE_UI_DOCKERHUB }}:${{ github.sha }}
+            ${{ env.IMAGE_UI_DOCKERHUB }}:${{ github.ref_name }}
             ${{ env.IMAGE_UI_GHCR }}:latest
             ${{ env.IMAGE_UI_GHCR }}:${{ github.sha }}
+            ${{ env.IMAGE_UI_GHCR }}:${{ github.ref_name }}
           push: true
           # Use cache to speed up builds
           cache-from: type=local,src=/tmp/.buildx-cache-ui
