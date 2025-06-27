@@ -1,7 +1,7 @@
-use crate::features::relay::{
-    dto::responses::{AsWsTextMessage, PeerDisconnectedResponseDto},
+use crate::feature::relay::{
     state::RelayState,
     types::DisconnectReason,
+    ws::dto::response::{AsWsTextMessage, PeerDisconnectedResponseDto},
 };
 
 pub async fn notify_peers_on_disconnect(

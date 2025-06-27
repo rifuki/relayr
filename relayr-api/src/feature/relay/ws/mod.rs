@@ -1,3 +1,4 @@
+mod dto;
 mod peer_disconnect;
 mod ping;
 mod read;

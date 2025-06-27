@@ -12,14 +12,14 @@ use tokio::{
 };
 
 use crate::{
-    features::relay::{
-        dto::{
-            requests::RelayIncomingPayload,
-            responses::{AsWsTextMessage, RegisterResponseDto},
-        },
+    feature::relay::{
         error::{ErrorCode, ErrorMessage},
         state::RelayState,
         types::DisconnectReason,
+        ws::dto::{
+            request::RelayIncomingPayload,
+            response::{AsWsTextMessage, RegisterResponseDto},
+        },
         ws::read_handlers::handle_text_message_payload,
     },
     send_or_stop,

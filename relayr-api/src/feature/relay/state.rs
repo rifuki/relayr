@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use axum::extract::ws::Message;
 use tokio::sync::{Mutex, mpsc::Sender};
 
-use crate::features::relay::types::FileMetadata;
+use crate::feature::relay::types::FileMetadata;
 
 #[derive(Clone, Debug)]
 pub struct RelayState {

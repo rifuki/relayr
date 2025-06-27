@@ -7,7 +7,7 @@ use tokio::{
     time::Instant,
 };
 
-use crate::features::relay::{
+use crate::feature::relay::{
     state::RelayState,
     ws::{
         peer_disconnect, ping::spawn_ping_task, read::spawn_read_task,
