@@ -1,13 +1,15 @@
 use axum::{
-    Json,
     extract::{Path, Query, State, WebSocketUpgrade},
     http::StatusCode,
     response::IntoResponse,
 };
 
-use crate::feature::relay::{
-    types::{FileMetadata, RelayQueryParams},
-    ws::socket::handle_socket,
+use crate::{
+    common::response::{ApiResponse, AppError, AppResult},
+    feature::relay::{
+        types::{FileMetadata, RelayQueryParams},
+        ws::socket::handle_socket,
+    },
 };
 
 use super::state::RelayState;
@@ -23,18 +25,20 @@ pub async fn handle_relay_ws_upgrade(
 pub async fn handle_get_file_metadata(
     Path(sender_id): Path<String>,
     State(state): State<RelayState>,
-) -> Result<Json<FileMetadata>, StatusCode> {
+) -> AppResult<FileMetadata> {
     if let Some(file_meta) = state.get_file_metadata(&sender_id).await {
-        Ok(Json(file_meta))
+        Ok(ApiResponse::default().with_data(file_meta))
     } else {
-        Err(StatusCode::NOT_FOUND)
+        Err(AppError::default()
+            .with_code(StatusCode::NOT_FOUND)
+            .with_message("File metadata not found"))
     }
 }
 
-pub async fn handle_ping() -> &'static str {
-    "pong"
+pub async fn handle_ping() -> AppResult<String> {
+    Ok(ApiResponse::default().with_data("pong".to_string()))
 }
 
-pub async fn handle_debug_state(State(state): State<RelayState>) -> String {
-    format!("{:#?}", state)
+pub async fn handle_debug_state(State(state): State<RelayState>) -> AppResult<String> {
+    Ok(ApiResponse::default().with_data(format!("{:#?}", state)))
 }

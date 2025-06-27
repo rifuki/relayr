@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/types/api";
 import { apiClient, API_ENDPOINTS } from "../";
 
 // Types
@@ -11,10 +12,17 @@ export const relayService = {
    * @returns {Promise<FileMetadata>} - A promise that resolves to the file metadata.
    */
   getFileMetadata: async (senderId: string): Promise<FileMetadata> => {
-    const response = await apiClient.get(
+    const response = await apiClient.get<ApiResponse<FileMetadata>>(
       API_ENDPOINTS.RELAY.FILE_METADATA(senderId), // Construct API endpoint using senderId
     );
-    return response.data; // Return the file metadata from the response
+
+    if (response.data.data) {
+      return response.data.data; // Return the file metadata from the response
+    }
+
+    throw new Error(
+      "API returned a success response but no metadata. This should never happen.",
+    );
   },
   /**
    * Pings the relay server to check its status.

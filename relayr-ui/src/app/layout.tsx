@@ -103,14 +103,15 @@ export default function RootLayout({
         </SenderWebSocketProvider>
         {/* Sonner for toast notifications */}
         <Toaster />
-        {process.env.NODE_ENV !== "development" && (
-          <>
-            <Analytics />
-            {/* Vercel Analytics for tracking user interactions */}
-            <SpeedInsights />
-            {/* Vercel Speed Insights for performance monitoring */}
-          </>
-        )}
+        {process.env.VERCEL === "1" &&
+          process.env.VERCEL_ENV === "production" && (
+            <>
+              <Analytics />
+              {/* Vercel Analytics for tracking user interactions */}
+              <SpeedInsights />
+              {/* Vercel Speed Insights for performance monitoring */}
+            </>
+          )}
       </body>
     </html>
   );

@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 #[allow(unused)]
 use tracing_subscriber::layer::SubscriberExt;
 #[allow(unused)]
@@ -30,8 +32,9 @@ async fn main() -> std::io::Result<()> {
         tracing_subscriber::fmt().with_env_filter("info").init();
     }
 
-    let tcp_listener = tokio::net::TcpListener::bind(("0.0.0.0", CONFIG.port)).await?;
-    tracing::info!("Server is running on \"https://localhost:{}\"", CONFIG.port);
+    let addr = SocketAddr::from(([0, 0, 0, 0], CONFIG.port));
+    let tcp_listener = tokio::net::TcpListener::bind(addr).await?;
+    tracing::info!("listening on https://{}", addr);
 
     let cors = CorsLayer::new().allow_origin(Any);
 

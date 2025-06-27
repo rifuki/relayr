@@ -14,7 +14,7 @@ fn get_rust_env() -> String {
 }
 
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
-    tracing::info!(".env file loaded, initializing configuration");
+    tracing::info!(".env file loaded, initializing configuration.");
     Config {
         rust_env: get_rust_env(),
         port: std::env::var("PORT")
