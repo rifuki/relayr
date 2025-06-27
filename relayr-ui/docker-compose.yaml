@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/rifuki/relayr-ui:latest
+    container_name: relayr-ui
+    image: ghcr.io/rifuki/rifuki/relayr-ui:latest
     ports:
       - "3000:80"
