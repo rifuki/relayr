@@ -1,17 +1,13 @@
-"use client";
-
 // Next.js
-import dynamic from "next/dynamic";
+import { Metadata } from "next";
 
-// Custom Components
-import ExperienceLoading from "@/components/loading/ExperienceLoading";
+// Internal Components
+import LazySendPage from "./LazySendPage";
 
-// Lazy-loaded Internal Components
-const Send = dynamic(() => import("./Send"), {
-  loading: () => <ExperienceLoading />,
-  ssr: false,
-});
+export const metadata: Metadata = {
+  title: "Send File | Relayr",
+};
 
 export default function SendPage() {
-  return <Send />;
+  return <LazySendPage />;
 }
