@@ -13,26 +13,29 @@ import { Button } from "@/components/ui/button";
 // Internal Components
 import CardState from "./CardState";
 import { MotionButton } from "@/components/animations/motion-button";
+import { useApiErrorParser } from "@/hooks/useApiErrorParser";
 
-// Props interface for FileMetaError component
 interface FileMetaErrorProps {
-  message?: string;
+  error: unknown;
 }
 
-/**
- * FileMetaError component displays an error state for file metadata retrieval.
- * It shows an error icon and a message indicating the issue with the transfer link.
- *
- * @param {FileMetaErrorProps} props - The properties for the component.
- * @returns JSX.Element The rendered component.
- */
-export default function FileMetaError({ message }: FileMetaErrorProps) {
+export default function FileMetaError({ error }: FileMetaErrorProps) {
   const router = useRouter();
+
+  const { message, isNetworkError } = useApiErrorParser(error, {
+    appErrorMessageOverride: (error) => {
+      if (
+        error.errors.message.toLowerCase().includes("file metadata not found")
+      )
+        return "Invalid or expired link. Please ask the sender for a new one.";
+      else return error.errors.message;
+    },
+  });
 
   // Function to handle button click for retry or redirection
   const handleButtonClick = () => {
     // Reload the page to retry fetching the transfer link
-    if (message === "Network Error") {
+    if (isNetworkError) {
       // If the error is network-related, reload the page to retry fetching the transfer link
       window.location.reload();
     } else {
@@ -66,11 +69,8 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
         <h1 className="text-2xl font-bold text-destructive">
           Oops! Something went wrong
         </h1>
-        <p className="text-base text-muted-foreground">
-          {message === "Network Error"
-            ? "We couldn't connect to the sender. Please check your connection and try again."
-            : "Invalid or expired link. Please ask the sender for a new one."}
-        </p>
+        {/* Display the error message */}
+        <p className="text-base text-muted-foreground">{message}</p>
 
         <motion.div
           className="flex items-center justify-center space-y-2"
@@ -85,7 +85,7 @@ export default function FileMetaError({ message }: FileMetaErrorProps) {
             onClick={handleButtonClick}
           >
             {/* Button text based on the error message */}
-            {message === "Network Error" ? (
+            {isNetworkError ? (
               "Reload Page"
             ) : (
               <span className="inline-flex items-center justify-center gap-3">

@@ -3,12 +3,13 @@ use std::time::Duration;
 use axum::{Json, Router, http::StatusCode, routing::get};
 use serde_json::{Value as SerdeJson, json};
 
-use crate::{config::CONFIG, feature::relay::routes::relay_router};
+use crate::{common::response::AppError, config::CONFIG, feature::relay::routes::relay_router};
 
 pub fn app_routes() -> Router {
     Router::new()
         .nest("/api/v1", Router::new().nest("/relay", relay_router()))
         .route("/health", get(check_health))
+        .fallback(handle_404)
 }
 
 async fn check_health() -> (StatusCode, Json<SerdeJson>) {
@@ -51,4 +52,10 @@ async fn check_health() -> (StatusCode, Json<SerdeJson>) {
             }
         })),
     )
+}
+
+async fn handle_404() -> AppError {
+    AppError::default()
+        .with_code(StatusCode::NOT_FOUND)
+        .with_message("The requested endpoint does not exist.")
 }

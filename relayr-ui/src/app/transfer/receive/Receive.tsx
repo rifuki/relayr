@@ -48,18 +48,20 @@ export default function Receive() {
   // Determine the sender ID to use: either from the query or the last valid one stored
   const senderId = senderIdFromQuery;
 
+  // Check if we can fetch file metadata based on the current transfer state
+  const canFetchFileMeta =
+    !isConnected &&
+    !isTransferError &&
+    !isTransferCanceled &&
+    !isTransferring &&
+    !isTransferCompleted;
   // Fetch file metadata from backend using the sender ID
   const {
     data,
     isLoading: isFetchingFileMeta,
     error,
   } = useRelayFileMetadata(senderId ?? "", {
-    enabled:
-      !isConnected &&
-      !isTransferError &&
-      !isTransferCanceled &&
-      !isTransferring &&
-      !isTransferCompleted,
+    enabled: canFetchFileMeta,
   });
 
   // When metadata is successfully fetched, update store with metadata and connection info
@@ -73,9 +75,12 @@ export default function Receive() {
   // Handle invalid or missing sender ID
   if (!senderId && !isConnected && !isTransferring && !isTransferCompleted)
     return <MissingSenderId />;
-  // Show error state if file metadata failed to fetch
-  if (error && !isConnected && !isTransferring && !isTransferCompleted)
-    return <FileMetaError message={error.message} />;
+
+  // Handle when there is an error fetching file metadata
+  if (error && !isConnected && !isTransferring && !isTransferCompleted) {
+    return <FileMetaError error={error} />;
+  }
+
   // Show loading state while fetching metadata
   if (isFetchingFileMeta) return <FileMetaLoading />;
 

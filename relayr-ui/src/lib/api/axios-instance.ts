@@ -18,7 +18,11 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response, // Return the response as it is
   (error) => {
-    return Promise.reject(error); // Reject the error if any
+    // If the error is an Axios error with a response, reject with the error data
+    if (axios.isAxiosError(error) && error.response && error.response.data) {
+      return Promise.reject(error.response.data);
+    }
+    return Promise.reject(error);
   },
 );
 

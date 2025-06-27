@@ -8,10 +8,8 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct Errors {
-    pub message: String,
     pub code: u16,
-    pub timestamp: i64,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: String,
     pub details: Option<String>,
 }
 
@@ -19,6 +17,7 @@ pub struct Errors {
 pub struct AppError {
     pub success: bool,
     pub errors: Errors,
+    pub timestamp: i64,
 }
 
 // Idiomatic implementation of `Default`.
@@ -28,23 +27,23 @@ impl Default for AppError {
         Self {
             success: false,
             errors: Errors {
-                message: "".to_owned(),
                 code: 500,
-                timestamp: Utc::now().timestamp(),
+                message: "".to_owned(),
                 details: None,
             },
+            timestamp: Utc::now().timestamp(),
         }
     }
 }
 
 // --- Builder Methods ---
 impl AppError {
-    pub fn with_message(mut self, message: String) -> Self {
-        self.errors.message = message;
-        self
-    }
     pub fn with_code(mut self, code: StatusCode) -> Self {
         self.errors.code = code.as_u16();
+        self
+    }
+    pub fn with_message(mut self, message: &str) -> Self {
+        self.errors.message = message.to_owned();
         self
     }
     pub fn with_details(mut self, details: String) -> Self {
