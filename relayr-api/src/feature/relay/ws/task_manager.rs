@@ -1,6 +1,6 @@
 use tokio::task::JoinHandle;
 
-use crate::features::relay::types::DisconnectReason;
+use crate::feature::relay::types::DisconnectReason;
 
 pub async fn wait_socket_tasks(
     mut ping_task: JoinHandle<()>,

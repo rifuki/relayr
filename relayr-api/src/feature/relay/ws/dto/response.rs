@@ -294,25 +294,26 @@ pub struct SenderAckResponseDto {
     pub request_type: String,
     pub sender_id: String,
     pub recipient_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
     pub timestamp: i64,
 }
 impl SenderAckResponseDto {
-    pub fn new(request_type: &str, sender_id: &str, recipient_id: &str) -> Self {
+    pub fn new(
+        request_type: &str,
+        sender_id: &str,
+        recipient_id: &str,
+        message: Option<String>,
+    ) -> Self {
         Self {
             success: true,
             msg_type: "senderAck".to_owned(),
             request_type: request_type.to_owned(),
             sender_id: sender_id.to_owned(),
             recipient_id: recipient_id.to_owned(),
-            message: None,
+            message,
             timestamp: Utc::now().timestamp(),
         }
-    }
-
-    pub fn message(mut self, message: &str) -> Self {
-        self.message = Some(message.to_owned());
-        self
     }
 }
 impl_ws_text_response!(SenderAckResponseDto);

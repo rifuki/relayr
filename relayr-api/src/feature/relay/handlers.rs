@@ -5,7 +5,7 @@ use axum::{
     response::IntoResponse,
 };
 
-use crate::features::relay::{
+use crate::feature::relay::{
     types::{FileMetadata, RelayQueryParams},
     ws::socket::handle_socket,
 };

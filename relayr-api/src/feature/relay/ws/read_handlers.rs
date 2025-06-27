@@ -7,10 +7,13 @@ use axum::extract::ws::{CloseFrame, Message};
 use tokio::sync::mpsc::Sender;
 
 use crate::{
-    features::relay::{
-        dto::{
-            requests::RelayIncomingPayload,
-            responses::{
+    feature::relay::{
+        error::{ErrorCode, ErrorMessage},
+        state::RelayState,
+        types::FileMetadata,
+        ws::dto::{
+            request::RelayIncomingPayload,
+            response::{
                 AsWsTextMessage, CancelRecipientReadyResponseDto,
                 CancelRecipientTransferResponseDto, CancelSenderReadyResponseDto,
                 CancelSenderTransferResponseDto, FileChunkResponseDto, FileEndResponseDto,
@@ -18,9 +21,6 @@ use crate::{
                 SenderAckResponseDto,
             },
         },
-        error::{ErrorCode, ErrorMessage},
-        state::RelayState,
-        types::FileMetadata,
     },
     send_or_stop,
 };
@@ -327,6 +327,7 @@ pub async fn handle_text_message_payload(
                     &payload.request_type,
                     &sender_id,
                     &payload.recipient_id,
+                    payload.message,
                 )
                 .as_ws_text_message();
                 send_or_stop!(recipient_tx, success_msg, stop_flag);
@@ -397,11 +398,6 @@ pub async fn handle_text_message_payload(
             )
             .as_ws_text_message();
 
-            send_or_stop!(tx, err_msg, stop_flag);
-        }
-        _ => {
-            let err_msg = ErrorMessage::new(ErrorCode::NotHandledYet, "not handled yet!")
-                .as_ws_text_message();
             send_or_stop!(tx, err_msg, stop_flag);
         }
     }

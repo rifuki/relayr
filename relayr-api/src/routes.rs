@@ -3,7 +3,7 @@ use std::time::Duration;
 use axum::{Json, Router, http::StatusCode, routing::get};
 use serde_json::{Value as SerdeJson, json};
 
-use crate::{config::CONFIG, features::relay::routes::relay_router};
+use crate::{config::CONFIG, feature::relay::routes::relay_router};
 
 pub fn app_routes() -> Router {
     Router::new()

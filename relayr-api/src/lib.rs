@@ -1,3 +1,4 @@
+pub mod common;
 pub mod config;
-pub mod features;
+pub mod feature;
 pub mod routes;

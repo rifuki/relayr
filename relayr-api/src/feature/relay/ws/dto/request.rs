@@ -3,8 +3,6 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 #[serde(tag = "type")]
 pub enum RelayIncomingPayload {
-    #[serde(rename = "register")]
-    Register(RegisterPayload),
     #[serde(rename = "recipientReady")]
     RecipientReady(RecipientReadyPayload),
     #[serde(rename = "fileMeta")]
@@ -25,8 +23,6 @@ pub enum RelayIncomingPayload {
     CancelRecipientTransfer(CancelRecipientTransferPayload),
     #[serde(rename = "senderAck")]
     SenderAck(SenderAckPayload),
-    #[serde(rename = "recipientAck")]
-    RecipientAck(RecipientAckPayload),
     #[serde(rename = "restartTransfer")]
     RestartTransfer,
     #[serde(rename = "userClose")]
@@ -35,12 +31,6 @@ pub enum RelayIncomingPayload {
     Terminate,
     #[serde(other)]
     Unknown,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RegisterPayload {
-    pub conn_id: String,
 }
 
 #[derive(Deserialize)]
@@ -129,15 +119,6 @@ pub struct SenderAckPayload {
     pub request_type: String,
     pub sender_id: Option<String>,
     pub recipient_id: String,
-    pub message: Option<String>,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RecipientAckPayload {
-    pub recipient_id: Option<String>,
-    pub sender_id: String,
-    pub status: String,
     pub message: Option<String>,
 }
 
