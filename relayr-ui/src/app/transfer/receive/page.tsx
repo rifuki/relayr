@@ -1,17 +1,13 @@
-"use client";
-
 // Next.js
-import dynamic from "next/dynamic";
+import { Metadata } from "next";
 
-// Custom Components
-import ExperienceLoading from "@/components/loading/ExperienceLoading";
+// Internal Components
+import LazyReceivePage from "./LazyReceivePage";
 
-// Lazy-loaded Internal Components
-const Receive = dynamic(() => import("./Receive"), {
-  loading: () => <ExperienceLoading />,
-  ssr: false,
-});
+export const metadata: Metadata = {
+  title: "Receive File | Relayr",
+}
 
 export default function ReceivePage() {
-  return <Receive />;
+  return <LazyReceivePage />;
 }
