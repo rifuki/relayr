@@ -1,0 +1,232 @@
+.
+├── .github
+│   └── workflows
+│       └── ci-cd.yaml
+├── .gitignore
+├── build-local-prod.sh
+├── context.ts
+├── directori.txt
+├── docker-compose.yaml
+├── relayr-api
+│   ├── .cargo
+│   │   └── config.toml
+│   ├── .dockerignore
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── build-docker-multi-arch.sh
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── Dockerfile
+│   ├── README.md
+│   └── src
+│       ├── common
+│       │   ├── mod.rs
+│       │   └── response
+│       │       ├── error.rs
+│       │       ├── mod.rs
+│       │       └── success.rs
+│       ├── config.rs
+│       ├── feature
+│       │   ├── mod.rs
+│       │   └── relay
+│       │       ├── error.rs
+│       │       ├── handlers.rs
+│       │       ├── macros.rs
+│       │       ├── mod.rs
+│       │       ├── routes.rs
+│       │       ├── state.rs
+│       │       ├── types.rs
+│       │       └── ws
+│       │           ├── dto
+│       │           │   ├── mod.rs
+│       │           │   ├── request.rs
+│       │           │   └── response.rs
+│       │           ├── mod.rs
+│       │           ├── peer_disconnect.rs
+│       │           ├── ping.rs
+│       │           ├── read_handlers.rs
+│       │           ├── read.rs
+│       │           ├── socket.rs
+│       │           ├── task_manager.rs
+│       │           └── write.rs
+│       ├── lib.rs
+│       ├── main.rs
+│       └── routes.rs
+└── relayr-ui
+    ├── .dockerignore
+    ├── .env.development
+    ├── .env.example
+    ├── .env.production
+    ├── .gitignore
+    ├── build-docker-multi-arch.sh
+    ├── Caddyfile
+    ├── components.json
+    ├── Dockerfile
+    ├── env.d.ts
+    ├── eslint.config.mjs
+    ├── next-env.d.ts
+    ├── next.config.ts
+    ├── package-lock.json
+    ├── package.json
+    ├── postcss.config.mjs
+    ├── public
+    │   ├── file.svg
+    │   ├── globe.svg
+    │   ├── image.gif
+    │   ├── next.svg
+    │   ├── vercel.svg
+    │   └── window.svg
+    ├── README.md
+    ├── scripts
+    │   ├── get-local-ip.ts
+    │   └── set-local-ip.ts
+    ├── src
+    │   ├── app
+    │   │   ├── dev
+    │   │   │   ├── layout.tsx
+    │   │   │   └── localstorage
+    │   │   │       ├── LocalStorage.tsx
+    │   │   │       └── page.tsx
+    │   │   ├── favicon.ico
+    │   │   ├── globals.css
+    │   │   ├── layout.tsx
+    │   │   ├── not-found.tsx
+    │   │   ├── page.tsx
+    │   │   ├── robots.ts
+    │   │   ├── sitemap.ts
+    │   │   └── transfer
+    │   │       ├── layout.tsx
+    │   │       ├── receive
+    │   │       │   ├── LazyReceivePage.tsx
+    │   │       │   ├── page.tsx
+    │   │       │   └── Receive.tsx
+    │   │       └── send
+    │   │           ├── LazySendPage.tsx
+    │   │           ├── page.tsx
+    │   │           └── Send.tsx
+    │   ├── components
+    │   │   ├── animations
+    │   │   │   └── motion-button.tsx
+    │   │   ├── file-transfer
+    │   │   │   ├── commons
+    │   │   │   │   ├── HeaderConnectionStatus.tsx
+    │   │   │   │   ├── index.ts
+    │   │   │   │   └── WebSocketStatusIndicator.tsx
+    │   │   │   ├── ErrorAlert.tsx
+    │   │   │   ├── receiver
+    │   │   │   │   ├── index.ts
+    │   │   │   │   ├── ReceiverFlow.tsx
+    │   │   │   │   ├── states
+    │   │   │   │   │   ├── CardState.tsx
+    │   │   │   │   │   ├── FileMetaError.tsx
+    │   │   │   │   │   ├── FileMetaLoading.tsx
+    │   │   │   │   │   └── MissingSenderId.tsx
+    │   │   │   │   ├── step-config.ts
+    │   │   │   │   └── steps
+    │   │   │   │       ├── index.ts
+    │   │   │   │       ├── Step1_ReadyToReceive.tsx
+    │   │   │   │       ├── Step2_WaitForSender.tsx
+    │   │   │   │       ├── Step3_Receiving.tsx
+    │   │   │   │       └── Step4_TransferCompleted.tsx
+    │   │   │   ├── sender
+    │   │   │   │   ├── index.ts
+    │   │   │   │   ├── SenderFlow.tsx
+    │   │   │   │   ├── step-config.ts
+    │   │   │   │   └── steps
+    │   │   │   │       ├── index.ts
+    │   │   │   │       ├── Step1_FileSelector.tsx
+    │   │   │   │       ├── Step2_FileSelected.tsx
+    │   │   │   │       ├── Step3_WaitForReceiver.tsx
+    │   │   │   │       ├── Step4_ReadyToSend.tsx
+    │   │   │   │       ├── Step5_Sending.tsx
+    │   │   │   │       └── Step6_TransferCompleted.tsx
+    │   │   │   ├── shareable-link
+    │   │   │   │   ├── CopyButton.tsx
+    │   │   │   │   ├── index.tsx
+    │   │   │   │   └── QrButton.tsx
+    │   │   │   ├── shared
+    │   │   │   │   ├── FileInfoCard.tsx
+    │   │   │   │   ├── index.ts
+    │   │   │   │   ├── step-types.ts
+    │   │   │   │   ├── StepButtonsSection.tsx
+    │   │   │   │   ├── StepHeaderSection.tsx
+    │   │   │   │   ├── StepInfoSection.tsx
+    │   │   │   │   ├── StepNoticeSection.tsx
+    │   │   │   │   ├── StepSectionWrapper.tsx
+    │   │   │   │   └── StepTransferProgressSection.tsx
+    │   │   │   ├── TransferCardLayout.tsx
+    │   │   │   └── WebSocketConnectionStatus.tsx
+    │   │   ├── Footer.tsx
+    │   │   ├── Header.tsx
+    │   │   ├── loading
+    │   │   │   └── ExperienceLoading.tsx
+    │   │   ├── motion-primitives
+    │   │   │   ├── animated-number.tsx
+    │   │   │   ├── initial-transition-loader.tsx
+    │   │   │   ├── sliding-number.tsx
+    │   │   │   ├── text-loop.tsx
+    │   │   │   ├── text-shimmer.tsx
+    │   │   │   └── transition-panel.tsx
+    │   │   ├── ThemeToggle.tsx
+    │   │   └── ui
+    │   │       ├── alert.tsx
+    │   │       ├── badge.tsx
+    │   │       ├── button.tsx
+    │   │       ├── card.tsx
+    │   │       ├── input.tsx
+    │   │       ├── label.tsx
+    │   │       ├── popover.tsx
+    │   │       ├── progress.tsx
+    │   │       ├── sonner.tsx
+    │   │       └── tooltip.tsx
+    │   ├── hooks
+    │   │   ├── query
+    │   │   │   └── useRelay.ts
+    │   │   ├── useApiErrorParser.ts
+    │   │   └── useInitId.ts
+    │   ├── lib
+    │   │   ├── animations.ts
+    │   │   ├── api
+    │   │   │   ├── api-url.ts
+    │   │   │   ├── axios-instance.ts
+    │   │   │   ├── endpoints.ts
+    │   │   │   ├── get-api-url.ts
+    │   │   │   ├── index.ts
+    │   │   │   └── services
+    │   │   │       ├── index.ts
+    │   │   │       └── relayServices.ts
+    │   │   ├── constants.ts
+    │   │   ├── send-next-chunk.ts
+    │   │   └── utils.ts
+    │   ├── listeners
+    │   │   ├── ConnectionStatusListener.tsx
+    │   │   └── websocket
+    │   │       ├── handlers
+    │   │       │   ├── receiver.ts
+    │   │       │   └── sender.ts
+    │   │       ├── ReceiverWebSocketListener.tsx
+    │   │       └── SenderWebSocketListener.tsx
+    │   ├── providers
+    │   │   ├── ReceiverWebSocketProvider.tsx
+    │   │   ├── SenderWebSocketProvider.tsx
+    │   │   ├── TanStackProvider.tsx
+    │   │   └── ThemeProvider.tsx
+    │   ├── stores
+    │   │   ├── useConnectionStore.ts
+    │   │   ├── useFileReceiverStore.ts
+    │   │   └── useFileSenderStore.ts
+    │   ├── types
+    │   │   ├── api.ts
+    │   │   ├── file.ts
+    │   │   └── webSocketMessages
+    │   │       ├── index.ts
+    │   │       ├── receiver.ts
+    │   │       ├── sender.ts
+    │   │       └── shared.ts
+    │   └── utils
+    │       ├── clipboard.ts
+    │       ├── file.ts
+    │       └── local-storage.ts
+    └── tsconfig.json
+
+49 directories, 181 files

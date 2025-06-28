@@ -1,10 +1,10 @@
 # Build stage: install dependencies and build the Next.js app
-FROM node:latest AS builder
+FROM node:22-alpine AS builder
 WORKDIR /usr/src/app
 
 # Copy package.json and install dependencies
 COPY package.json ./
-RUN npm install 
+RUN npm ci
 
 # Copy all source code and build for production
 COPY . .
