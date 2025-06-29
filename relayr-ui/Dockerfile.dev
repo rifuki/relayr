@@ -1,0 +1,22 @@
+# Use a modern, lightweight Node.js image
+FROM node:22-alpine AS development
+WORKDIR /usr/src/app
+
+# --- Do the stable steps FIRST ---
+
+# 1. Copy package.json and the lock file.
+# This layer's cache will only break if these files change.
+COPY package.json ./
+
+# 2. Install dependencies.
+# This now ONLY depends on the layer above (package.json).
+# It will be cached as long as package.json doesn't change.
+RUN npm install
+
+ENV NODE_ENV=development
+
+# Expose the default port for Next.js development server
+EXPOSE 3000
+
+# The command to run the development server with hot-reloading
+CMD ["npm", "run", "dev"]

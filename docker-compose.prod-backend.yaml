@@ -1,0 +1,40 @@
+# FILE: docker-compose.prod-backend.yaml
+# PURPOSE: FOR REAL PRODUCTION SERVER (Backend-Only).
+# This file runs the API and a reverse proxy, to support a remote frontend (e.g., on Vercel).
+# IMPORTANT: This file has NO 'build:' section, it only pulls pre-built images from a registry.
+
+services:
+  # Runs the pre-built API image from your container registry
+  relayr-api:
+    image: ghcr.io/rifuki/relayr/relayr-api:latest # <-- Fetches from the registry
+    container_name: relayr-api-prod
+    ports:
+      - "8080:8080"
+    # No ports, as Caddy will access it via the internal Docker network
+    restart: unless-stopped
+#
+#   # Runs Caddy as a reverse proxy with automatic SSL
+#   proxy:
+#     image: caddy:2-alpine
+#     container_name: relayr-proxy-prod
+#     restart: unless-stopped
+#     ports:
+#       - "80:80"
+#       - "443:443"
+#       - "443:443/udp" # For HTTP/3
+#     volumes:
+#       # You will need to create this Caddyfile on your server
+#       # Example Caddyfile content:
+#       # api.your-domain.com {
+#       #     reverse_proxy relayr-api:8080
+#       # }
+#       - ./Caddyfile:/etc/caddy/Caddyfile
+#       # Volumes to persist SSL certificates
+#       - caddy_data:/data
+#       - caddy_config:/config
+#     depends_on:
+#       - relayr-api
+#
+# volumes:
+#   caddy_data:
+#   caddy_config:

@@ -1,0 +1,60 @@
+## FILE: docker-compose.dev.yaml
+# PURPOSE: For local development with hot-reloading.
+# This file is optimized for speed and developer experience.
+
+services:
+  # Backend Service for the API (Rust)
+  relayr-api:
+    container_name: relayr-api-dev
+    image: relayr-api-dev
+    build:
+      context: ./relayr-api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount the host's source code into the container for hot-reloading
+      - ./relayr-api:/usr/src/app
+      # Use a named volume for compilation output to improve performance and keep the host clean.
+      - api-target:/usr/src/app/target
+      # Use a named volume to persist Rust dependencies and speed up subsequent builds.
+      - cargo-cache:/usr/local/cargo/registry
+    restart: "no"
+
+  # Frontend Service for the UI (Next.js)
+  relayr-ui:
+    container_name: relayr-ui-dev
+    # This ensures the API is started before the UI starts
+    image: relayr-ui-dev
+    build:
+      context: ./relayr-ui
+      dockerfile: Dockerfile.dev
+    ports:
+      # Map the container's port 3000 to the host's port 3000
+      - "3000:3000"
+    volumes:
+      # Mount the host's source code into the container for hot-reloading
+      - ./relayr-ui:/usr/src/app
+      # Use a named volume to persist node_modules. This achieves two things:
+      # 1. It prevents the host's node_modules from overwriting the container's.
+      # 2. It persists the installed modules, so `npm ci` is not needed on every start.
+      - ui-node-modules:/usr/src/app/node_modules
+      - ui-next:/usr/src/app/.next
+    restart: "no"
+    depends_on:
+      - relayr-api
+
+# Declaration of all named volumes used by the services. This makes them persistent.
+volumes:
+  cargo-cache:
+    name: relayr-cargo-cache
+    driver: local
+  api-target:
+    name: relayr-api-target
+    driver: local
+  ui-next:
+    name: relayr-ui-next
+    driver: local
+  ui-node-modules:
+    name: relayr-ui-node-modules
+    driver: local

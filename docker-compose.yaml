@@ -1,26 +1,32 @@
+# FILE: docker-compose.yaml
+# PURPOSE: To simulate a production build on your local machine.
+# This file uses the production Dockerfiles to create production-ready images.
+
 services:
+  # Build the production image for the API
   relayr-api:
+    container_name: relayr-api-localbuild
+    image: relayr-api-localbuild
     build:
       context: ./relayr-api
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile # Uses the final production Dockerfile
     platform: linux/amd64
-    container_name: relayr-api
-    image: ghcr.io/rifuki/relayr/relayr-api:latest
     ports:
       - "8080:8080"
-    restart: unless-stopped
 
+  # Build the production image for the UI
   relayr-ui:
-    depends_on:
-      - relayr-api
+    container_name: relayr-ui-localbuild
+    image: relayr-ui-localbuild
     build:
       context: ./relayr-ui
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile # Uses the final production Dockerfile
       args:
+        # This value will be baked into the static files
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     platform: linux/amd64
-    container_name: relayr-ui
-    image: ghcr.io/rifuki/relayr/relayr-ui:latest
     ports:
+      # The production UI image serves on port 80 (inside the container)
       - "3000:80"
-    restart: unless-stopped
+    depends_on:
+      - relayr-api

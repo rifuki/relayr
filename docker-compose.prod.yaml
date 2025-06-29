@@ -1,0 +1,23 @@
+# FILE: docker-compose.prod.yaml
+# PURPOSE: FOR REAL PRODUCTION SERVER ONLY.
+# This file DOES NOT build anything. It only pulls and runs pre-built images from a registry.
+
+services:
+  # Runs the pre-built API image from container registry
+  relayr-api:
+    image: ghcr.io/rifuki/relayr/relayr-api:latest # <-- Fetches from the registry
+    container_name: relayr-api-prod
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # Runs the pre-built UI image from container registry
+  relayr-ui:
+    image: ghcr.io/rifuki/relayr/relayr-ui:latest # <-- Fetches from the registry
+    container_name: relayr-ui-prod
+    ports:
+      # The production UI image serves on port 80 (inside the container)
+      - "3000:80"
+    restart: unless-stopped
+    depends_on:
+      - relayr-api
