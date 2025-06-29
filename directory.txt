@@ -1,22 +1,18 @@
 .
-├── .github
-│   └── workflows
-│       └── ci-cd.yaml
-├── .gitignore
-├── build-local-prod.sh
+├── Caddyfile
 ├── context.ts
-├── directori.txt
+├── directory.txt
+├── docker-compose.dev.yaml
+├── docker-compose.prod-backend.yaml
+├── docker-compose.prod.yaml
 ├── docker-compose.yaml
+├── docker.sh
 ├── relayr-api
-│   ├── .cargo
-│   │   └── config.toml
-│   ├── .dockerignore
-│   ├── .env.example
-│   ├── .gitignore
 │   ├── build-docker-multi-arch.sh
 │   ├── Cargo.lock
 │   ├── Cargo.toml
 │   ├── Dockerfile
+│   ├── Dockerfile.dev
 │   ├── README.md
 │   └── src
 │       ├── common
@@ -53,15 +49,11 @@
 │       ├── main.rs
 │       └── routes.rs
 └── relayr-ui
-    ├── .dockerignore
-    ├── .env.development
-    ├── .env.example
-    ├── .env.production
-    ├── .gitignore
     ├── build-docker-multi-arch.sh
     ├── Caddyfile
     ├── components.json
     ├── Dockerfile
+    ├── Dockerfile.dev
     ├── env.d.ts
     ├── eslint.config.mjs
     ├── next-env.d.ts
@@ -227,6 +219,7 @@
     │       ├── clipboard.ts
     │       ├── file.ts
     │       └── local-storage.ts
-    └── tsconfig.json
+    ├── tsconfig.json
+    └── tsconfig.tsbuildinfo
 
-49 directories, 181 files
+47 directories, 176 files

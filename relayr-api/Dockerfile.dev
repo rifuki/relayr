@@ -1,0 +1,26 @@
+# Use a lightweight rust-alpine image for the development environment
+FROM rust:1.88-alpine AS development
+WORKDIR /usr/src/app
+
+# Install base dependencies required for compiling Rust code and other packages
+RUN apk add --no-cache musl-dev build-base gcc
+
+# Install cargo-watch to enable hot-reloading for the Rust application
+RUN cargo install cargo-watch
+
+# Copy the manifest files to cache dependencies
+# This step speeds up subsequent builds if the dependencies haven't changed
+COPY Cargo.toml Cargo.lock ./
+
+# A common trick to pre-build and cache dependencies without the full source code
+# This creates a dummy main.rs, builds, and then removes the dummy source
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release && rm -rf src
+
+# Set the default command to run when the container starts
+# This starts cargo-watch to monitor for file changes and re-run the application
+# -q: Quiet mode, reduces verbose output from cargo-watch
+# -c: Clear the screen before each execution
+# -w .: Watch the current directory for changes
+# -x run: Execute `cargo run` when a change is detected
+CMD ["cargo", "watch", "-q", "-c", "-w", ".", "-x", "run"]

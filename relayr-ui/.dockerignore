@@ -10,4 +10,5 @@ docker-compose.yaml
 README.md
 *.log
 
-.env*
+.env.example
+.env.production
